@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technik-Trainer: Oberstufe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { background-color: #f0f2f5; font-family: sans-serif; }
+        .quiz-card { max-width: 700px; margin: 2rem auto; background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .option-btn { margin-bottom: 0.8rem; text-align: left; padding: 12px; border: 2px solid #dee2e6; }
+        .option-btn:hover:not([disabled]) { border-color: #0d6efd; background-color: #f8f9fa; }
+        .feedback-area { display: none; margin-top: 1.5rem; padding: 1rem; border-radius: 8px; }
+        .is-correct { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .is-wrong { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .progress { height: 8px; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="quiz-card">
+        <h3 class="mb-3 text-primary border-bottom pb-2">Technologie: Festigkeit & Werkstoffe</h3>
+        
+        <div class="progress">
+            <div id="pBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+        </div>
+
+        <div id="question-container">
+            </div>
+
+        <div id="results" class="text-center" style="display:none;">
+            <h4>Training beendet!</h4>
+            <p id="final-score" class="display-6"></p>
+            <button class="btn btn-lg btn-outline-primary" onclick="location.reload()">Wiederholen</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const questions = [
+    {
+        q: "Berechne die Zugspannung $\\sigma$, wenn eine Kraft $F = 12000 \\, N$ auf eine Fläche $A = 200 \\, mm^2$ wirkt.",
+        options: ["$60 \\, N/mm^2$", "$240 \\, N/mm^2$", "$600 \\, N/mm^2$"],
+        ans: 0,
+        exp: "Formel: $\\sigma = \\frac{F}{A} = \\frac{12000 \\, N}{200 \\, mm^2} = 60 \\, N/mm^2$."
+    },
+    {
+        q: "Welche Belastungsart liegt vor, wenn zwei entgegengesetzte Kräfte die Länge eines Bauteils vergrößern wollen?",
+        options: ["Druckbelastung", "Zugbelastung", "Torsionsbelastung"],
+        ans: 1,
+        exp: "Bei der Zugbelastung wirken die Kräfte nach außen und führen zu einer Dehnung $\\epsilon$ des Bauteils."
+    },
+    {
+        q: "Wie verhält sich die Spannung $\\sigma$, wenn bei gleichbleibender Kraft $F$ die Querschnittsfläche $A$ halbiert wird?",
+        options: ["Die Spannung halbiert sich.", "Die Spannung bleibt gleich.", "Die Spannung verdoppelt sich."],
+        ans: 2,
+        exp: "Da $A$ im Nenner steht ($\\sigma = F/A$), führt eine Halbierung der Fläche zu einer Verdopplung der Spannung."
+    },
+    {
+        q: "Was beschreibt die Bruchdehnung $A$ im Zugversuch?",
+        options: ["Die maximale Kraft vor dem Bruch.", "Die bleibende Verlängerung nach dem Bruch in Prozent.", "Die Härte des Werkstoffs."],
+        ans: 1,
+        exp: "Die Bruchdehnung $A = \\frac{L_u - L_0}{L_0} \\cdot 100\\%$ gibt an, wie verformungsfähig (zäh) ein Werkstoff ist."
+    },
+    {
+        q: "Welches Bauteil verbindet beim PKW-Motor den Kolben mit der Kurbelwelle?",
+        options: ["Die Nockenwelle", "Das Pleuel", "Das Ventil"],
+        ans: 1,
+        exp: "Das Pleuel wandelt die lineare Bewegung des Kolbens in die rotierende Bewegung der Kurbelwelle um."
+    },
+    {
+        q: "Eine Flächenpressung $p$ wird berechnet über...",
+        options: ["$p = F \\cdot A$", "$p = \\frac{F}{A}$", "$p = \\frac{A}{F}$"],
+        ans: 1,
+        exp: "Genau wie die Normalspannung wird die Flächenpressung als Kraft pro Fläche definiert: $p = F/A$."
+    },
+    {
+        q: "Was passiert im Spannungs-Dehnungs-Diagramm oberhalb der Streckgrenze $R_e$?",
+        options: ["Das Bauteil verformt sich plastisch.", "Das Bauteil verformt sich rein elastisch.", "Der Werkstoff wird flüssig."],
+        ans: 0,
+        exp: "Oberhalb von $R_e$ kehrt das Material nach Entlastung nicht mehr in seine Ursprungsform zurück; es bleibt eine dauerhafte Verformung."
+    },
+    {
+        q: "Warum haben Windkraftanlagen Getriebe?",
+        options: ["Um den Wind zu bremsen.", "Um die langsame Rotordrehzahl für den Generator zu erhöhen.", "Um die Spannung im Stromnetz zu regeln."],
+        ans: 1,
+        exp: "Generatoren benötigen meist hohe Drehzahlen ($1500 \\, min^{-1}$), während der Rotor sich langsam dreht ($10-20 \\, min^{-1}$)."
+    },
+    {
+        q: "Was gibt der Sicherheitsfaktor $S=3$ an?",
+        options: ["Dass das Bauteil 3-mal so lang ist wie nötig.", "Dass die wirkende Spannung nur $1/3$ der Grenzspannung beträgt.", "Dass 3 Kräfte gleichzeitig wirken."],
+        ans: 1,
+        exp: "Die zulässige Spannung $\\sigma_{zul}$ ist der Kennwert (z.B. $R_e$) geteilt durch $S$."
+    },
+    {
+        q: "Welches Metall hat typischerweise einen höheren E-Modul?",
+        options: ["Aluminium (ca. $70.000 \\, N/mm^2$)", "Stahl (ca. $210.000 \\, N/mm^2$)", "Kupfer (ca. $110.000 \\, N/mm^2$)"],
+        ans: 1,
+        exp: "Stahl ist wesentlich steifer als Aluminium, was sich im dreifach höheren E-Modul widerspiegelt."
+    }
+];
+
+let current = 0;
+let score = 0;
+
+function renderQuestion() {
+    const item = questions[current];
+    const container = document.getElementById('question-container');
+    
+    let html = `<p class="fw-bold mb-3">${item.q}</p><div class="d-grid">`;
+    item.options.forEach((opt, idx) => {
+        html += `<button class="btn option-btn" onclick="check(${idx})">${opt}</button>`;
+    });
+    html += `</div><div id="fb" class="feedback-area"></div>`;
+    html += `<button id="btnNext" class="btn btn-primary mt-3 w-100" style="display:none" onclick="goNext()">Weiter</button>`;
+    
+    container.innerHTML = html;
+    
+    // WICHTIG: MathJax anweisen, die neuen Inhalte zu rendern
+    if (window.MathJax) {
+        MathJax.typesetPromise();
+    }
+}
+
+function check(idx) {
+    const item = questions[current];
+    const fb = document.getElementById('fb');
+    const btns = document.querySelectorAll('.option-btn');
+    
+    btns.forEach(b => b.disabled = true);
+    fb.style.display = 'block';
+    
+    if(idx === item.ans) {
+        fb.innerHTML = `<strong>Richtig!</strong> ${item.exp}`;
+        fb.className = "feedback-area is-correct";
+        score++;
+    } else {
+        fb.innerHTML = `<strong>Nicht ganz...</strong> ${item.exp}`;
+        fb.className = "feedback-area is-wrong";
+        btns[idx].classList.add('btn-danger', 'text-white');
+    }
+    btns[item.ans].classList.add('btn-success', 'text-white');
+    
+    document.getElementById('btnNext').style.display = 'block';
+    document.getElementById('pBar').style.width = ((current + 1) / questions.length * 100) + "%";
+    
+    if (window.MathJax) {
+        MathJax.typesetPromise();
+    }
+}
+
+function goNext() {
+    current++;
+    if(current < questions.length) {
+        renderQuestion();
+    } else {
+        document.getElementById('question-container').style.display = 'none';
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('final-score').innerText = `${score} / ${questions.length}`;
+    }
+}
+
+renderQuestion();
+</script>
+
+</body>
+</html>

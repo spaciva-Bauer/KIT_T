@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stirling-Explorer Pro | p-V-Analyse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e67e22;
+            --heat-color: #c0392b;
+            --cool-color: #2980b9;
+        }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .hero-section {
+            background: linear-gradient(135deg, #2c3e50, #2980b9);
+            color: white; padding: 3rem 1rem; border-bottom: 5px solid var(--accent-color);
+        }
+        .interactive-card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: white; }
+        .phase-box {
+            padding: 1rem; margin-bottom: 0.5rem; cursor: pointer;
+            border-left: 5px solid #dee2e6; transition: all 0.2s;
+        }
+        .phase-box.active { border-left-color: var(--accent-color); background: #fff3e0; font-weight: bold; }
+        
+        /* p-V Diagramm Styling */
+        .diagram-container {
+            position: relative; width: 100%; max-width: 400px; margin: auto;
+            aspect-ratio: 1 / 1; border-left: 2px solid black; border-bottom: 2px solid black;
+            background: #fff; padding: 20px;
+        }
+        .axis-label-y { position: absolute; top: 0; left: -30px; transform: rotate(-90deg); font-weight: bold; }
+        .axis-label-x { position: absolute; bottom: -25px; right: 0; font-weight: bold; }
+        
+        svg { width: 100%; height: 100%; overflow: visible; }
+        .cycle-path { fill: none; stroke: #ccc; stroke-width: 2; stroke-dasharray: 4; }
+        .active-segment { fill: none; stroke: var(--accent-color); stroke-width: 4; transition: all 0.4s; }
+        .point { fill: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+<header class="hero-section text-center">
+    <div class="container">
+        <h1>Stirling-Kreisprozess</h1>
+        <p class="lead">Analyse im Druck-Volumen-Diagramm ($p$-$V$)</p>
+    </div>
+</header>
+
+<main class="container my-5">
+    <div class="row g-4">
+        <div class="col-md-5">
+            <div class="card interactive-card p-4">
+                <h4 class="mb-3">Zustandsänderungen</h4>
+                <div id="p1" class="phase-box active" onclick="showPhase(1, 'Isotherme Expansion', 'T = konst. Das Gas dehnt sich aus, Druck sinkt ($p \\propto 1/V$). Wärme $Q_{zu}$ wird in Arbeit $W_{ab}$ umgewandelt.')">
+                    1. Expansion ($T_H$)
+                </div>
+                <div id="p2" class="phase-box" onclick="showPhase(2, 'Isochore Abkühlung', 'V = konst. Der Verdränger schiebt Gas in den Regenerator. Druck sinkt durch Abkühlung.')">
+                    2. Abkühlung ($V_{max}$)
+                </div>
+                <div id="p3" class="phase-box" onclick="showPhase(3, 'Isotherme Kompression', 'T = konst. Das Gas wird verdichtet, Druck steigt. Kompressionsarbeit muss aufgebracht werden.')">
+                    3. Kompression ($T_C$)
+                </div>
+                <div id="p4" class="phase-box" onclick="showPhase(4, 'Isochore Erwärmung', 'V = konst. Gas nimmt Wärme vom Regenerator auf. Druck steigt bei konstantem Volumen.')">
+                    4. Erwärmung ($V_{min}$)
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card interactive-card p-4 text-center">
+                <h5>p-V-Diagramm</h5>
+                <div class="diagram-container">
+                    <span class="axis-label-y">Druck $p$</span>
+                    <svg viewBox="0 0 200 200">
+                        <path class="cycle-path" d="M 50,50 Q 100,60 150,120 L 150,170 Q 100,140 50,130 Z" />
+                        <path id="activePath" class="active-segment" d="" />
+                        
+                        <circle cx="50" cy="50" r="4" class="point" /> <text x="40" y="45" font-size="10">1</text>
+                        <circle cx="150" cy="120" r="4" class="point" /> <text x="155" y="115" font-size="10">2</text>
+                        <circle cx="150" cy="170" r="4" class="point" /> <text x="155" y="180" font-size="10">3</text>
+                        <circle cx="50" cy="130" r="4" class="point" /> <text x="40" y="140" font-size="10">4</text>
+                    </svg>
+                    <span class="axis-label-x">Volumen $V$</span>
+                </div>
+                <div class="alert alert-info mt-4">
+                    <strong id="displayTitle">Phase 1: Isotherme Expansion</strong><br>
+                    <small id="displayDesc">T = konst. Das Gas dehnt sich aus, Druck sinkt. Wärme wird in Arbeit umgewandelt.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="border-bottom pb-2">Komponenten & Realisierung</h3>
+            <div class="list-group shadow-sm">
+                <div class="list-group-item"><strong>Regenerator:</strong> Speichert Wärmeenergie zwischen den isochoren Phasen (Geflecht aus Kupfer/Keramik).</div>
+                <div class="list-group-item"><strong>Verdrängerkolben:</strong> Sorgt für den Gaswechsel zwischen Heiß- und Kaltzone (isochore Prozesse).</div>
+                <div class="list-group-item"><strong>Arbeitskolben:</strong> Verrichtet die mechanische Arbeit (isotherme Prozesse).</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const paths = {
+        1: "M 50,50 Q 100,60 150,120", // Isotherme Exp
+        2: "M 150,120 L 150,170",      // Isochore Abkühlung
+        3: "M 150,170 Q 100,140 50,130", // Isotherme Komp
+        4: "M 50,130 L 50,50"           // Isochore Erwärmung
+    };
+
+    function showPhase(id, title, desc) {
+        document.querySelectorAll('.phase-box').forEach(b => b.classList.remove('active'));
+        document.getElementById('p' + id).classList.add('active');
+        
+        document.getElementById('activePath').setAttribute('d', paths[id]);
+        document.getElementById('displayTitle').innerText = "Phase " + id + ": " + title;
+        document.getElementById('displayDesc').innerText = desc;
+    }
+    
+    // Initialisierung
+    showPhase(1, 'Isotherme Expansion', 'T = konst. Das Gas dehnt sich aus, Druck sinkt. Wärme wird in Arbeit umgewandelt.');
+</script>
+
+<script>
+  window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

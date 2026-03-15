@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technik-Lehrer Tool: E-Technik & Systeme</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .quiz-container { max-width: 800px; margin: 40px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .option-btn { text-align: left; margin-bottom: 12px; padding: 12px 20px; font-size: 1.1rem; transition: all 0.2s; }
+        .explanation { display: none; margin-top: 20px; padding: 20px; border-radius: 8px; border-left: 6px solid #0d6efd; background: #f8f9fa; }
+        .progress { height: 12px; margin-bottom: 25px; border-radius: 10px; }
+        .hidden { display: none; }
+        .question-text { font-weight: 600; color: #2c3e50; min-height: 60px; }
+    </style>
+</head>
+<body class="tex2jax_process">
+
+<div class="container">
+    <div class="quiz-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge bg-primary px-3 py-2">Technik Oberstufe</span>
+            <span id="question-counter" class="text-muted">Frage 1 von 10</span>
+        </div>
+        
+        <div class="progress">
+            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;"></div>
+        </div>
+
+        <div id="quiz-box">
+            <h4 id="question-text" class="question-text mb-4">Lade Fragestellung...</h4>
+            <div id="options-container" class="d-grid gap-2">
+                </div>
+            
+            <div id="explanation-box" class="explanation shadow-sm">
+                <h5 class="text-primary"><i class="bi bi-info-circle"></i> Analyse & Erklärung</h5>
+                <p id="explanation-text" class="mb-3"></p>
+                <button class="btn btn-primary btn-lg w-100" onclick="nextQuestion()">Nächste Frage &rarr;</button>
+            </div>
+        </div>
+
+        <div id="result-box" class="hidden text-center py-5">
+            <h2 class="display-4">Auswertung</h2>
+            <p id="final-score" class="fs-3 my-4"></p>
+            <div class="alert alert-info">
+                Gute Arbeit! Nutze dieses Wissen für die Analyse komplexerer Schaltungen.
+            </div>
+            <button class="btn btn-outline-primary mt-3" onclick="location.reload()">Test wiederholen</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            q: "In einem Knotenpunkt fließen drei Ströme ein: $I_1 = 2\\,A$, $I_2 = 3\\,A$. Ein dritter Strom $I_3$ fließt ab. Wie groß ist $I_3$ nach der Knotenregel?",
+            options: ["1 A", "5 A", "6 A", "0 A"],
+            correct: 1,
+            exp: "Nach der ersten Kirchhoff'schen Regel (Knotenregel) gilt: $\\sum I_{zu} = \\sum I_{ab}$. In diesem Fall also: $I_3 = I_1 + I_2 = 2\\,A + 3\\,A = 5\\,A$."
+        },
+        {
+            q: "In einer Masche mit einer Spannungsquelle $U_q = 12\\,V$ und zwei Widerständen fällt an $R_1$ eine Spannung von $U_1 = 4\\,V$ ab. Wie hoch ist $U_2$?",
+            options: ["4 V", "12 V", "8 V", "16 V"],
+            correct: 2,
+            exp: "Die Maschenregel besagt: In einem Umlauf ist die Summe aller Spannungen null. $U_q - U_1 - U_2 = 0$. Umgestellt nach $U_2$: $U_2 = 12\\,V - 4\\,V = 8\\,V$."
+        },
+        {
+            q: "Ein System wird als 'automatisierungstechnisch' klassifiziert. Welches Merkmal ist hierfür entscheidend?",
+            options: ["Rein manuelle Steuerung", "Selbstständige Abarbeitung von Prozessen durch Sensoren/Aktoren", "Ausschließliche Speicherung von Daten", "Verzicht auf Rückkopplung"],
+            correct: 1,
+            exp: "Automatisierungssysteme nehmen über Sensoren Zustände auf, verarbeiten diese und greifen über Aktoren korrigierend in den Prozess ein."
+        },
+        
+        {
+            q: "Wie verhält sich der Gesamtwiderstand $R_{ges}$, wenn zwei identische Widerstände parallel geschaltet werden?",
+            options: ["Er verdoppelt sich", "Er bleibt gleich", "Er halbiert sich", "Er sinkt auf Null"],
+            correct: 2,
+            exp: "Bei Parallelschaltung gilt: $\\frac{1}{R_{ges}} = \\frac{1}{R} + \\frac{1}{R}$. Für zwei gleiche Widerstände ergibt das $R_{ges} = \\frac{R}{2}$."
+        },
+        {
+            q: "Welche Komponente in einem PC fungiert primär als 'Informationsverarbeitung' im Sinne des EVA-Prinzips?",
+            options: ["Die Festplatte (SSD)", "Das Netzteil", "Der Mikroprozessor (CPU)", "Die Tastatur"],
+            correct: 2,
+            exp: "EVA steht für Eingabe, Verarbeitung, Ausgabe. Während die SSD speichert, ist die CPU das Herzstück der logischen Verarbeitung."
+        },
+        {
+            q: "Betrachtet man die Entwicklung vom Relais zum Mikrochip: Welcher Aspekt hat die Produktqualität am stärksten beeinflusst?",
+            options: ["Erhöhung des Gewichts", "Verschleißfreiheit und Geschwindigkeit durch Halbleiter", "Erhöhter Wartungsaufwand", "Nutzung von mechanischen Kontakten"],
+            correct: 1,
+            exp: "Halbleiterbauteile wie Transistoren haben keine beweglichen Teile (wie Relais), schalten millionenfach schneller und sind nahezu verschleißfrei."
+        },
+        {
+            q: "Dimensionierung: Eine LED ($U_D = 2,5\\,V$, $I_D = 20\\,mA$) soll an $U = 12,5\\,V$ betrieben werden. Berechne $R_{vor}$.",
+            options: ["100 $\\Omega$", "250 $\\Omega$", "500 $\\Omega$", "625 $\\Omega$"],
+            correct: 2,
+            exp: "Spannung am Widerstand: $U_R = 12,5\\,V - 2,5\\,V = 10\\,V$. Widerstand: $R = \\frac{U_R}{I_D} = \\frac{10\\,V}{0,02\\,A} = 500\\,\\Omega$."
+        },
+        {
+            q: "Was beschreibt der Begriff 'Schnittstelle' (Interface) in einem elektrotechnischen System?",
+            options: ["Der Ort der Energiegewinnung", "Der Übergangspunkt für Stoff-, Energie- oder Informationsfluss", "Die Farbe der Kabelisolierung", "Die interne CPU-Taktung"],
+            correct: 1,
+            exp: "Schnittstellen definieren, wie Teilsysteme miteinander interagieren, etwa durch genormte Stecker oder Protokolle."
+        },
+        {
+            q: "Wie wirkt sich die Miniaturisierung auf die Einsatzgebiete elektrotechnischer Systeme aus?",
+            options: ["Systeme sind nur noch stationär nutzbar", "Integration in Kleidung, Implantate und mobile Endgeräte", "Die Systeme werden teurer und seltener", "Funktionsumfang muss reduziert werden"],
+            correct: 1,
+            exp: "Durch die enorme Verkleinerung (Mooresches Gesetz) wanderten Computer von riesigen Hallen in die Hosentasche (Smartphone) oder sogar in den menschlichen Körper (Herzschrittmacher)."
+        }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+
+    function renderMath() {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise().catch((err) => console.log('MathJax Error: ', err));
+        }
+    }
+
+    function loadQuestion() {
+        const qData = questions[currentQ];
+        document.getElementById("question-counter").innerText = `Frage ${currentQ + 1} von ${questions.length}`;
+        document.getElementById("question-text").innerHTML = qData.q;
+        
+        const container = document.getElementById("options-container");
+        container.innerHTML = "";
+        document.getElementById("explanation-box").style.display = "none";
+        
+        qData.options.forEach((opt, index) => {
+            const btn = document.createElement("button");
+            btn.className = "btn btn-outline-secondary option-btn shadow-sm";
+            btn.innerHTML = opt;
+            btn.onclick = () => checkAnswer(index);
+            container.appendChild(btn);
+        });
+
+        const progress = ((currentQ) / questions.length) * 100;
+        document.getElementById("progressBar").style.width = progress + "%";
+
+        renderMath();
+    }
+
+    function checkAnswer(index) {
+        const qData = questions[currentQ];
+        const buttons = document.querySelectorAll(".option-btn");
+        buttons.forEach(btn => btn.disabled = true);
+        
+        if(index === qData.correct) {
+            buttons[index].className = "btn btn-success option-btn text-white";
+            score++;
+        } else {
+            buttons[index].className = "btn btn-danger option-btn text-white";
+            buttons[qData.correct].className = "btn btn-success option-btn text-white shadow";
+        }
+
+        document.getElementById("explanation-text").innerHTML = qData.exp;
+        document.getElementById("explanation-box").style.display = "block";
+        
+        renderMath();
+    }
+
+    function nextQuestion() {
+        currentQ++;
+        if(currentQ < questions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById("quiz-box").classList.add("hidden");
+        document.getElementById("result-box").classList.remove("hidden");
+        document.getElementById("progressBar").style.width = "100%";
+        document.getElementById("progressBar").classList.replace("bg-primary", "bg-success");
+        document.getElementById("final-score").innerText = `Ergebnis: ${score} / ${questions.length} Punkten`;
+    }
+
+    window.onload = loadQuestion;
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

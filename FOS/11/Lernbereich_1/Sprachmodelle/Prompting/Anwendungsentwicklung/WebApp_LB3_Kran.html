@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technik-Labor: Turmdrehkran Interaktiv</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .header-bg {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 5px solid #f1c40f;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .crane-visual {
+            background: #fff;
+            min-height: 300px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+        #crane-canvas {
+            width: 100%;
+            height: 400px;
+        }
+        .control-panel {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .warning-box {
+            background-color: #ffdada;
+            border-left: 5px solid #ff4d4d;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header class="header-bg text-center">
+    <div class="container">
+        <h1 class="display-5 fw-bold">Analyse: Turmdrehkran</h1>
+        <p class="lead">Kompetenzbereich: Funktionsweise & technische Realisierung</p>
+    </div>
+</header>
+
+<main class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card p-3">
+                <h3>Physik-Simulator: Lastmoment</h3>
+                <p class="text-muted">Verändere die Position der Laufkatze und das Gewicht der Last.</p>
+                <div class="crane-visual mb-3">
+                    <canvas id="crane-canvas"></canvas>
+                </div>
+                <div id="status-alert" class="alert alert-success mt-2">
+                    <strong>Status:</strong> Das System ist stabil.
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card p-3 control-panel">
+                <h4>Parameter</h4>
+                <hr>
+                <div class="mb-4">
+                    <label for="weightRange" class="form-label">Lastgewicht: <span id="weightVal">2000</span> kg</label>
+                    <input type="range" class="form-range" id="weightRange" min="500" max="10000" step="100" value="2000">
+                </div>
+                <div class="mb-4">
+                    <label for="distanceRange" class="form-label">Position Laufkatze: <span id="distanceVal">20</span> m</label>
+                    <input type="range" class="form-range" id="distanceRange" min="5" max="50" step="1" value="20">
+                </div>
+                
+                <div class="mt-3 p-3 bg-white rounded shadow-sm">
+                    <h5>Berechnung (Hebelgesetz)</h5>
+                    <code>M = F * l</code><br>
+                    <strong>Aktuelles Moment:</strong> <br>
+                    <span id="momentVal" class="h4 text-primary">392.4</span> kNm
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card p-4">
+                <h3>Komponenten & Aufbau</h3>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded mb-2">
+                            <h5>1. Der Turm (Mast)</h5>
+                            <p class="small text-muted">Stahl-Gitterkonstruktion. Überträgt Druckkräfte in das Fundament.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded mb-2">
+                            <h5>2. Der Ausleger</h5>
+                            <p class="small text-muted">Horizontaler Arm. Trägt die Laufkatze und bestimmt die Reichweite.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded mb-2">
+                            <h5>3. Gegenausleger</h5>
+                            <p class="small text-muted">Beinhaltet das Betongegengewicht zur Momentenkompensation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="text-center py-4 text-muted">
+    <small>&copy; 2024 Fachbereich Technologie - Oberstufe</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const canvas = document.getElementById('crane-canvas');
+    const ctx = canvas.getContext('2d');
+    const weightRange = document.getElementById('weightRange');
+    const distanceRange = document.getElementById('distanceRange');
+    const weightVal = document.getElementById('weightVal');
+    const distanceVal = document.getElementById('distanceVal');
+    const momentVal = document.getElementById('momentVal');
+    const statusAlert = document.getElementById('status-alert');
+
+    const MAX_MOMENT = 1500; // Schwellenwert für Demo-Zwecke (kNm)
+
+    function drawCrane() {
+        const w = canvas.width = canvas.offsetWidth;
+        const h = canvas.height = 400;
+        
+        const weight = parseInt(weightRange.value);
+        const distance = parseInt(distanceRange.value);
+        
+        // Berechnungen
+        const gravity = 9.81;
+        const moment = (weight * gravity * distance) / 1000;
+        
+        // UI Updates
+        weightVal.innerText = weight;
+        distanceVal.innerText = distance;
+        momentVal.innerText = moment.toFixed(1);
+
+        if (moment > MAX_MOMENT) {
+            statusAlert.className = "alert alert-danger mt-2";
+            statusAlert.innerHTML = "<strong>WARNUNG:</strong> Überlast! Kippgefahr des Krans!";
+        } else {
+            statusAlert.className = "alert alert-success mt-2";
+            statusAlert.innerHTML = "<strong>Status:</strong> Das System ist stabil.";
+        }
+
+        // Zeichnen
+        ctx.clearRect(0, 0, w, h);
+        
+        // Boden
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, h - 20);
+        ctx.lineTo(w, h - 20);
+        ctx.stroke();
+
+        const centerX = w / 3;
+        const baseY = h - 20;
+
+        // Mast
+        ctx.fillStyle = "#f1c40f";
+        ctx.fillRect(centerX - 10, baseY - 300, 20, 300);
+        
+        // Ausleger (vorne)
+        ctx.fillRect(centerX - 10, baseY - 300, 300, 15);
+        
+        // Gegenausleger (hinten)
+        ctx.fillStyle = "#7f8c8d";
+        ctx.fillRect(centerX - 80, baseY - 300, 70, 15);
+
+        // Laufkatze & Last
+        const trolleyX = centerX + (distance * 5); // Skalierung 1m = 5px
+        ctx.fillStyle = "#c0392b";
+        ctx.fillRect(trolleyX - 5, baseY - 285, 10, 10);
+        
+        // Seil
+        ctx.beginPath();
+        ctx.moveTo(trolleyX, baseY - 285);
+        ctx.lineTo(trolleyX, baseY - 100);
+        ctx.stroke();
+
+        // Last-Box
+        const size = Math.min(20 + (weight/500), 50);
+        ctx.fillRect(trolleyX - (size/2), baseY - 100, size, size);
+    }
+
+    weightRange.addEventListener('input', drawCrane);
+    distanceRange.addEventListener('input', drawCrane);
+    window.addEventListener('resize', drawCrane);
+
+    // Initiale Zeichnung
+    drawCrane();
+</script>
+</body>
+</html>
