@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stirlingmotor - Interaktive Lernapp</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --secondary: #f97316;
+            --accent: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        /* Header Styling */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            border-bottom: 2px solid var(--border);
+            background: white;
+            margin: 0;
+            padding: 0 1rem;
+        }
+
+        .nav-link {
+            color: var(--dark);
+            border: none;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            background: transparent;
+        }
+
+        /* Main Content */
+        .content-wrapper {
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Cards */
+        .info-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .info-card:hover {
+            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+        }
+
+        .info-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .info-card .icon {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* Animation Container */
+        .animation-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Controls */
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 2px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-custom {
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary-custom {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #059669;
+            transform: scale(1.05);
+        }
+
+        .btn-danger-custom {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger-custom:hover {
+            background: #dc2626;
+        }
+
+        /* Badge & Labels */
+        .temperature-badge {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+
+        .temp-hot {
+            background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+        }
+
+        .temp-cold {
+            background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+        }
+
+        /* Interactive Elements */
+        .component-description {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .component-description strong {
+            color: var(--primary);
+        }
+
+        /* Range Slider */
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Progress Bar */
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background: var(--border);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--accent) 0%, var(--secondary) 100%);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .nav-link {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .animation-container {
+                padding: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn-custom {
+                width: 100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .rotating {
+            animation: rotate 2s linear infinite;
+            transform-origin: center;
+        }
+
+        .pulsing {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Info Boxes */
+        .alert-custom {
+            border-radius: 10px;
+            border-left: 4px solid;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-info-custom {
+            background: rgba(37, 99, 235, 0.1);
+            border-left-color: var(--primary);
+            color: var(--dark);
+        }
+
+        .alert-success-custom {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--accent);
+            color: var(--dark);
+        }
+
+        .alert-warning-custom {
+            background: rgba(249, 115, 22, 0.1);
+            border-left-color: var(--secondary);
+            color: var(--dark);
+        }
+
+        /* Tabs Content */
+        .tab-pane {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .comparison-table table {
+            margin-bottom: 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
+            color: white;
+            font-weight: 700;
+            padding: 1rem;
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-cog"></i> Der Stirlingmotor</h1>
+            <p>Interaktive Lernplattform zur Funktionsweise und Anwendung</p>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="sticky-top bg-white border-bottom">
+        <div class="container">
+            <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ueberblick">Überblick</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#aufbau">Aufbau & Komponenten</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#animation">Animation</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#funktionsweise">Funktionsweise</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#anwendungen">Anwendungen</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#quiz">Quiz</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <div class="container">
+            <div class="tab-content" id="tabContent">
+
+                <!-- Tab 1: Überblick -->
+                <div class="tab-pane fade show active" id="ueberblick">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <div class="icon"><i class="fas fa-history"></i></div>
+                                <h3>Was ist ein Stirlingmotor?</h3>
+                                <p>Der Stirlingmotor ist eine <strong>Wärmekraftmaschine</strong>, die mechanische Energie durch die Umwandlung von Wärmeenergie erzeugt. Er wurde 1816 von Robert Stirling erfunden und funktioniert nach einem geschlossenen thermodynamischen Kreisprozess.</p>
+                                <p class="mt-3"><strong>Besonderheit:</strong> Im Gegensatz zu Verbrennungsmotoren verbrennt der Stirlingmotor Brennstoff <em>außerhalb</em> des Motors – daher auch "Außenverbrennungsmotor" genannt.</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <div class="icon"><i class="fas fa-leaf"></i></div>
+                                <h3>Warum ist das relevant?</h3>
+                                <p>Stirlingmotoren erfahren eine <strong>Renaissance</strong> in modernen Anwendungen:</p>
+                                <ul class="mt-3">
+                                    <li>🌱 Nachhaltige Energieerzeugung</li>
+                                    <li>♻️ Nutzung von Abwärme</li>
+                                    <li>🔇 Besonders leise Funktionsweise</li>
+                                    <li>🌍 Einsatz mit erneuerbaren Energiequellen</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="alert-custom alert-success-custom">
+                                <strong><i class="fas fa-lightbulb"></i> Lernziel:</strong> Du wirst die Funktionsweise, den Aufbau und die technische Realisierung eines Stirlingmotors verstehen und seine praktischen Anwendungen kennenlernen.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Aufbau & Komponenten -->
+                <div class="tab-pane fade" id="aufbau">
+                    <h2 class="mb-4">Komponenten des Stirlingmotors</h2>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <h3><i class="fas fa-circle-notch text-warning"></i> Arbeitszylinder</h3>
+                                <div class="component-description">
+                                    <strong>Funktion:</strong> Hier bewegt sich der Arbeitskolben auf und ab. Der abwechselnde Druck und die Entspannung des Arbeitsgases treiben den Motor an.
+                                </div>
+                                <p><strong>Material:</strong> Hochwertiger Stahl oder Aluminium</p>
+                                <p><strong>Anforderung:</strong> Hohe Dichtheit, keine Undichtigkeiten</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <h3><i class="fas fa-circle-notch text-danger"></i> Verdränger-Zylinder</h3>
+                                <div class="component-description">
+                                    <strong>Funktion:</strong> Der Verdränger-Kolben verlagert das Arbeitsgas zwischen dem Heißbereich und dem Kaltbereich.
+                                </div>
+                                <p><strong>Material:</strong> Graphit oder Keramik (sehr hohe Temperaturen!)</p>
+                                <p><strong>Besonderheit:</strong> Bewegt sich mit Phasenversatz zum Arbeitskolben</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <h3><i class="fas fa-fire text-danger"></i> Heizer (Heizkammer)</h3>
+                                <div class="component-description">
+                                    <strong>Funktion:</strong> Wird von außen geheizt (Brenner, Sonnenenergie, Abwärme)
+                                </div>
+                                <p><strong>Temperatur:</strong> Typischerweise 600–800°C</p>
+                                <p><strong>Bedeutung:</strong> Je größer der Temperaturunterschied, desto höher der Wirkungsgrad</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <h3><i class="fas fa-snowflake text-info"></i> Kühler</h3>
+                                <div class="component-description">
+                                    <strong>Funktion:</strong> Kühlt das Arbeitsgas nach der Expansion ab
+                                </div>
+                                <p><strong>Temperatur:</strong> Typischerweise 50–100°C</p>
+                                <p><strong>Gestaltung:</strong> Oft mit Kühlrippen für bessere Wärmeleitung</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <h3><i class="fas fa-filter text-success"></i> Regenerator</h3>
+                                <div class="component-description">
+                                    <strong>Funktion:</strong> Speichert Wärme während des Zyklus und gibt sie wieder ab – erhöht den Wirkungsgrad
+                                </div>
+                                <p><strong>Material:</strong> Feinmaschiges Drahtgeflecht oder Keramik</p>
+                                <p><strong>Effekt:</strong> Kann Wirkungsgrad um 20–30% steigern</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <h3><i class="fas fa-link text-secondary"></i> Hubmechanismus & Kurbel</h3>
+                                <div class="component-description">
+                                    <strong>Funktion:</strong> Überträgt die Bewegung der Kolben in rotierende Bewegung
+                                </div>
+                                <p><strong>Kinematik:</strong> Garantiert den richtigen Phasenversatz zwischen Arbeits- und Verdrängerkolben</p>
+                                <p><strong>Material:</strong> Gehärteter Stahl</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Animation -->
+                <div class="tab-pane fade" id="animation">
+                    <h2 class="mb-4">Interaktive Animation der Funktionsweise</h2>
+
+                    <div class="animation-container">
+                        <svg id="motorAnimation" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Gehäuse -->
+                            <rect x="50" y="50" width="500" height="300" fill="none" stroke="#2563eb" stroke-width="3" rx="10"/>
+
+                            <!-- Heizbereich (Links) -->
+                            <rect x="60" y="100" width="80" height="200" fill="#ffe4e6" stroke="#dc2626" stroke-width="2" rx="5"/>
+                            <text x="100" y="210" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626">HEIZ-BEREICH</text>
+
+                            <!-- Kühler (Rechts) -->
+                            <rect x="460" y="100" width="80" height="200" fill="#cffafe" stroke="#0ea5e9" stroke-width="2" rx="5"/>
+                            <text x="500" y="210" text-anchor="middle" font-size="12" font-weight="bold" fill="#0ea5e9">KÜHL-BEREICH</text>
+
+                            <!-- Regenerator (Mitte) -->
+                            <rect x="220" y="100" width="40" height="200" fill="#f3e8ff" stroke="#a855f7" stroke-width="2" rx="5"/>
+                            <text x="240" y="210" text-anchor="middle" font-size="11" font-weight="bold" fill="#a855f7">REG</text>
+
+                            <!-- Arbeitszylinder mit Kolben -->
+                            <g id="workCylinder">
+                                <rect x="300" y="130" width="80" height="140" fill="none" stroke="#059669" stroke-width="2" rx="5"/>
+                                <rect id="workPiston" x="310" y="140" width="60" height="30" fill="#10b981" stroke="#059669" stroke-width="2" rx="3"/>
+                                <text x="340" y="160" text-anchor="middle" font-size="11" font-weight="bold" fill="white">ARBEITS-KOLBEN</text>
+                            </g>
+
+                            <!-- Verdrängerkolben -->
+                            <g id="displacerCylinder">
+                                <rect x="160" y="160" width="40" height="80" fill="none" stroke="#f97316" stroke-width="2" rx="3"/>
+                                <rect id="displacerPiston" x="170" y="170" width="20" height="60" fill="#f97316" stroke="#ea580c" stroke-width="1" rx="2"/>
+                                <text x="180" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="white">V</text>
+                            </g>
+
+                            <!-- Welle/Antrieb -->
+                            <g id="crankshaft">
+                                <circle cx="400" cy="320" r="4" fill="#333"/>
+                                <circle id="rotatingWheel" cx="400" cy="320" r="30" fill="none" stroke="#2563eb" stroke-width="3"/>
+                            </g>
+
+                            <!-- Verbindungsstangen -->
+                            <line x1="340" y1="170" x2="400" y2="320" stroke="#555" stroke-width="2"/>
+                            <line x1="180" y1="230" x2="400" y2="320" stroke="#f97316" stroke-width="2" stroke-dasharray="5,5"/>
+
+                            <!-- Temperatur-Indikatoren -->
+                            <circle cx="100" cy="80" r="6" fill="#dc2626" class="pulsing"/>
+                            <text x="100" y="95" text-anchor="middle" font-size="10" font-weight="bold">~700°C</text>
+
+                            <circle cx="500" cy="80" r="6" fill="#0ea5e9" class="pulsing"/>
+                            <text x="500" y="95" text-anchor="middle" font-size="10" font-weight="bold">~50°C</text>
+
+                            <!-- Pfeil für Energiefluss -->
+                            <g>
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                        <polygon points="0 0, 10 3, 0 6" fill="#f97316"/>
+                                    </marker>
+                                </defs>
+                                <path d="M 120 40 Q 300 20 480 40" stroke="#f97316" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
+                                <text x="300" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#f97316">WÄRMEFLUSS</text>
+                            </g>
+                        </svg>
+
+                        <div class="controls">
+                            <button class="btn-custom btn-primary-custom" onclick="startAnimation()">
+                                <i class="fas fa-play"></i> Starten
+                            </button>
+                            <button class="btn-custom btn-secondary-custom" onclick="pauseAnimation()">
+                                <i class="fas fa-pause"></i> Pause
+                            </button>
+                            <button class="btn-custom btn-danger-custom" onclick="resetAnimation()">
+                                <i class="fas fa-redo"></i> Zurücksetzen
+                            </button>
+                            <div>
+                                <label for="speedSlider" class="form-label">Geschwindigkeit:</label>
+                                <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1" onchange="updateSpeed()">
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="alert-custom alert-info-custom">
+                                <strong><i class="fas fa-info-circle"></i> Beobachte:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Der rote Verdrängerkolben (V) bewegt sich mit <strong>Phasenversatz</strong> zum grünen Arbeitskolben</li>
+                                    <li>Das Gas wird zwischen den Bereichen hin- und herbewegt</li>
+                                    <li>Der Wärmestrom (orange Pfeile) treibt den Prozess an</li>
+                                    <li>Die rotierende Welle gibt die Ausgangskraft ab</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Funktionsweise -->
+                <div class="tab-pane fade" id="funktionsweise">
+                    <h2 class="mb-4">Der Stirling-Prozess (Thermodynamischer Ablauf)</h2>
+
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <div class="info-card">
+                                <h3>Phase 1: Expansion</h3>
+                                <div class="temperature-badge temp-hot">HEIZEN</div>
+                                <div class="component-description">
+                                    Das Arbeitsgas wird in der Heizkammer erwärmt und dehnt sich aus. Der Druck steigt an und drückt den Arbeitskolben nach vorne.
+                                </div>
+                                <p><strong>Energiefluss:</strong> Wärme → Druck</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <div class="info-card">
+                                <h3>Phase 2: Verdichtung</h3>
+                                <div class="temperature-badge">VERDICHTER</div>
+                                <div class="component-description">
+                                    Der Verdränger-Kolben bewegt sich, sodass das Gas vom warmen in den kalten Bereich verschoben wird. Der Druck nimmt ab.
+                                </div>
+                                <p><strong>Prozess:</strong> Isobare Verschiebung</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <div class="info-card">
+                                <h3>Phase 3: Abkühlung</h3>
+                                <div class="temperature-badge temp-cold">KÜHLEN</div>
+                                <div class="component-description">
+                                    Das Gas wird im Kühler abgekühlt und zieht sich zusammen. Der Druck fällt stark ab.
+                                </div>
+                                <p><strong>Energiefluss:</strong> Wärme ab</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <div class="info-card">
+                                <h3>Phase 4: Entspannung</h3>
+                                <div class="temperature-badge">REGENERATOR</div>
+                                <div class="component-description">
+                                    Der Regenerator speichert die Wärme zwischen den Phasen. Das abgekühlte Gas wird zurück in die Heizkammer verschoben.
+                                </div>
+                                <p><strong>Effekt:</strong> +20–30% Effizienz</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="info-card">
+                            <h3><i class="fas fa-chart-line"></i> p-V Diagramm</h3>
+                            <p>Der thermodynamische Prozess kann im Druck-Volumen-Diagramm dargestellt werden:</p>
+                            <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="max-width: 100%; height: auto;">
+                                <!-- Achsen -->
+                                <line x1="50" y1="250" x2="350" y2="250" stroke="#333" stroke-width="2"/>
+                                <line x1="50" y1="250" x2="50" y2="30" stroke="#333" stroke-width="2"/>
+                                <text x="360" y="260" font-size="12" font-weight="bold">Volumen →</text>
+                                <text x="30" y="20" font-size="12" font-weight="bold">Druck →</text>
+
+                                <!-- Stirling-Zyklus (vereinfacht) -->
+                                <path d="M 100 200 Q 180 80 250 150 Q 280 180 100 200" fill="rgba(37, 99, 235, 0.2)" stroke="#2563eb" stroke-width="3"/>
+
+                                <!-- Beschriftung -->
+                                <circle cx="100" cy="200" r="5" fill="#dc2626"/>
+                                <text x="85" y="220" font-size="11">Expansion</text>
+
+                                <circle cx="250" cy="150" r="5" fill="#0ea5e9"/>
+                                <text x="240" y="130" font-size="11">Kompression</text>
+
+                                <!-- Grid -->
+                                <g stroke="#ddd" stroke-width="1">
+                                    <line x1="50" y1="50" x2="350" y2="50"/>
+                                    <line x1="50" y1="100" x2="350" y2="100"/>
+                                    <line x1="50" y1="150" x2="350" y2="150"/>
+                                    <line x1="50" y1="200" x2="350" y2="200"/>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <h3><i class="fas fa-calculator"></i> Wichtige Formeln</h3>
+                                <div class="component-description">
+                                    <p><strong>Wirkungsgrad (Carnot-Limit):</strong></p>
+                                    <p style="font-family: monospace; font-size: 1.1rem;">η = 1 − (T_kalt / T_heiß)</p>
+                                    <p class="mt-3"><strong>Beispiel:</strong></p>
+                                    <p>T_heiß = 700°C = 973 K<br>
+                                    T_kalt = 50°C = 323 K<br>
+                                    η = 1 − (323/973) = <strong>66,8%</strong> (theoretisch)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <h3><i class="fas fa-star"></i> Realistische Werte</h3>
+                                <div class="component-description">
+                                    <p><strong>Tatsächlicher Wirkungsgrad:</strong> 30–40%</p>
+                                    <p>Das ist deutlich höher als bei konventionellen Verbrennungsmotoren (20–30%), wenn man die geringe Verschmutzung einrechnet.</p>
+                                    <p class="mt-3"><strong>Vorteile des hohen η:</strong></p>
+                                    <ul class="mb-0">
+                                        <li>Geringere Betriebskosten</li>
+                                        <li>Umweltfreundlicher</li>
+                                        <li>Weniger Abwärme</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 5: Anwendungen -->
+                <div class="tab-pane fade" id="anwendungen">
+                    <h2 class="mb-4">Praktische Anwendungen des Stirlingmotors</h2>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <div class="icon"><i class="fas fa-sun" style="color: #fbbf24;"></i></div>
+                                <h3>Solarenergie-Anlagen</h3>
+                                <p>Stirlingmotoren können direkt von Sonnenenergie angetrieben werden. Parabolspiegelkonzentrator (Dish-Stirling) ist eine aussichtsreiche Technologie.</p>
+                                <p class="mt-2"><strong>Wirkungsgrad:</strong> Bis zu 30% (weltweit)</p>
+                                <p><strong>Einsatz:</strong> Sonnenenergie-Kraftwerke, Mini-BHKW</p>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar" style="width: 30%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <div class="icon"><i class="fas fa-recycle" style="color: #34d399;"></i></div>
+                                <h3>Abwärmenutzung (KWK)</h3>
+                                <p>Stirlingmotoren nutzen Abwärme von Industrieprozessen oder Heizkessel zur Stromerzeugung (Kraft-Wärme-Kopplung).</p>
+                                <p class="mt-2"><strong>Vorteil:</strong> Keine zusätzliche Wärmequelle nötig</p>
+                                <p><strong>Potenzial:</strong> Energieeffizienz bis 90%</p>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar" style="width: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <div class="icon"><i class="fas fa-snowflake" style="color: #06b6d4;"></i></div>
+                                <h3>Kryotechnische Anwendungen</h3>
+                                <p>Der Stirlingmotor kann auch als Kühlmaschine betrieben werden (Stirling-Kühler). Verwendet zur Verflüssigung von Gasen.</p>
+                                <p class="mt-2"><strong>Anwendung:</strong> Flüssigstickstoff-Erzeugung</p>
+                                <p><strong>Industrie:</strong> Medizin, Forschung, Weltraum</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <div class="icon"><i class="fas fa-ship" style="color: #0284c7;"></i></div>
+                                <h3>Marine & Weltraum</h3>
+                                <p>U-Boote und Raumfahrtagenturen erforschen Stirlingmotoren für noiseless Antriebe.</p>
+                                <p class="mt-2"><strong>Vorteil:</strong> Extrem leise Funktionsweise</p>
+                                <p><strong>Projekt:</strong> Stirling AIP (Air Independent Propulsion)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <div class="icon"><i class="fas fa-home" style="color: #f97316;"></i></div>
+                                <h3>Dezentrale Stromerzeugung</h3>
+                                <p>Micro-BHKW-Anlagen für Einfamilienhäuser nutzen Stirlingmotoren zur kombinierten Heiz- und Stromversorgung.</p>
+                                <p class="mt-2"><strong>Leistung:</strong> 1–10 kW</p>
+                                <p><strong>Brennstoff:</strong> Gas, Holz, Pellets</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="info-card">
+                                <div class="icon"><i class="fas fa-flask" style="color: #a855f7;"></i></div>
+                                <h3>Forschung & Bildung</h3>
+                                <p>Stirlingmotoren sind ideale Lehr- und Demonstrationsobjekte für thermodynamische Prinzipien.</p>
+                                <p class="mt-2"><strong>Einsatz:</strong> Schulen, Universitäten</p>
+                                <p><strong>Vorteil:</strong> Sichtbare Funktionsweise, ungefährlich</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="comparison-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Vergleich</th>
+                                        <th>Stirlingmotor</th>
+                                        <th>Ottomotor</th>
+                                        <th>Dieselmotor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Wirkungsgrad</strong></td>
+                                        <td>30–40%</td>
+                                        <td>25–30%</td>
+                                        <td>30–45%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Emissionen</strong></td>
+                                        <td>Sehr gering</td>
+                                        <td>Erhöht</td>
+                                        <td>Erhöht</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Lautstärke</strong></td>
+                                        <td>Sehr leise</td>
+                                        <td>Laut</td>
+                                        <td>Sehr laut</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Brennstoff</strong></td>
+                                        <td>Variabel (extern)</td>
+                                        <td>Benzin</td>
+                                        <td>Diesel</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Wartung</strong></td>
+                                        <td>Niedrig</td>
+                                        <td>Mittel</td>
+                                        <td>Mittel</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Komplexität</strong></td>
+                                        <td>Hoch</td>
+                                        <td>Mittel</td>
+                                        <td>Mittel</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 6: Quiz -->
+                <div class="tab-pane fade" id="quiz">
+                    <h2 class="mb-4">Überprüfe dein Wissen</h2>
+
+                    <div class="row">
+                        <div class="col-lg-8 offset-lg-2">
+                            <div id="quizContainer"></div>
+                            <button class="btn-custom btn-primary-custom mt-4" onclick="loadQuiz()" style="width: 100%;">
+                                <i class="fas fa-sync-alt"></i> Quiz zurücksetzen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>Stirlingmotor – Interaktive Lernplattform</strong></p>
+        <p>Technologie-Oberstufe | Kompetenzerwartung: Funktionsweise aktuell relevanter Maschinen</p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">© 2026 Bildungsplattform | Alle Inhalte unter Creative Commons Lizenz</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Animation State
+        let animationRunning = false;
+        let animationSpeed = 1;
+        let animationAngle = 0;
+
+        // Animation Functions
+        function startAnimation() {
+            if (!animationRunning) {
+                animationRunning = true;
+                animate();
+            }
+        }
+
+        function pauseAnimation() {
+            animationRunning = false;
+        }
+
+        function resetAnimation() {
+            animationRunning = false;
+            animationAngle = 0;
+            updateMotor();
+        }
+
+        function updateSpeed() {
+            animationSpeed = parseFloat(document.getElementById('speedSlider').value);
+        }
+
+        function animate() {
+            if (animationRunning) {
+                animationAngle += 2 * animationSpeed;
+                if (animationAngle > 360) animationAngle -= 360;
+                updateMotor();
+                requestAnimationFrame(animate);
+            }
+        }
+
+        function updateMotor() {
+            // Arbeitskolben bewegt sich
+            const workPiston = document.getElementById('workPiston');
+            const workOffset = Math.sin((animationAngle) * Math.PI / 180) * 40;
+            workPiston.setAttribute('x', 310 + workOffset);
+
+            // Verdränger-Kolben mit Phasenversatz (90 Grad)
+            const displacerPiston = document.getElementById('displacerPiston');
+            const displacerOffset = Math.sin((animationAngle + 90) * Math.PI / 180) * 25;
+            displacerPiston.setAttribute('y', 170 + displacerOffset);
+
+            // Rotierende Welle
+            const wheel = document.getElementById('rotatingWheel');
+            wheel.setAttribute('transform', `rotate(${animationAngle} 400 320)`);
+        }
+
+        // Quiz System
+        const quizData = [
+            {
+                question: "In welchem Jahr wurde der Stirlingmotor erfunden?",
+                options: ["1816", "1876", "1906", "1956"],
+                correct: 0,
+                explanation: "Der Stirlingmotor wurde 1816 von Robert Stirling erfunden – lange vor dem modernen Verbrennungsmotor!"
+            },
+            {
+                question: "Welche Temperatur hat normalerweise die Heizkammer?",
+                options: ["200–300°C", "400–500°C", "600–800°C", "1000–1200°C"],
+                correct: 2,
+                explanation: "Die Heizkammer arbeitet typischerweise bei 600–800°C. Je heißer, desto höher der theoretische Wirkungsgrad."
+            },
+            {
+                question: "Was ist der Hauptvorteil des Regenerators?",
+                options: ["Reduziert die Lautstärke", "Erhöht den Wirkungsgrad um 20–30%", "Kühlt das Gas", "Erhöht die Drehzahl"],
+                correct: 1,
+                explanation: "Der Regenerator speichert Wärme zwischen den Prozessphasen und gibt sie gezielt wieder ab – das steigert die Effizienz!"
+            },
+            {
+                question: "Was ist ein charakteristisches Merkmal des Stirlingmotors?",
+                options: ["Verbrennung im Zylinder", "Externe Wärmequelle", "Hochfrequenz-Verdichtung", "Variable Zylinderzahl"],
+                correct: 1,
+                explanation: "Der Stirlingmotor ist ein Außenverbrennungsmotor – der Brennstoff verbrennt außerhalb des Motors. Das macht ihn vielseitig einsetzbar."
+            },
+            {
+                question: "Welche moderne Anwendung nutzt Stirlingmotoren intensiv?",
+                options: ["Autos", "Solarenergie-Kraftwerke", "Fahrräder", "Handys"],
+                correct: 1,
+                explanation: "Dish-Stirling-Systeme (Parabolspiegel mit Stirlingmotor) sind eine vielversprechende Solarenergie-Technologie mit hohen Wirkungsgraden."
+            },
+            {
+                question: "Wie heißt der Prozess mit Phasenversatz zwischen Arbeits- und Verdrängerkolben?",
+                options: ["Carnot-Prozess", "Otto-Prozess", "Stirling-Prozess", "Diesel-Prozess"],
+                correct: 2,
+                explanation: "Der Stirling-Prozess ist der thermodynamische Kreisprozess mit charakteristischem Phasenversatz (meist 90°) zwischen den Kolben."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function loadQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestion >= quizData.length) {
+                showResults();
+                return;
+            }
+
+            const question = quizData[currentQuestion];
+            let html = `
+                <div class="info-card">
+                    <h4>Frage ${currentQuestion + 1}/${quizData.length}</h4>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" style="width: ${((currentQuestion) / quizData.length) * 100}%"></div>
+                    </div>
+                    <h5 class="mb-3">${question.question}</h5>
+                    <div class="row">
+            `;
+
+            question.options.forEach((option, index) => {
+                html += `
+                    <div class="col-12 mb-2">
+                        <button class="btn btn-outline-primary" style="width: 100%; text-align: left;" onclick="answerQuestion(${index})">
+                            ${String.fromCharCode(65 + index)}. ${option}
+                        </button>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('quizContainer').innerHTML = html;
+        }
+
+        function answerQuestion(index) {
+            const question = quizData[currentQuestion];
+
+            if (index === question.correct) {
+                score++;
+                showFeedback(true, question.explanation);
+            } else {
+                showFeedback(false, question.explanation);
+            }
+        }
+
+        function showFeedback(isCorrect, explanation) {
+            const status = isCorrect ? 
+                '<span style="color: #10b981;"><i class="fas fa-check-circle"></i> Richtig!</span>' :
+                '<span style="color: #ef4444;"><i class="fas fa-times-circle"></i> Leider falsch.</span>';
+
+            const html = `
+                <div class="info-card">
+                    <h4>${status}</h4>
+                    <p class="mt-3"><strong>Erklärung:</strong> ${explanation}</p>
+                    <button class="btn-custom btn-primary-custom" style="width: 100%; margin-top: 1rem;" onclick="nextQuestion()">
+                        Nächste Frage →
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('quizContainer').innerHTML = html;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            displayQuestion();
+        }
+
+        function showResults() {
+            const percentage = (score / quizData.length) * 100;
+            let feedback = '';
+            let color = '';
+
+            if (percentage === 100) {
+                feedback = '🎉 Perfekt! Du hast alles richtig gemacht!';
+                color = '#10b981';
+            } else if (percentage >= 80) {
+                feedback = '✨ Ausgezeichnet! Du hast sehr gutes Wissen!';
+                color = '#10b981';
+            } else if (percentage >= 60) {
+                feedback = '👍 Gut gemacht! Einige Punkte zum Wiederholen.';
+                color = '#f97316';
+            } else {
+                feedback = '💪 Gute Übung! Wiederhole die Inhalte noch einmal.';
+                color = '#ef4444';
+            }
+
+            const html = `
+                <div class="info-card" style="border-left: 5px solid ${color};">
+                    <h3 style="color: ${color};">${feedback}</h3>
+                    <div class="mt-4">
+                        <h5>Ergebnis: <strong>${score}/${quizData.length}</strong> Punkte</h5>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: ${percentage}%; background: ${color};"></div>
+                        </div>
+                        <p class="mt-3" style="font-size: 1.5rem; font-weight: bold; color: ${color};">${percentage.toFixed(0)}%</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('quizContainer').innerHTML = html;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQuiz();
+            updateMotor();
+        });
+    </script>
+</body>
+</html>
