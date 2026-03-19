@@ -669,17 +669,11 @@ function drawEngine(a) {
   const rCylY = H * 0.08;
 
   // Connecting pipe — diagonal from bottom of cold to bottom of hot
-  // Cold bottom center
   const coldBotX = lCylX + lCylW / 2;
   const coldBotY = lCylY + lCylH;
   // Hot bottom center
   const hotBotX = rCylX + rCylW / 2;
   const hotBotY = rCylY + rCylH;
-
-  // Crank wheel center — top left
-  const crankX = W * 0.22;
-  const crankY = H * 0.22;
-  const crankR = H * 0.13;
 
   // ---- CONNECTING PIPE (diagonal) ----
   const pipeW = W * 0.055;
@@ -731,8 +725,8 @@ function drawEngine(a) {
   ctx.strokeRect(lCylX, lCylY, lCylW, lCylH);
 
   // Cold piston — moves up/down, 90° offset from hot
-  const coldPistonTravel = lCylH * 0.38;
-  const coldPistonY_center = lCylY + lCylH * 0.42;
+  const coldPistonTravel = lCylH * 0.32;
+  const coldPistonY_center = lCylY + lCylH * 0.50;
   const coldPistonPos = coldPistonY_center + Math.sin(a + Math.PI / 2) * coldPistonTravel;
   const cPH = lCylH * 0.1;
   ctx.fillStyle = '#5B8DD9';
@@ -750,15 +744,6 @@ function drawEngine(a) {
     ctx.fillStyle = cg;
     ctx.fillRect(lCylX + 2, coldPistonPos + cPH/2, lCylW - 4, coldGasH);
   }
-
-  // Piston rod (cold)
-  const coldRodTopY = coldPistonPos - cPH/2;
-  ctx.strokeStyle = '#6B7280';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(lCylX + lCylW/2, coldRodTopY);
-  ctx.lineTo(lCylX + lCylW/2, lCylY - 10);
-  ctx.stroke();
 
   // Label cold
   ctx.fillStyle = '#93C5FD';
@@ -785,8 +770,8 @@ function drawEngine(a) {
   ctx.strokeRect(rCylX, rCylY, rCylW, rCylH);
 
   // Hot piston — moves up/down
-  const hotPistonTravel = rCylH * 0.38;
-  const hotPistonY_center = rCylY + rCylH * 0.42;
+  const hotPistonTravel = rCylH * 0.32;
+  const hotPistonY_center = rCylY + rCylH * 0.50;
   const hotPistonPos = hotPistonY_center + Math.sin(a) * hotPistonTravel;
   const hPH = rCylH * 0.1;
   ctx.fillStyle = '#E05530';
@@ -805,15 +790,6 @@ function drawEngine(a) {
     ctx.fillRect(rCylX + 2, hotPistonPos + hPH/2, rCylW - 4, hotGasH);
   }
 
-  // Piston rod (hot) — goes up, connects to crank
-  const hotRodTopY = hotPistonPos - hPH/2;
-  ctx.strokeStyle = '#6B7280';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(rCylX + rCylW/2, hotRodTopY);
-  ctx.lineTo(rCylX + rCylW/2, rCylY - 10);
-  ctx.stroke();
-
   // Label hot
   ctx.fillStyle = '#FCA981';
   ctx.font = `bold ${W*0.017}px Space Mono, monospace`;
@@ -821,13 +797,28 @@ function drawEngine(a) {
   ctx.fillText('HEISS', rCylX + rCylW/2, rCylY - 18);
 
   // ---- CRANKSHAFT & FLYWHEEL ----
-  // Flywheel (big circle)
+  // Two cranks: left crank for cold piston, right crank for hot piston
+  // Left crank (cold cylinder)
+  const lCrankX = lCylX + lCylW / 2;
+  const lCrankY = lCylY - 55;
+  const lCrankR = 28;
+
+  // Right crank (hot cylinder)
+  const rCrankX = rCylX + rCylW / 2;
+  const rCrankY = rCylY - 55;
+  const rCrankR = 28;
+
+  // Shared flywheel in center between the two cylinders
+  const crankX = W * 0.44;
+  const crankY = H * 0.30;
+  const crankR = H * 0.09;
+
+  // Draw shared flywheel
   ctx.strokeStyle = '#4B5563';
   ctx.lineWidth = 5;
   ctx.beginPath();
   ctx.arc(crankX, crankY, crankR, 0, Math.PI * 2);
   ctx.stroke();
-  // Flywheel spokes
   ctx.strokeStyle = '#374151';
   ctx.lineWidth = 2;
   for (let s = 0; s < 4; s++) {
@@ -838,38 +829,101 @@ function drawEngine(a) {
     ctx.stroke();
   }
 
-  // Crank pin A (connects to cold piston rod)
-  const pinAX = crankX + Math.cos(a + Math.PI/2) * crankR * 0.65;
-  const pinAY = crankY + Math.sin(a + Math.PI/2) * crankR * 0.65;
-  // Crank pin B (connects to hot piston rod) — 90° offset
-  const pinBX = crankX + Math.cos(a) * crankR * 0.65;
-  const pinBY = crankY + Math.sin(a) * crankR * 0.65;
+  // Left crank disk (cold)
+  ctx.strokeStyle = '#3A5A8A';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(lCrankX, lCrankY, lCrankR, 0, Math.PI * 2);
+  ctx.stroke();
+  // Left crank arm
+  const pinAX = lCrankX + Math.cos(a + Math.PI / 2) * lCrankR;
+  const pinAY = lCrankY + Math.sin(a + Math.PI / 2) * lCrankR;
+  ctx.strokeStyle = '#5B8DD9';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(lCrankX, lCrankY);
+  ctx.lineTo(pinAX, pinAY);
+  ctx.stroke();
 
-  // Connecting rod A — cold piston
+  // Right crank disk (hot)
+  ctx.strokeStyle = '#8A3A2A';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(rCrankX, rCrankY, rCrankR, 0, Math.PI * 2);
+  ctx.stroke();
+  // Right crank arm
+  const pinBX = rCrankX + Math.cos(a) * rCrankR;
+  const pinBY = rCrankY + Math.sin(a) * rCrankR;
+  ctx.strokeStyle = '#E05530';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(rCrankX, rCrankY);
+  ctx.lineTo(pinBX, pinBY);
+  ctx.stroke();
+
+  // Flywheel pins — two pins on the flywheel rim, 90° apart (matching the two cranks)
+  const fwPinAX = crankX + Math.cos(a + Math.PI / 2) * crankR * 0.75;
+  const fwPinAY = crankY + Math.sin(a + Math.PI / 2) * crankR * 0.75;
+  const fwPinBX = crankX + Math.cos(a) * crankR * 0.75;
+  const fwPinBY = crankY + Math.sin(a) * crankR * 0.75;
+
+  // Connecting rod: flywheel pin A → left crank center
+  ctx.strokeStyle = '#5B8DD9';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(fwPinAX, fwPinAY);
+  ctx.lineTo(lCrankX, lCrankY);
+  ctx.stroke();
+
+  // Connecting rod: flywheel pin B → right crank center
+  ctx.strokeStyle = '#E05530';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(fwPinBX, fwPinBY);
+  ctx.lineTo(rCrankX, rCrankY);
+  ctx.stroke();
+
+  // Flywheel pin dots
+  ctx.fillStyle = '#93C5FD';
+  ctx.beginPath(); ctx.arc(fwPinAX, fwPinAY, 4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FCA981';
+  ctx.beginPath(); ctx.arc(fwPinBX, fwPinBY, 4, 0, Math.PI*2); ctx.fill();
+
+  // Connecting rod A — cold piston to left crank pin
   ctx.strokeStyle = '#8899AA';
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(pinAX, pinAY);
-  ctx.lineTo(lCylX + lCylW/2, lCylY - 10);
+  ctx.lineTo(lCylX + lCylW/2, coldPistonPos - cPH/2);
   ctx.stroke();
 
-  // Connecting rod B — hot piston (goes from crank to top of hot piston rod)
-  // Route via top-right
+  // Connecting rod B — hot piston to right crank pin
   ctx.strokeStyle = '#8899AA';
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(pinBX, pinBY);
-  ctx.lineTo(rCylX + rCylW/2, rCylY - 10);
+  ctx.lineTo(rCylX + rCylW/2, hotPistonPos - hPH/2);
   ctx.stroke();
 
-  // Pin A dot
+  // Pin dots
   ctx.fillStyle = '#93C5FD';
   ctx.beginPath(); ctx.arc(pinAX, pinAY, 5, 0, Math.PI*2); ctx.fill();
-  // Pin B dot
   ctx.fillStyle = '#FCA981';
   ctx.beginPath(); ctx.arc(pinBX, pinBY, 5, 0, Math.PI*2); ctx.fill();
 
-  // Center hub
+  // Left crank center hub
+  ctx.fillStyle = '#1F2533';
+  ctx.beginPath(); ctx.arc(lCrankX, lCrankY, 7, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(lCrankX, lCrankY, 7, 0, Math.PI*2); ctx.stroke();
+
+  // Right crank center hub
+  ctx.fillStyle = '#1F2533';
+  ctx.beginPath(); ctx.arc(rCrankX, rCrankY, 7, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(rCrankX, rCrankY, 7, 0, Math.PI*2); ctx.stroke();
+
+  // Flywheel center hub
   ctx.fillStyle = '#1F2533';
   ctx.beginPath(); ctx.arc(crankX, crankY, 9, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 2;
