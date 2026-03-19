@@ -551,6 +551,27 @@
                             <rect x="220" y="100" width="40" height="200" fill="#f3e8ff" stroke="#a855f7" stroke-width="2" rx="5"/>
                             <text x="240" y="210" text-anchor="middle" font-size="11" font-weight="bold" fill="#a855f7">REG</text>
 
+                            <!-- Welle/Antrieb (muss zuerst definiert sein) -->
+                            <g id="crankshaft">
+                                <g id="rotatingWheel" transform="translate(400, 320)">
+                                    <!-- Äußerer Kreis -->
+                                    <circle cx="0" cy="0" r="30" fill="none" stroke="#2563eb" stroke-width="3"/>
+                                    <!-- Speichen -->
+                                    <line x1="0" y1="-30" x2="0" y2="30" stroke="#2563eb" stroke-width="2"/>
+                                    <line x1="-30" y1="0" x2="30" y2="0" stroke="#2563eb" stroke-width="2"/>
+                                    <line x1="-21" y1="-21" x2="21" y2="21" stroke="#2563eb" stroke-width="2"/>
+                                    <line x1="21" y1="-21" x2="-21" y2="21" stroke="#2563eb" stroke-width="2"/>
+                                    <!-- Nabe -->
+                                    <circle cx="0" cy="0" r="5" fill="#333"/>
+                                </g>
+                            </g>
+
+                            <!-- Verbindungsstange Arbeitskolben -->
+                            <line id="rodWork" x1="340" y1="170" x2="400" y2="320" stroke="#555" stroke-width="2"/>
+                            
+                            <!-- Verbindungsstange Verdränger -->
+                            <line id="rodDisplacer" x1="180" y1="230" x2="400" y2="320" stroke="#f97316" stroke-width="2" stroke-dasharray="5,5"/>
+
                             <!-- Arbeitszylinder mit Kolben -->
                             <g id="workCylinder">
                                 <rect x="300" y="130" width="80" height="140" fill="none" stroke="#059669" stroke-width="2" rx="5"/>
@@ -564,16 +585,6 @@
                                 <rect id="displacerPiston" x="170" y="170" width="20" height="60" fill="#f97316" stroke="#ea580c" stroke-width="1" rx="2"/>
                                 <text x="180" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="white">V</text>
                             </g>
-
-                            <!-- Welle/Antrieb -->
-                            <g id="crankshaft">
-                                <circle cx="400" cy="320" r="4" fill="#333"/>
-                                <circle id="rotatingWheel" cx="400" cy="320" r="30" fill="none" stroke="#2563eb" stroke-width="3"/>
-                            </g>
-
-                            <!-- Verbindungsstangen -->
-                            <line x1="340" y1="170" x2="400" y2="320" stroke="#555" stroke-width="2"/>
-                            <line x1="180" y1="230" x2="400" y2="320" stroke="#f97316" stroke-width="2" stroke-dasharray="5,5"/>
 
                             <!-- Temperatur-Indikatoren -->
                             <circle cx="100" cy="80" r="6" fill="#dc2626" class="pulsing"/>
@@ -935,19 +946,35 @@
         }
 
         function updateMotor() {
-            // Arbeitskolben bewegt sich
+            // Arbeitskolben bewegt sich horizontal
             const workPiston = document.getElementById('workPiston');
             const workOffset = Math.sin((animationAngle) * Math.PI / 180) * 40;
-            workPiston.setAttribute('x', 310 + workOffset);
+            const newWorkX = 310 + workOffset;
+            workPiston.setAttribute('x', newWorkX);
 
-            // Verdränger-Kolben mit Phasenversatz (90 Grad)
+            // Verbindungsstange Arbeitskolben: von Kolbenmitte zur Welle
+            const rodWork = document.getElementById('rodWork');
+            const workPistonCenterX = newWorkX + 30; // Mittelpunkt des Kolbens
+            const workPistonCenterY = 155; // Mittelpunkt vertikal
+            rodWork.setAttribute('x1', workPistonCenterX);
+            rodWork.setAttribute('y1', workPistonCenterY);
+
+            // Verdränger-Kolben mit Phasenversatz (90 Grad) - bewegt sich vertikal
             const displacerPiston = document.getElementById('displacerPiston');
             const displacerOffset = Math.sin((animationAngle + 90) * Math.PI / 180) * 25;
-            displacerPiston.setAttribute('y', 170 + displacerOffset);
+            const newDisplacerY = 170 + displacerOffset;
+            displacerPiston.setAttribute('y', newDisplacerY);
 
-            // Rotierende Welle
+            // Verbindungsstange Verdränger: von Kolbenmitte zur Welle
+            const rodDisplacer = document.getElementById('rodDisplacer');
+            const displacerPistonCenterX = 180; // Mittelpunkt horizontal (fest)
+            const displacerPistonCenterY = newDisplacerY + 30; // Mittelpunkt vertikal
+            rodDisplacer.setAttribute('x1', displacerPistonCenterX);
+            rodDisplacer.setAttribute('y1', displacerPistonCenterY);
+
+            // Rotierende Welle mit korrekter transform
             const wheel = document.getElementById('rotatingWheel');
-            wheel.setAttribute('transform', `rotate(${animationAngle} 400 320)`);
+            wheel.setAttribute('transform', `translate(400, 320) rotate(${animationAngle})`);
         }
 
         // Quiz System
