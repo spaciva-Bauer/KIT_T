@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIT12 – Schleifen in Python</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1a2733;
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        header {
+            background: #1e3a5f; color: white;
+            padding: 1.25rem 2rem;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        header h1   { font-size: 1.35rem; font-weight: 600; }
+        header .sub { font-size: 0.85rem; opacity: 0.7; margin-top: 0.15rem; }
+        .badge {
+            background: #e8a020; color: white;
+            font-size: 0.7rem; font-weight: 700;
+            padding: 0.2rem 0.55rem; border-radius: 1rem;
+            text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+        }
+
+        /* ── Progress ── */
+        .progress-wrap {
+            background: #162d4a; padding: 0.6rem 2rem;
+            display: flex; gap: 0.4rem; align-items: center;
+        }
+        .progress-label { color: rgba(255,255,255,0.5); font-size: 0.7rem; white-space: nowrap; margin-right: 0.25rem; }
+        .progress-step  { height: 5px; flex: 1; background: rgba(255,255,255,0.15); border-radius: 3px; transition: background 0.4s; }
+        .progress-step.done   { background: #4ade80; }
+        .progress-step.active { background: #e8a020; }
+
+        /* ── Layout ── */
+        main { max-width: 880px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
+
+        /* ── Section cards ── */
+        .section {
+            background: white; border-radius: 12px;
+            padding: 2rem; margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+        .section-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.1em; color: #1e3a5f; margin-bottom: 0.4rem;
+        }
+        .section > h2 {
+            font-size: 1.25rem; color: #1e3a5f;
+            margin-bottom: 1rem; padding-bottom: 0.6rem;
+            border-bottom: 2px solid #e8edf3;
+        }
+        h3 { font-size: 1rem; color: #1e3a5f; margin: 1.5rem 0 0.6rem; }
+        p  { margin-bottom: 0.75rem; color: #334155; font-size: 0.95rem; }
+
+        /* ── Boxes ── */
+        .info-box {
+            background: #eff6ff; border-left: 4px solid #1e3a5f;
+            border-radius: 0 8px 8px 0; padding: 0.9rem 1.2rem;
+            margin: 1rem 0; font-size: 0.92rem; color: #1e3a5f;
+        }
+        .warn-box {
+            background: #fff7ed; border-left: 4px solid #e8a020;
+            border-radius: 0 8px 8px 0; padding: 0.9rem 1.2rem;
+            margin: 1rem 0; font-size: 0.92rem; color: #78350f;
+        }
+
+        /* ── Syntax box ── */
+        .syntax-box {
+            background: #f1f5f9; border: 1px solid #cbd5e1;
+            border-radius: 8px; padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            line-height: 1.8; margin: 0.75rem 0; color: #334155;
+        }
+        .syntax-box .ph { color: #64748b; font-style: italic; }
+        .syntax-box .kw { color: #1e3a5f; font-weight: 700; }
+
+        /* ── Code blocks ── */
+        .code-block {
+            background: #1e2d3d; color: #e2e8f0;
+            border-radius: 8px; padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            line-height: 1.8; margin: 0.75rem 0; overflow-x: auto;
+        }
+        .code-block .kw { color: #93c5fd; }
+        .code-block .fn { color: #86efac; }
+        .code-block .st { color: #fde68a; }
+        .code-block .nm { color: #f9a8d4; }
+        .code-block .cm { color: #64748b; font-style: italic; }
+        .code-block .op { color: #cbd5e1; }
+        .code-block .lo { color: #c4b5fd; }
+
+        /* Inline code */
+        code {
+            background: #e8edf3; padding: 0.1rem 0.35rem;
+            border-radius: 3px; font-family: 'Courier New', monospace;
+            font-size: 0.85em; color: #1e3a5f;
+        }
+
+        /* ── range() visualiser ── */
+        .range-vis {
+            display: flex; flex-wrap: wrap; gap: 0.4rem;
+            margin: 0.75rem 0 1rem; align-items: center;
+        }
+        .range-vis .rv-label {
+            font-family: 'Courier New', monospace; font-size: 0.82rem;
+            color: #1e3a5f; margin-right: 0.25rem; font-weight: 700;
+        }
+        .range-num {
+            background: #1e3a5f; color: white;
+            width: 2rem; height: 2rem; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Courier New', monospace; font-size: 0.85rem; font-weight: 700;
+        }
+        .range-num.skip {
+            background: #e2e8f0; color: #94a3b8;
+            text-decoration: line-through; font-size: 0.75rem;
+        }
+        .range-arrow { color: #94a3b8; font-size: 0.8rem; }
+
+        /* ── Two-column compare ── */
+        .compare { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 0.75rem 0; }
+        .compare-col { flex: 1; min-width: 220px; }
+        .compare-col > h4 {
+            font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+            color: #64748b; margin-bottom: 0.4rem;
+        }
+
+        /* ══════════════════════════
+           EXERCISES
+        ══════════════════════════ */
+        .exercise {
+            background: #f8fafc; border: 2px solid #e2e8f0;
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .exercise.knobel { border-color: #e8a020; background: #fffbf0; }
+        .ex-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .ex-num {
+            background: #1e3a5f; color: white;
+            width: 1.9rem; height: 1.9rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.88rem; flex-shrink: 0;
+        }
+        .exercise.knobel .ex-num { background: #e8a020; }
+        .ex-header h3 { margin: 0; border: none; padding: 0; font-size: 1rem; color: #1a2733; }
+        .ex-type {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #64748b; background: #e2e8f0;
+            padding: 0.15rem 0.5rem; border-radius: 1rem; white-space: nowrap;
+        }
+        .ex-type.knobel-tag { background: #fde68a; color: #78350f; }
+        .ex-task     { font-size: 0.93rem; color: #334155; margin-bottom: 0.75rem; }
+        .ex-question { font-size: 0.93rem; color: #1a2733; margin: 1rem 0 0.5rem; font-weight: 600; }
+
+        /* Feedback */
+        .feedback { margin-top: 1rem; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.88rem; display: none; line-height: 1.5; }
+        .feedback.show { display: block; }
+        .feedback.ok  { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+        .feedback.err { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+
+        /* Buttons */
+        .btn {
+            background: #1e3a5f; color: white; border: none;
+            padding: 0.55rem 1.3rem; border-radius: 6px;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer;
+            margin-top: 1rem; transition: background 0.2s;
+        }
+        .btn:hover { background: #2d5488; }
+        .btn.sec { background: transparent; color: #1e3a5f; border: 2px solid #1e3a5f; margin-left: 0.5rem; }
+        .btn.sec:hover { background: #eff6ff; }
+
+        /* Multiple choice */
+        .mc-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+        .mc-list li { margin-bottom: 0.4rem; }
+        .mc-list label {
+            display: flex; align-items: flex-start; gap: 0.7rem;
+            padding: 0.55rem 0.9rem; background: white;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            cursor: pointer; font-size: 0.88rem; transition: border-color 0.2s; line-height: 1.45;
+        }
+        .mc-list label:hover { border-color: #1e3a5f; }
+        .mc-list input[type="radio"] { accent-color: #1e3a5f; flex-shrink: 0; margin-top: 0.2rem; }
+        .mc-list label.ok  { border-color: #86efac; background: #f0fdf4; }
+        .mc-list label.err { border-color: #fca5a5; background: #fef2f2; }
+
+        /* ── Drag & Drop ── */
+        .dnd-wrap  { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .dnd-col   { flex: 1; min-width: 240px; }
+        .dnd-col > h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; }
+        .drag-item {
+            padding: 0.5rem 0.9rem;
+            background: #1e2d3d; color: #e2e8f0;
+            border: 2px solid #2d4a6a; border-radius: 7px;
+            margin-bottom: 0.5rem; cursor: grab;
+            font-size: 0.82rem; font-family: 'Courier New', monospace;
+            line-height: 1.6; white-space: pre;
+            transition: all 0.18s; user-select: none;
+        }
+        .drag-item:hover    { border-color: #4ade80; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .drag-item.dragging { opacity: 0.4; cursor: grabbing; }
+        .drag-item.ok-placed  { border-color: #4ade80; background: #0f2d1e; }
+        .drag-item.err-placed { border-color: #f87171; background: #2d0f0f; }
+        .drag-item .kw { color: #93c5fd; }
+        .drag-item .fn { color: #86efac; }
+        .drag-item .st { color: #fde68a; }
+        .drag-item .nm { color: #f9a8d4; }
+        .drag-item .lo { color: #c4b5fd; }
+        .drag-item .op { color: #cbd5e1; }
+        .drop-zone {
+            min-height: 3.2rem; border: 2px dashed #cbd5e1;
+            border-radius: 7px; padding: 0.2rem; margin-bottom: 0.5rem;
+            background: #f8fafc; display: flex; align-items: center; transition: all 0.18s;
+        }
+        .drop-zone.over      { border-color: #1e3a5f; background: #eff6ff; }
+        .drop-zone .dz-label { font-size: 0.68rem; color: #94a3b8; padding: 0 0.6rem; }
+        .drop-zone .drag-item { margin-bottom: 0; width: 100%; }
+
+        /* ── Ü2 scenario blocks ── */
+        .scenario-block {
+            background: white; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;
+        }
+        .scenario-label {
+            font-family: 'Courier New', monospace; font-size: 0.82rem;
+            font-weight: 700; color: #1e3a5f;
+            background: #eff6ff; display: inline-block;
+            padding: 0.1rem 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;
+        }
+
+        /* ── Ü3: Error finder ── */
+        .code-line {
+            display: block; padding: 0.15rem 0.75rem; border-radius: 4px;
+            cursor: pointer; transition: background 0.15s;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            color: #e2e8f0; line-height: 1.8; user-select: none;
+        }
+        .code-line:hover      { background: rgba(255,255,255,0.08); }
+        .code-line.correct-ln { background: rgba(74,222,128,0.2);  outline: 1px solid #4ade80; cursor: default; }
+        .code-line.wrong-ln   { background: rgba(248,113,113,0.2); outline: 1px solid #f87171; }
+        .line-num { color: #475569; margin-right: 1rem; user-select: none; }
+
+        /* ── Ü4: Trace table ── */
+        .trace-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.88rem; margin: 0.75rem 0;
+            font-family: 'Courier New', monospace;
+        }
+        .trace-table th {
+            background: #1e3a5f; color: white;
+            padding: 0.5rem 0.75rem; font-weight: 600; text-align: center;
+        }
+        .trace-table th:first-child { border-radius: 8px 0 0 0; text-align: left; }
+        .trace-table th:last-child  { border-radius: 0 8px 0 0; }
+        .trace-table td {
+            padding: 0.45rem 0.75rem; border-bottom: 1px solid #e8edf3;
+            text-align: center; color: #334155;
+        }
+        .trace-table td:first-child { text-align: left; background: #1e2d3d; color: #e2e8f0; }
+        .trace-table tr:last-child td { border-bottom: none; }
+        .trace-input {
+            width: 4.5rem; padding: 0.3rem 0.5rem;
+            border: 2px solid #e2e8f0; border-radius: 5px;
+            font-family: 'Courier New', monospace; font-size: 0.88rem;
+            text-align: center; outline: none; transition: border-color 0.2s;
+        }
+        .trace-input:focus { border-color: #1e3a5f; }
+        .trace-input.ok  { border-color: #86efac; background: #f0fdf4; color: #166534; }
+        .trace-input.err { border-color: #fca5a5; background: #fef2f2; color: #991b1b; }
+
+        /* ── Ü5 Knobelaufgabe ── */
+        .knobel-step {
+            background: white; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;
+        }
+        .knobel-step-label {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #e8a020; margin-bottom: 0.4rem;
+        }
+        .knobel-step h4 { font-size: 0.95rem; font-weight: 700; color: #1a2733; margin-bottom: 0.6rem; }
+
+        /* Completion */
+        .completion { text-align: center; padding: 2.5rem 1rem; display: none; }
+        .completion.show { display: block; }
+        .completion .icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
+        .completion h2    { color: #1e3a5f; margin-bottom: 0.5rem; }
+        .completion p     { color: #475569; }
+    </style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+    <div>
+        <div class="badge">KIT12 &middot; LB 1</div>
+        <h1>Schleifen: for und while</h1>
+        <div class="sub">Grundlagen der Programmierung &middot; FOS/BOS Bayern</div>
+    </div>
+</header>
+
+<!-- ══════════ PROGRESS ══════════ -->
+<div class="progress-wrap">
+    <span class="progress-label">Fortschritt</span>
+    <div class="progress-step done"   id="ps1"></div>
+    <div class="progress-step done"   id="ps2"></div>
+    <div class="progress-step done"   id="ps3"></div>
+    <div class="progress-step active" id="ps4"></div>
+    <div class="progress-step"        id="ps5"></div>
+    <div class="progress-step"        id="ps6"></div>
+    <div class="progress-step"        id="ps7"></div>
+    <div class="progress-step"        id="ps8"></div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════
+     THEORIE
+══════════════════════════════════════ -->
+
+<!-- T1: for-Schleife -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 1 von 3</div>
+    <h2>Die <code>for</code>-Schleife</h2>
+    <p>Eine <code>for</code>-Schleife wiederholt einen Codeblock für <strong>jeden Wert in einer Folge</strong>. Die häufigste Folge wird mit der Funktion <code>range()</code> erzeugt.</p>
+
+    <div class="syntax-box">
+<span class="kw">for</span> <span class="ph">&lt;Laufvariable&gt;</span> <span class="kw">in</span> <span class="ph">&lt;Folge&gt;</span>:
+    <span class="ph">&lt;Anweisung(en) – werden für jeden Wert ausgeführt&gt;</span>
+    </div>
+
+    <h3><code>range()</code> – Zahlenfolgen erzeugen</h3>
+    <p><code>range()</code> erzeugt eine Zahlenfolge. Der <strong>Stopwert ist ausgeschlossen</strong> (wie beim Struktogramm: „bis kleiner als").</p>
+
+    <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:0.88rem; margin:0.75rem 0;">
+        <thead>
+            <tr style="background:#1e3a5f; color:white;">
+                <th style="padding:0.5rem 0.9rem; text-align:left; border-radius:8px 0 0 0;">Aufruf</th>
+                <th style="padding:0.5rem 0.9rem; text-align:left;">Erzeugte Folge</th>
+                <th style="padding:0.5rem 0.9rem; text-align:left; border-radius:0 8px 0 0;">Erklärung</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding:0.45rem 0.9rem; border-bottom:1px solid #e8edf3; font-family:'Courier New',monospace; color:#1e3a5f; font-weight:700;"><code>range(5)</code></td>
+                <td style="padding:0.45rem 0.9rem; border-bottom:1px solid #e8edf3; font-family:'Courier New',monospace;">0, 1, 2, 3, 4</td>
+                <td style="padding:0.45rem 0.9rem; border-bottom:1px solid #e8edf3; color:#334155;">Start = 0, Stopp = 5 (ausgeschlossen)</td>
+            </tr>
+            <tr style="background:#f8fafc;">
+                <td style="padding:0.45rem 0.9rem; border-bottom:1px solid #e8edf3; font-family:'Courier New',monospace; color:#1e3a5f; font-weight:700;"><code>range(1, 6)</code></td>
+                <td style="padding:0.45rem 0.9rem; border-bottom:1px solid #e8edf3; font-family:'Courier New',monospace;">1, 2, 3, 4, 5</td>
+                <td style="padding:0.45rem 0.9rem; border-bottom:1px solid #e8edf3; color:#334155;">Start = 1, Stopp = 6 (ausgeschlossen)</td>
+            </tr>
+            <tr>
+                <td style="padding:0.45rem 0.9rem; border-bottom:1px solid #e8edf3; font-family:'Courier New',monospace; color:#1e3a5f; font-weight:700;"><code>range(2, 10, 2)</code></td>
+                <td style="padding:0.45rem 0.9rem; border-bottom:1px solid #e8edf3; font-family:'Courier New',monospace;">2, 4, 6, 8</td>
+                <td style="padding:0.45rem 0.9rem; border-bottom:1px solid #e8edf3; color:#334155;">Start = 2, Stopp = 10, Schrittweite = 2</td>
+            </tr>
+            <tr style="background:#f8fafc;">
+                <td style="padding:0.45rem 0.9rem; font-family:'Courier New',monospace; color:#1e3a5f; font-weight:700;"><code>range(5, 0, -1)</code></td>
+                <td style="padding:0.45rem 0.9rem; font-family:'Courier New',monospace;">5, 4, 3, 2, 1</td>
+                <td style="padding:0.45rem 0.9rem; color:#334155;">Rückwärts zählen mit Schrittweite −1</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="code-block">
+<span class="cm"># Einmaleins einer Zahl</span>
+<span class="var">n</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Welche Zahl? "</span>))
+
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">11</span>):
+    <span class="fn">print</span>(<span class="var">n</span>, <span class="st">"x"</span>, <span class="var">i</span>, <span class="st">"="</span>, <span class="var">n</span> <span class="op">*</span> <span class="var">i</span>)
+
+<span class="cm"># Summe der Zahlen 1 bis 100 (Gaußsche Summe)</span>
+<span class="var">summe</span> <span class="op">=</span> <span class="nm">0</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">101</span>):
+    <span class="var">summe</span> <span class="op">=</span> <span class="var">summe</span> <span class="op">+</span> <span class="var">i</span>
+<span class="fn">print</span>(<span class="st">"Summe:"</span>, <span class="var">summe</span>)     <span class="cm"># 5050</span>
+    </div>
+
+    <div class="info-box">
+        <strong>Akkumulator-Muster:</strong> Eine Variable (hier <code>summe</code>) wird <em>vor</em> der Schleife mit einem Startwert (0) initialisiert und in jedem Schleifendurchlauf aktualisiert. Dieses Muster tritt sehr häufig auf.
+    </div>
+</div>
+
+<!-- T2: while-Schleife -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 2 von 3</div>
+    <h2>Die <code>while</code>-Schleife</h2>
+    <p>Eine <code>while</code>-Schleife wiederholt einen Block, <strong>solange eine Bedingung wahr ist</strong>. Sie wird eingesetzt, wenn die Anzahl der Durchläufe vorher nicht bekannt ist.</p>
+
+    <div class="syntax-box">
+<span class="kw">while</span> <span class="ph">&lt;Bedingung&gt;</span>:
+    <span class="ph">&lt;Anweisung(en)&gt;</span>
+    </div>
+
+    <div class="compare">
+        <div class="compare-col">
+            <h4><code>for</code>-Schleife – Anzahl bekannt</h4>
+            <div class="code-block" style="margin:0; font-size:0.82rem;">
+<span class="cm"># Genau 5 Mal wiederholen</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">5</span>):
+    <span class="fn">print</span>(<span class="st">"Hallo"</span>)
+            </div>
+        </div>
+        <div class="compare-col">
+            <h4><code>while</code>-Schleife – Abbruchbedingung</h4>
+            <div class="code-block" style="margin:0; font-size:0.82rem;">
+<span class="cm"># Solange keine gültige Eingabe</span>
+<span class="var">eingabe</span> <span class="op">=</span> <span class="st">""</span>
+<span class="kw">while</span> <span class="var">eingabe</span> <span class="op">!=</span> <span class="st">"ja"</span>:
+    <span class="var">eingabe</span> <span class="op">=</span> <span class="fn">input</span>(<span class="st">"Weiter? "</span>)
+            </div>
+        </div>
+    </div>
+
+    <div class="code-block">
+<span class="cm"># Countdown mit while</span>
+<span class="var">i</span> <span class="op">=</span> <span class="nm">5</span>
+<span class="kw">while</span> <span class="var">i</span> <span class="op">&gt;</span> <span class="nm">0</span>:
+    <span class="fn">print</span>(<span class="var">i</span>)
+    <span class="var">i</span> <span class="op">=</span> <span class="var">i</span> <span class="op">-</span> <span class="nm">1</span>       <span class="cm"># i muss sich verändern!</span>
+<span class="fn">print</span>(<span class="st">"Start!"</span>)
+    </div>
+
+    <div class="warn-box">
+        <strong>Endlosschleife vermeiden!</strong> Wenn die Bedingung einer <code>while</code>-Schleife niemals <code>False</code> wird, läuft das Programm endlos. Achte darauf, dass die Laufvariable im Schleifenkörper <em>immer</em> verändert wird.
+    </div>
+</div>
+
+<!-- T3: break, continue -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 3 von 3</div>
+    <h2><code>break</code> und <code>continue</code></h2>
+    <p>Mit <code>break</code> und <code>continue</code> kann der Schleifenablauf gezielt beeinflusst werden. Beide Anweisungen funktionieren in <code>for</code>- und <code>while</code>-Schleifen.</p>
+
+    <div class="compare">
+        <div class="compare-col">
+            <h4><code>break</code> – Schleife sofort verlassen</h4>
+            <div class="code-block" style="margin:0; font-size:0.82rem;">
+<span class="cm"># Suche erste negative Zahl</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">101</span>):
+    <span class="var">z</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Zahl: "</span>))
+    <span class="kw">if</span> <span class="var">z</span> <span class="op">&lt;</span> <span class="nm">0</span>:
+        <span class="fn">print</span>(<span class="st">"Negativ gefunden!"</span>)
+        <span class="kw">break</span>   <span class="cm"># ← verlässt die for-Schleife</span>
+            </div>
+        </div>
+        <div class="compare-col">
+            <h4><code>continue</code> – Iteration überspringen</h4>
+            <div class="code-block" style="margin:0; font-size:0.82rem;">
+<span class="cm"># Nur ungerade Zahlen ausgeben</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">11</span>):
+    <span class="kw">if</span> <span class="var">i</span> <span class="op">%</span> <span class="nm">2</span> <span class="op">==</span> <span class="nm">0</span>:
+        <span class="kw">continue</span>  <span class="cm"># ← gerade Zahlen überspringen</span>
+    <span class="fn">print</span>(<span class="var">i</span>)
+<span class="cm"># Ausgabe: 1 3 5 7 9</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <strong>Wann welche Schleife?</strong><br>
+        &bull; <strong><code>for</code></strong>: Anzahl der Wiederholungen ist bekannt (z.&nbsp;B. Einmaleins, Summe bis n).<br>
+        &bull; <strong><code>while</code></strong>: Abbruchbedingung hängt von Laufzeit-Werten ab (z.&nbsp;B. Benutzereingabe, Annäherungsverfahren).
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     ÜBUNGEN
+══════════════════════════════════════ -->
+<div class="section">
+    <div class="section-label">Übungen</div>
+    <h2>Jetzt bist du dran!</h2>
+    <p>Bearbeite die fünf Aufgaben. Du erhältst nach jeder Aufgabe sofortiges Feedback.</p>
+
+    <!-- ─────────────────────────────────
+         Ü1 – Code-Reihenfolge (DnD)
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex1">
+        <div class="ex-header">
+            <div class="ex-num">1</div>
+            <h3>Schleife in die richtige Reihenfolge bringen</h3>
+            <span class="ex-type">Code-Reihenfolge</span>
+        </div>
+        <p class="ex-task">
+            Ein Programm soll die <strong>Summe aller Zahlen von 1 bis n</strong> berechnen und ausgeben. Bringe die fünf Blöcke in die richtige Reihenfolge. <strong>Achtung:</strong> Ein Block gehört <em>nicht</em> dazu!
+        </p>
+        <div class="dnd-wrap">
+            <div class="dnd-col">
+                <h4>Verfügbare Blöcke</h4>
+                <div id="pool1">
+                    <div class="drag-item" draggable="true" data-id="b_print"><span class="fn">print</span>(<span class="st">"Summe:"</span>, summe)</div>
+                    <div class="drag-item" draggable="true" data-id="b_inp">n <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Bis zu welcher Zahl? "</span>))</div>
+                    <div class="drag-item" draggable="true" data-id="b_wrong">    summe <span class="op">=</span> i <span class="op">*</span> i</div>
+                    <div class="drag-item" draggable="true" data-id="b_add">    summe <span class="op">=</span> summe <span class="op">+</span> i</div>
+                    <div class="drag-item" draggable="true" data-id="b_init">summe <span class="op">=</span> <span class="nm">0</span></div>
+                    <div class="drag-item" draggable="true" data-id="b_for"><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, n <span class="op">+</span> <span class="nm">1</span>):</div>
+                </div>
+            </div>
+            <div class="dnd-col">
+                <h4>Meine Reihenfolge</h4>
+                <div class="drop-zone" id="dz1_1"><span class="dz-label">1. Block</span></div>
+                <div class="drop-zone" id="dz1_2"><span class="dz-label">2. Block</span></div>
+                <div class="drop-zone" id="dz1_3"><span class="dz-label">3. Block</span></div>
+                <div class="drop-zone" id="dz1_4"><span class="dz-label">4. Block</span></div>
+                <div class="drop-zone" id="dz1_5"><span class="dz-label">5. Block</span></div>
+            </div>
+        </div>
+        <button class="btn"     onclick="checkEx1()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx1()">Zurücksetzen</button>
+        <div class="feedback" id="fb1"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü2 – Code-Vorhersage
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex2">
+        <div class="ex-header">
+            <div class="ex-num">2</div>
+            <h3>Was gibt die Schleife aus?</h3>
+            <span class="ex-type">Code-Vorhersage</span>
+        </div>
+        <p class="ex-task">Analysiere die Schleifen und wähle jeweils die korrekte Ausgabe.</p>
+
+        <div class="scenario-block">
+            <div class="scenario-label">Szenario A</div>
+            <div class="code-block" style="margin:0.4rem 0 0.6rem; font-size:0.85rem;">
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">3</span>, <span class="nm">9</span>, <span class="nm">2</span>):
+    <span class="fn">print</span>(i)
+            </div>
+            <ul class="mc-list" id="mc2a">
+                <li><label><input type="radio" name="q2a" value="a"> 3 &nbsp; 4 &nbsp; 5 &nbsp; 6 &nbsp; 7 &nbsp; 8 &nbsp; (alle Zahlen von 3 bis 8)</label></li>
+                <li><label><input type="radio" name="q2a" value="b"> 3 &nbsp; 5 &nbsp; 7 &nbsp; (jede zweite, Stopp vor 9)</label></li>
+                <li><label><input type="radio" name="q2a" value="c"> 3 &nbsp; 5 &nbsp; 7 &nbsp; 9 &nbsp; (jede zweite, einschließlich 9)</label></li>
+                <li><label><input type="radio" name="q2a" value="d"> 2 &nbsp; 4 &nbsp; 6 &nbsp; 8 &nbsp; (Start bei 2)</label></li>
+            </ul>
+        </div>
+
+        <div class="scenario-block">
+            <div class="scenario-label">Szenario B</div>
+            <div class="code-block" style="margin:0.4rem 0 0.6rem; font-size:0.85rem;">
+<span class="var">i</span> <span class="op">=</span> <span class="nm">1</span>
+<span class="kw">while</span> i <span class="op">&lt;=</span> <span class="nm">3</span>:
+    <span class="fn">print</span>(i <span class="op">*</span> <span class="nm">10</span>)
+    i <span class="op">=</span> i <span class="op">+</span> <span class="nm">1</span>
+            </div>
+            <ul class="mc-list" id="mc2b">
+                <li><label><input type="radio" name="q2b" value="a"> 1 &nbsp; 2 &nbsp; 3</label></li>
+                <li><label><input type="radio" name="q2b" value="b"> 10 &nbsp; 20 &nbsp; 30</label></li>
+                <li><label><input type="radio" name="q2b" value="c"> 10 &nbsp; 20 &nbsp; 30 &nbsp; 40</label></li>
+                <li><label><input type="radio" name="q2b" value="d"> 10 &nbsp; 11 &nbsp; 12</label></li>
+            </ul>
+        </div>
+
+        <div class="scenario-block">
+            <div class="scenario-label">Szenario C</div>
+            <div class="code-block" style="margin:0.4rem 0 0.6rem; font-size:0.85rem;">
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">6</span>):
+    <span class="kw">if</span> i <span class="op">%</span> <span class="nm">2</span> <span class="op">==</span> <span class="nm">0</span>:
+        <span class="kw">continue</span>
+    <span class="fn">print</span>(i)
+            </div>
+            <ul class="mc-list" id="mc2c">
+                <li><label><input type="radio" name="q2c" value="a"> 1 &nbsp; 2 &nbsp; 3 &nbsp; 4 &nbsp; 5 &nbsp; (alle Zahlen)</label></li>
+                <li><label><input type="radio" name="q2c" value="b"> 2 &nbsp; 4 &nbsp; (nur gerade)</label></li>
+                <li><label><input type="radio" name="q2c" value="c"> 1 &nbsp; 3 &nbsp; 5 &nbsp; (nur ungerade)</label></li>
+                <li><label><input type="radio" name="q2c" value="d"> Keine Ausgabe</label></li>
+            </ul>
+        </div>
+
+        <button class="btn"     onclick="checkEx2()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx2()">Zurücksetzen</button>
+        <div class="feedback" id="fb2"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü3 – Fehlersuche
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex3">
+        <div class="ex-header">
+            <div class="ex-num">3</div>
+            <h3>Logischen Fehler finden</h3>
+            <span class="ex-type">Fehlersuche</span>
+        </div>
+        <p class="ex-task">
+            Das Programm soll die Summe der Zahlen von 1 bis einschließlich <code>n</code> berechnen. Es liefert aber ein falsches Ergebnis – für <code>n = 5</code> gibt es <code>10</code> statt <code>15</code> aus. Klicke auf die fehlerhafte Zeile.
+        </p>
+        <div class="code-block" style="padding:0.75rem 0;">
+            <span class="code-line" data-line="1" onclick="pickLine3(1)"><span class="line-num">1</span><span class="var">n</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Bis zu welcher Zahl? "</span>))</span>
+            <span class="code-line" data-line="2" onclick="pickLine3(2)"><span class="line-num">2</span><span class="var">summe</span> <span class="op">=</span> <span class="nm">0</span></span>
+            <span class="code-line" data-line="3" onclick="pickLine3(3)"><span class="line-num">3</span><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="var">n</span>):</span>
+            <span class="code-line" data-line="4" onclick="pickLine3(4)"><span class="line-num">4</span>    <span class="var">summe</span> <span class="op">=</span> <span class="var">summe</span> <span class="op">+</span> <span class="var">i</span></span>
+            <span class="code-line" data-line="5" onclick="pickLine3(5)"><span class="line-num">5</span><span class="fn">print</span>(<span class="st">"Summe:"</span>, <span class="var">summe</span>)</span>
+        </div>
+        <div class="feedback" id="fb3"></div>
+        <button class="btn sec" onclick="resetEx3()">Zurücksetzen</button>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü4 – Trace (while-Schleife)
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex4">
+        <div class="ex-header">
+            <div class="ex-num">4</div>
+            <h3>While-Schleife Schritt für Schritt verfolgen</h3>
+            <span class="ex-type">Code-Vorhersage</span>
+        </div>
+        <p class="ex-task">
+            Verfolge den Ablauf dieser Schleife. Trage nach jeder Iteration die neuen Werte von <code>i</code> und <code>produkt</code> ein.
+        </p>
+        <div class="code-block">
+<span class="var">i</span>       <span class="op">=</span> <span class="nm">1</span>
+<span class="var">produkt</span> <span class="op">=</span> <span class="nm">1</span>
+
+<span class="kw">while</span> i <span class="op">&lt;=</span> <span class="nm">4</span>:
+    <span class="var">produkt</span> <span class="op">=</span> <span class="var">produkt</span> <span class="op">*</span> i
+    <span class="var">i</span>       <span class="op">=</span> <span class="var">i</span> <span class="op">+</span> <span class="nm">1</span>
+        </div>
+        <p style="font-size:0.88rem; color:#64748b; margin-bottom:0.5rem;">Startwerte vor der Schleife: <code>i = 1</code>, <code>produkt = 1</code></p>
+
+        <table class="trace-table">
+            <thead>
+                <tr>
+                    <th>Nach Iteration</th>
+                    <th>produkt</th>
+                    <th>i</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1. Durchlauf &nbsp;<span style="color:#64748b; font-size:0.78rem;">(i war 1)</span></td>
+                    <td><input class="trace-input" id="t1p" placeholder="?"></td>
+                    <td><input class="trace-input" id="t1i" placeholder="?"></td>
+                </tr>
+                <tr>
+                    <td>2. Durchlauf &nbsp;<span style="color:#64748b; font-size:0.78rem;">(i war 2)</span></td>
+                    <td><input class="trace-input" id="t2p" placeholder="?"></td>
+                    <td><input class="trace-input" id="t2i" placeholder="?"></td>
+                </tr>
+                <tr>
+                    <td>3. Durchlauf &nbsp;<span style="color:#64748b; font-size:0.78rem;">(i war 3)</span></td>
+                    <td><input class="trace-input" id="t3p" placeholder="?"></td>
+                    <td><input class="trace-input" id="t3i" placeholder="?"></td>
+                </tr>
+                <tr>
+                    <td>4. Durchlauf &nbsp;<span style="color:#64748b; font-size:0.78rem;">(i war 4)</span></td>
+                    <td><input class="trace-input" id="t4p" placeholder="?"></td>
+                    <td><input class="trace-input" id="t4i" placeholder="?"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button class="btn"     onclick="checkEx4()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx4()">Zurücksetzen</button>
+        <div class="feedback" id="fb4"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü5 – Knobelaufgabe: FizzBuzz
+    ───────────────────────────────── -->
+    <div class="exercise knobel" id="ex5">
+        <div class="ex-header">
+            <div class="ex-num">5</div>
+            <h3>Knobelaufgabe: FizzBuzz</h3>
+            <span class="ex-type knobel-tag">&#129504; Knobelaufgabe</span>
+        </div>
+        <p class="ex-task">
+            <strong>FizzBuzz</strong> ist eine klassische Programmieraufgabe: Gib alle Zahlen von 1 bis 20 aus. Aber: Ist die Zahl durch 3 teilbar, gib stattdessen <code>"Fizz"</code> aus. Ist sie durch 5 teilbar, gib <code>"Buzz"</code> aus. Ist sie durch <em>beide</em> teilbar, gib <code>"FizzBuzz"</code> aus.
+        </p>
+
+        <!-- Schritt 1 -->
+        <div class="knobel-step">
+            <div class="knobel-step-label">Schritt 1 &mdash; Den naiven Ansatz analysieren</div>
+            <h4>Was stimmt an diesem Versuch nicht?</h4>
+            <div class="code-block">
+<span class="kw">for</span> zahl <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">21</span>):
+    <span class="kw">if</span> zahl <span class="op">%</span> <span class="nm">3</span> <span class="op">==</span> <span class="nm">0</span>:
+        <span class="fn">print</span>(<span class="st">"Fizz"</span>)
+    <span class="kw">if</span> zahl <span class="op">%</span> <span class="nm">5</span> <span class="op">==</span> <span class="nm">0</span>:
+        <span class="fn">print</span>(<span class="st">"Buzz"</span>)
+    <span class="kw">if</span> zahl <span class="op">%</span> <span class="nm">3</span> <span class="op">!=</span> <span class="nm">0</span> <span class="lo">and</span> zahl <span class="op">%</span> <span class="nm">5</span> <span class="op">!=</span> <span class="nm">0</span>:
+        <span class="fn">print</span>(zahl)
+            </div>
+            <p class="ex-question">Was gibt dieser Code für <code>zahl = 15</code> aus?</p>
+            <ul class="mc-list" id="mc5a">
+                <li><label><input type="radio" name="q5a" value="a"> <code>FizzBuzz</code> in einer Zeile – genau richtig</label></li>
+                <li><label><input type="radio" name="q5a" value="b"> <code>Fizz</code> und danach <code>Buzz</code> in zwei getrennten Zeilen</label></li>
+                <li><label><input type="radio" name="q5a" value="c"> <code>15</code> – die letzte Bedingung greift</label></li>
+                <li><label><input type="radio" name="q5a" value="d"> Nichts – keine der Bedingungen trifft zu</label></li>
+            </ul>
+            <button class="btn" onclick="checkEx5a()">Überprüfen</button>
+            <button class="btn sec" onclick="resetEx5a()">Zurücksetzen</button>
+            <div class="feedback" id="fb5a"></div>
+        </div>
+
+        <!-- Schritt 2 -->
+        <div class="knobel-step" id="step5b" style="opacity:0.4; pointer-events:none;">
+            <div class="knobel-step-label">Schritt 2 &mdash; Die richtige Lösung bauen</div>
+            <h4>Bringe die Blöcke in die korrekte Reihenfolge</h4>
+            <p style="font-size:0.93rem; color:#334155; margin-bottom:0.75rem;">
+                Der Schlüssel: Der Fall <code>"FizzBuzz"</code> (teilbar durch 3 <em>und</em> 5) muss <strong>zuerst</strong> geprüft werden, bevor die einzelnen Fälle geprüft werden. Ansonsten greift einer der früheren <code>elif</code>-Zweige und <code>"FizzBuzz"</code> wird nie ausgegeben.<br>
+                Bringe die fünf Blöcke in die richtige Reihenfolge. Ein Block gehört <em>nicht</em> dazu!
+            </p>
+            <div class="dnd-wrap">
+                <div class="dnd-col">
+                    <h4>Verfügbare Blöcke</h4>
+                    <div id="pool5b">
+                        <div class="drag-item" draggable="true" data-id="s5_else"><span class="kw">    else</span>:
+        <span class="fn">print</span>(zahl)</div>
+                        <div class="drag-item" draggable="true" data-id="s5_for"><span class="kw">for</span> zahl <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">21</span>):</div>
+                        <div class="drag-item" draggable="true" data-id="s5_fb"><span class="kw">    if</span> zahl <span class="op">%</span> <span class="nm">3</span> <span class="op">==</span> <span class="nm">0</span> <span class="lo">and</span> zahl <span class="op">%</span> <span class="nm">5</span> <span class="op">==</span> <span class="nm">0</span>:
+        <span class="fn">print</span>(<span class="st">"FizzBuzz"</span>)</div>
+                        <div class="drag-item" draggable="true" data-id="s5_wrong"><span class="kw">    if</span> zahl <span class="op">%</span> <span class="nm">3</span> <span class="op">==</span> <span class="nm">0</span>:
+        <span class="fn">print</span>(<span class="st">"Fizz"</span>)</div>
+                        <div class="drag-item" draggable="true" data-id="s5_f"><span class="kw">    elif</span> zahl <span class="op">%</span> <span class="nm">3</span> <span class="op">==</span> <span class="nm">0</span>:
+        <span class="fn">print</span>(<span class="st">"Fizz"</span>)</div>
+                        <div class="drag-item" draggable="true" data-id="s5_b"><span class="kw">    elif</span> zahl <span class="op">%</span> <span class="nm">5</span> <span class="op">==</span> <span class="nm">0</span>:
+        <span class="fn">print</span>(<span class="st">"Buzz"</span>)</div>
+                    </div>
+                </div>
+                <div class="dnd-col">
+                    <h4>Meine Reihenfolge</h4>
+                    <div class="drop-zone" id="sdz1"><span class="dz-label">1. Block</span></div>
+                    <div class="drop-zone" id="sdz2"><span class="dz-label">2. Block</span></div>
+                    <div class="drop-zone" id="sdz3"><span class="dz-label">3. Block</span></div>
+                    <div class="drop-zone" id="sdz4"><span class="dz-label">4. Block</span></div>
+                    <div class="drop-zone" id="sdz5"><span class="dz-label">5. Block</span></div>
+                </div>
+            </div>
+            <button class="btn"     onclick="checkEx5b()">Überprüfen</button>
+            <button class="btn sec" onclick="resetEx5b()">Zurücksetzen</button>
+            <div class="feedback" id="fb5b"></div>
+        </div>
+    </div>
+
+    <!-- Abschluss -->
+    <div class="completion" id="completion">
+        <div class="icon">&#127881;</div>
+        <h2>Sehr gut gemacht!</h2>
+        <p>Du hast alle Übungen – einschließlich FizzBuzz – erfolgreich abgeschlossen.<br>
+        Im letzten Schritt geht es um das Entwerfen und Auswerten von <strong>Testfällen</strong>.</p>
+    </div>
+</div>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── Progress ───────────────────────────
+const done = { ex1:false, ex2:false, ex3:false, ex4:false, ex5:false };
+
+function refreshProgress() {
+    const map = { ps4:'ex1', ps5:'ex2', ps6:'ex3', ps7:'ex4', ps8:'ex5' };
+    Object.entries(map).forEach(([psId, exKey]) => {
+        document.getElementById(psId).className =
+            'progress-step ' + (done[exKey] ? 'done' : '');
+    });
+    if (Object.values(done).every(Boolean)) {
+        const c = document.getElementById('completion');
+        c.classList.add('show');
+        c.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+}
+
+// ─── Feedback helpers ──────────────────
+function showFB(id, isOk, msg) {
+    const el = document.getElementById(id);
+    el.className = 'feedback show ' + (isOk ? 'ok' : 'err');
+    el.innerHTML = (isOk ? '&#10003;&nbsp;' : '&#10007;&nbsp;') + msg;
+}
+function hideFB(id) { const el = document.getElementById(id); el.className = 'feedback'; el.innerHTML = ''; }
+
+// ─── MC helper ─────────────────────────
+function markMC(listId, correctVal) {
+    document.querySelectorAll('#' + listId + ' label').forEach(lbl => {
+        const r = lbl.querySelector('input');
+        if (r.value === correctVal)                   lbl.classList.add('ok');
+        else if (r.checked && r.value !== correctVal) lbl.classList.add('err');
+        r.disabled = true;
+    });
+}
+function resetMC(listId) {
+    document.querySelectorAll('#' + listId + ' input').forEach(r => { r.checked = false; r.disabled = false; });
+    document.querySelectorAll('#' + listId + ' label').forEach(l => l.className = '');
+}
+
+// ════════════════════════════════════════
+// Ü1 – Drag & Drop Summe
+// ════════════════════════════════════════
+// Correct: b_inp → b_init → b_for → b_add → b_print
+const EX1_CORRECT = ['b_inp', 'b_init', 'b_for', 'b_add', 'b_print'];
+const EX1_ITEMS = [
+    { id:'b_print', html:'<span class="fn">print</span>(<span class="st">"Summe:"</span>, summe)' },
+    { id:'b_inp',   html:'n <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Bis zu welcher Zahl? "</span>))' },
+    { id:'b_wrong', html:'    summe <span class="op">=</span> i <span class="op">*</span> i' },
+    { id:'b_add',   html:'    summe <span class="op">=</span> summe <span class="op">+</span> i' },
+    { id:'b_init',  html:'summe <span class="op">=</span> <span class="nm">0</span>' },
+    { id:'b_for',   html:'<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, n <span class="op">+</span> <span class="nm">1</span>):' },
+];
+
+let dragged1 = null;
+
+function initDnD1() {
+    document.querySelectorAll('#pool1 .drag-item, #dz1_1 .drag-item, #dz1_2 .drag-item, #dz1_3 .drag-item, #dz1_4 .drag-item, #dz1_5 .drag-item').forEach(item => {
+        item.addEventListener('dragstart', () => { dragged1 = item; setTimeout(() => item.classList.add('dragging'), 0); });
+        item.addEventListener('dragend',   () => { item.classList.remove('dragging'); dragged1 = null; });
+    });
+    ['dz1_1','dz1_2','dz1_3','dz1_4','dz1_5'].forEach((id, i) => {
+        const zone = document.getElementById(id);
+        zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault(); zone.classList.remove('over');
+            if (!dragged1) return;
+            const existing = zone.querySelector('.drag-item');
+            if (existing) document.getElementById('pool1').appendChild(existing);
+            const prev = dragged1.closest('.drop-zone');
+            if (prev) prev.innerHTML = '<span class="dz-label">' + (i+1) + '. Block</span>';
+            zone.innerHTML = ''; zone.appendChild(dragged1);
+            dragged1.classList.remove('ok-placed','err-placed');
+        });
+    });
+}
+initDnD1();
+
+function checkEx1() {
+    const ids    = ['dz1_1','dz1_2','dz1_3','dz1_4','dz1_5'];
+    const placed = ids.map(id => { const it = document.getElementById(id).querySelector('.drag-item'); return it ? it.dataset.id : null; });
+    if (placed.some(p => !p)) { showFB('fb1', false, 'Bitte alle fünf Felder befüllen.'); return; }
+    const ok = placed.every((v,i) => v === EX1_CORRECT[i]);
+    ids.forEach((id, i) => {
+        const it = document.getElementById(id).querySelector('.drag-item');
+        if (it) { it.classList.remove('ok-placed','err-placed'); it.classList.add(placed[i] === EX1_CORRECT[i] ? 'ok-placed' : 'err-placed'); }
+    });
+    if (ok) {
+        showFB('fb1', true, 'Richtig! Reihenfolge: Eingabe → Akkumulator initialisieren → for-Schleife → addieren → Ausgabe. Der Ablenkungsblock <code>summe = i * i</code> hätte das Quadrat statt der Summe berechnet.');
+        done.ex1 = true;
+    } else {
+        showFB('fb1', false, 'Noch nicht ganz. Denke: Was muss initialisiert sein, bevor die Schleife läuft? Und was gehört als eingerückter Block <em>in</em> die Schleife?');
+    }
+    refreshProgress();
+}
+
+function resetEx1() {
+    const pool = document.getElementById('pool1');
+    pool.innerHTML = '';
+    EX1_ITEMS.forEach(({ id, html }) => {
+        const d = document.createElement('div');
+        d.className = 'drag-item'; d.draggable = true; d.dataset.id = id; d.innerHTML = html;
+        pool.appendChild(d);
+    });
+    ['dz1_1','dz1_2','dz1_3','dz1_4','dz1_5'].forEach((id, i) => {
+        document.getElementById(id).innerHTML = '<span class="dz-label">' + (i+1) + '. Block</span>';
+    });
+    initDnD1(); hideFB('fb1'); done.ex1 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü2 – Code-Vorhersage
+// ════════════════════════════════════════
+// A: range(3,9,2) → 3,5,7 → b
+// B: i=1, while i<=3, print(i*10), i+=1 → 10,20,30 → b
+// C: range(1,6), continue on even → 1,3,5 → c
+const EX2_ANS = { mc2a:'b', mc2b:'b', mc2c:'c' };
+const EX2_NAMES = { mc2a:'q2a', mc2b:'q2b', mc2c:'q2c' };
+
+function checkEx2() {
+    const keys = Object.keys(EX2_ANS);
+    if (keys.some(k => !document.querySelector(`input[name="${EX2_NAMES[k]}"]:checked`))) {
+        showFB('fb2', false, 'Bitte alle drei Szenarien beantworten.');
+        return;
+    }
+    let allOk = true;
+    keys.forEach(k => {
+        markMC(k, EX2_ANS[k]);
+        const sel = document.querySelector(`input[name="${EX2_NAMES[k]}"]:checked`);
+        if (!sel || sel.value !== EX2_ANS[k]) allOk = false;
+    });
+    if (allOk) {
+        showFB('fb2', true, 'Alle drei Szenarien korrekt! Merke: <code>range(start, stopp, schritt)</code> schließt den Stoppwert aus. <code>continue</code> überspringt den Rest des Schleifenkörpers und springt sofort zur nächsten Iteration.');
+        done.ex2 = true;
+    } else {
+        const hints = {
+            mc2a: '<strong>A:</strong> <code>range(3, 9, 2)</code> erzeugt 3, 5, 7 – Schrittweite 2, 9 ist ausgeschlossen.',
+            mc2b: '<strong>B:</strong> <code>i * 10</code> ergibt 10, 20, 30. Die Schleife endet nach i=3, da 4 &gt; 3.',
+            mc2c: '<strong>C:</strong> <code>continue</code> überspringt gerade Zahlen → nur 1, 3, 5 werden ausgegeben.'
+        };
+        const wrong = keys.filter(k => { const s = document.querySelector(`input[name="${EX2_NAMES[k]}"]:checked`); return !s || s.value !== EX2_ANS[k]; });
+        showFB('fb2', false, wrong.map(k => hints[k]).join('<br>'));
+    }
+    refreshProgress();
+}
+
+function resetEx2() {
+    Object.keys(EX2_ANS).forEach(id => resetMC(id));
+    hideFB('fb2'); done.ex2 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü3 – Fehlersuche (Zeile 3: range(1, n) statt range(1, n+1))
+// ════════════════════════════════════════
+const LINE3_HINTS = {
+    1: 'Eingabe und Typumwandlung sind korrekt.',
+    2: 'Die Initialisierung mit 0 ist richtig für einen Summen-Akkumulator.',
+    4: 'Die Addition im Schleifenkörper ist korrekt.',
+    5: 'Die Ausgabe ist korrekt – das Problem liegt früher.'
+};
+
+function pickLine3(n) {
+    if (done.ex3) return;
+    document.querySelectorAll('.code-line').forEach(el => {
+        if (!el.classList.contains('correct-ln')) el.classList.remove('wrong-ln');
+    });
+    const el = document.querySelector(`.code-line[data-line="${n}"]`);
+    if (n === 3) {
+        el.classList.add('correct-ln');
+        showFB('fb3', true, 'Richtig! <code>range(1, n)</code> endet bei n−1 und schließt n selbst aus. Für n=5 werden nur 1+2+3+4 = 10 addiert, nicht 15. Die Lösung: <code>range(1, n + 1)</code> – damit wird n eingeschlossen. Das ist ein klassischer <strong>Off-by-One-Fehler</strong> (OBOE).');
+        done.ex3 = true; refreshProgress();
+    } else {
+        el.classList.add('wrong-ln');
+        setTimeout(() => el.classList.remove('wrong-ln'), 800);
+        showFB('fb3', false, LINE3_HINTS[n] || 'Diese Zeile ist korrekt. Achte auf den <code>range()</code>-Aufruf.');
+    }
+}
+
+function resetEx3() {
+    document.querySelectorAll('.code-line').forEach(el => el.classList.remove('correct-ln','wrong-ln'));
+    hideFB('fb3'); done.ex3 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü4 – Trace while-Schleife
+// ════════════════════════════════════════
+// produkt *= i, i += 1 each iteration, starting i=1, produkt=1
+// Iter 1 (i was 1): produkt=1*1=1, i=2
+// Iter 2 (i was 2): produkt=1*2=2, i=3
+// Iter 3 (i was 3): produkt=2*3=6, i=4
+// Iter 4 (i was 4): produkt=6*4=24, i=5
+const TRACE_ANS = {
+    t1p:'1',  t1i:'2',
+    t2p:'2',  t2i:'3',
+    t3p:'6',  t3i:'4',
+    t4p:'24', t4i:'5'
+};
+
+function checkEx4() {
+    let allOk = true;
+    Object.entries(TRACE_ANS).forEach(([id, expected]) => {
+        const inp = document.getElementById(id);
+        if (!inp) return;
+        const ok = inp.value.trim() === expected;
+        inp.className = 'trace-input ' + (ok ? 'ok' : 'err');
+        inp.disabled = true;
+        if (!ok) allOk = false;
+    });
+    if (allOk) {
+        showFB('fb4', true, 'Alle Werte korrekt! Das Programm berechnet 1 · 2 · 3 · 4 = 24 – also die Fakultät 4! (4 Fakultät). Das Akkumulator-Muster mit Multiplikation statt Addition ist das Grundmuster für solche Berechnungen.');
+        done.ex4 = true;
+    } else {
+        showFB('fb4', false, 'Noch nicht alle Werte stimmen (rot markiert). Tipp: Führe in jedem Durchlauf zuerst die Multiplikation durch (<code>produkt = produkt * i</code>), dann erst die Erhöhung von i.');
+        Object.entries(TRACE_ANS).forEach(([id, expected]) => {
+            const inp = document.getElementById(id);
+            if (inp && inp.value.trim() !== expected) inp.disabled = false;
+        });
+    }
+    refreshProgress();
+}
+
+function resetEx4() {
+    Object.keys(TRACE_ANS).forEach(id => {
+        const inp = document.getElementById(id);
+        if (inp) { inp.value = ''; inp.className = 'trace-input'; inp.disabled = false; }
+    });
+    hideFB('fb4'); done.ex4 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü5 – Knobelaufgabe FizzBuzz
+// ════════════════════════════════════════
+
+// ── 5a ──
+function checkEx5a() {
+    const a = document.querySelector('input[name="q5a"]:checked');
+    if (!a) { showFB('fb5a', false, 'Bitte eine Antwort auswählen.'); return; }
+    markMC('mc5a', 'b');
+    if (a.value === 'b') {
+        showFB('fb5a', true, 'Genau! Da zwei getrennte <code>if</code>-Anweisungen verwendet werden (kein <code>elif</code>), werden <em>beide</em> unabhängig voneinander geprüft. 15 ist sowohl durch 3 als auch durch 5 teilbar – es erscheinen daher zwei Zeilen: erst "Fizz", dann "Buzz". Schritt 2 zeigt die korrekte Lösung.');
+        const s2 = document.getElementById('step5b');
+        s2.style.opacity = '1'; s2.style.pointerEvents = 'auto';
+        initDnD5b();
+    } else {
+        showFB('fb5a', false, 'Nicht ganz. 15 ist durch 3 teilbar (→ erste <code>if</code> trifft zu) und auch durch 5 teilbar (→ zweite <code>if</code> trifft ebenfalls zu), da es keine <code>elif</code>-Verknüpfung gibt.');
+    }
+}
+function resetEx5a() {
+    resetMC('mc5a'); hideFB('fb5a');
+    const s2 = document.getElementById('step5b');
+    s2.style.opacity = '0.4'; s2.style.pointerEvents = 'none';
+}
+
+// ── 5b Drag & Drop ──
+// Correct: s5_for → s5_fb → s5_f → s5_b → s5_else
+const S5B_CORRECT = ['s5_for', 's5_fb', 's5_f', 's5_b', 's5_else'];
+const S5B_ITEMS = [
+    { id:'s5_else',  html:'<span class="kw">    else</span>:\n        <span class="fn">print</span>(zahl)' },
+    { id:'s5_for',   html:'<span class="kw">for</span> zahl <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">21</span>):' },
+    { id:'s5_fb',    html:'<span class="kw">    if</span> zahl <span class="op">%</span> <span class="nm">3</span> <span class="op">==</span> <span class="nm">0</span> <span class="lo">and</span> zahl <span class="op">%</span> <span class="nm">5</span> <span class="op">==</span> <span class="nm">0</span>:\n        <span class="fn">print</span>(<span class="st">"FizzBuzz"</span>)' },
+    { id:'s5_wrong', html:'<span class="kw">    if</span> zahl <span class="op">%</span> <span class="nm">3</span> <span class="op">==</span> <span class="nm">0</span>:\n        <span class="fn">print</span>(<span class="st">"Fizz"</span>)' },
+    { id:'s5_f',     html:'<span class="kw">    elif</span> zahl <span class="op">%</span> <span class="nm">3</span> <span class="op">==</span> <span class="nm">0</span>:\n        <span class="fn">print</span>(<span class="st">"Fizz"</span>)' },
+    { id:'s5_b',     html:'<span class="kw">    elif</span> zahl <span class="op">%</span> <span class="nm">5</span> <span class="op">==</span> <span class="nm">0</span>:\n        <span class="fn">print</span>(<span class="st">"Buzz"</span>)' },
+];
+
+let dragged5b = null;
+
+function initDnD5b() {
+    const allItems = document.querySelectorAll('#pool5b .drag-item, #sdz1 .drag-item, #sdz2 .drag-item, #sdz3 .drag-item, #sdz4 .drag-item, #sdz5 .drag-item');
+    allItems.forEach(item => {
+        item.addEventListener('dragstart', () => { dragged5b = item; setTimeout(() => item.classList.add('dragging'), 0); });
+        item.addEventListener('dragend',   () => { item.classList.remove('dragging'); dragged5b = null; });
+    });
+    ['sdz1','sdz2','sdz3','sdz4','sdz5'].forEach((id, i) => {
+        const zone = document.getElementById(id);
+        zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault(); zone.classList.remove('over');
+            if (!dragged5b) return;
+            const existing = zone.querySelector('.drag-item');
+            if (existing) document.getElementById('pool5b').appendChild(existing);
+            const prev = dragged5b.closest('.drop-zone');
+            if (prev) prev.innerHTML = '<span class="dz-label">' + (i+1) + '. Block</span>';
+            zone.innerHTML = ''; zone.appendChild(dragged5b);
+            dragged5b.classList.remove('ok-placed','err-placed');
+        });
+    });
+}
+
+function checkEx5b() {
+    const zones  = ['sdz1','sdz2','sdz3','sdz4','sdz5'];
+    const placed = zones.map(id => { const it = document.getElementById(id).querySelector('.drag-item'); return it ? it.dataset.id : null; });
+    if (placed.some(p => !p)) { showFB('fb5b', false, 'Bitte alle fünf Felder befüllen.'); return; }
+    const ok = placed.every((v, i) => v === S5B_CORRECT[i]);
+    zones.forEach((id, i) => {
+        const it = document.getElementById(id).querySelector('.drag-item');
+        if (it) { it.classList.remove('ok-placed','err-placed'); it.classList.add(placed[i] === S5B_CORRECT[i] ? 'ok-placed' : 'err-placed'); }
+    });
+    if (ok) {
+        showFB('fb5b', true,
+            'Perfekt! Die korrekte Struktur:<br>' +
+            '1. <code>for</code>-Schleife (Rahmen)<br>' +
+            '2. <code>if zahl % 3 == 0 and zahl % 5 == 0</code> → "FizzBuzz" <strong>zuerst prüfen!</strong><br>' +
+            '3. <code>elif zahl % 3 == 0</code> → "Fizz"<br>' +
+            '4. <code>elif zahl % 5 == 0</code> → "Buzz"<br>' +
+            '5. <code>else</code> → Zahl selbst ausgeben<br><br>' +
+            'Der Ablenkungsblock war das <code>if</code> (ohne elif) für Fizz – er hätte erneut das Problem aus Schritt 1 verursacht.');
+        done.ex5 = true; refreshProgress();
+    } else {
+        showFB('fb5b', false, 'Noch nicht ganz. Tipp: Welcher Fall muss <em>zuerst</em> abgefangen werden? Und: <code>if</code> vs. <code>elif</code> – welches ist hier korrekt?');
+    }
+}
+
+function resetEx5b() {
+    const pool = document.getElementById('pool5b');
+    pool.innerHTML = '';
+    S5B_ITEMS.forEach(({ id, html }) => {
+        const d = document.createElement('div');
+        d.className = 'drag-item'; d.draggable = true; d.dataset.id = id; d.innerHTML = html;
+        pool.appendChild(d);
+    });
+    ['sdz1','sdz2','sdz3','sdz4','sdz5'].forEach((id, i) => {
+        document.getElementById(id).innerHTML = '<span class="dz-label">' + (i+1) + '. Block</span>';
+    });
+    initDnD5b(); hideFB('fb5b'); done.ex5 = false; refreshProgress();
+}
+</script>
+
+</body>
+</html>
