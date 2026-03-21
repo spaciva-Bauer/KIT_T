@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIT12 – Verzweigungen in Python</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1a2733;
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        header {
+            background: #1e3a5f; color: white;
+            padding: 1.25rem 2rem;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        header h1   { font-size: 1.35rem; font-weight: 600; }
+        header .sub { font-size: 0.85rem; opacity: 0.7; margin-top: 0.15rem; }
+        .badge {
+            background: #e8a020; color: white;
+            font-size: 0.7rem; font-weight: 700;
+            padding: 0.2rem 0.55rem; border-radius: 1rem;
+            text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+        }
+
+        /* ── Progress ── */
+        .progress-wrap {
+            background: #162d4a; padding: 0.6rem 2rem;
+            display: flex; gap: 0.4rem; align-items: center;
+        }
+        .progress-label { color: rgba(255,255,255,0.5); font-size: 0.7rem; white-space: nowrap; margin-right: 0.25rem; }
+        .progress-step  { height: 5px; flex: 1; background: rgba(255,255,255,0.15); border-radius: 3px; transition: background 0.4s; }
+        .progress-step.done   { background: #4ade80; }
+        .progress-step.active { background: #e8a020; }
+
+        /* ── Layout ── */
+        main { max-width: 880px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
+
+        /* ── Section cards ── */
+        .section {
+            background: white; border-radius: 12px;
+            padding: 2rem; margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+        .section-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.1em; color: #1e3a5f; margin-bottom: 0.4rem;
+        }
+        .section > h2 {
+            font-size: 1.25rem; color: #1e3a5f;
+            margin-bottom: 1rem; padding-bottom: 0.6rem;
+            border-bottom: 2px solid #e8edf3;
+        }
+        h3 { font-size: 1rem; color: #1e3a5f; margin: 1.5rem 0 0.6rem; }
+        p  { margin-bottom: 0.75rem; color: #334155; font-size: 0.95rem; }
+
+        /* ── Boxes ── */
+        .info-box {
+            background: #eff6ff; border-left: 4px solid #1e3a5f;
+            border-radius: 0 8px 8px 0; padding: 0.9rem 1.2rem;
+            margin: 1rem 0; font-size: 0.92rem; color: #1e3a5f;
+        }
+        .warn-box {
+            background: #fff7ed; border-left: 4px solid #e8a020;
+            border-radius: 0 8px 8px 0; padding: 0.9rem 1.2rem;
+            margin: 1rem 0; font-size: 0.92rem; color: #78350f;
+        }
+
+        /* ── Syntax box ── */
+        .syntax-box {
+            background: #f1f5f9; border: 1px solid #cbd5e1;
+            border-radius: 8px; padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            line-height: 1.8; margin: 0.75rem 0;
+            color: #334155;
+        }
+        .syntax-box .ph   { color: #64748b; font-style: italic; }
+        .syntax-box .kw   { color: #1e3a5f; font-weight: 700; }
+
+        /* ── Code blocks ── */
+        .code-block {
+            background: #1e2d3d; color: #e2e8f0;
+            border-radius: 8px; padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            line-height: 1.8; margin: 0.75rem 0; overflow-x: auto;
+        }
+        .code-block .kw { color: #93c5fd; }
+        .code-block .fn { color: #86efac; }
+        .code-block .st { color: #fde68a; }
+        .code-block .nm { color: #f9a8d4; }
+        .code-block .cm { color: #64748b; font-style: italic; }
+        .code-block .op { color: #cbd5e1; }
+        .code-block .lo { color: #c4b5fd; } /* logical operators */
+
+        /* Inline code */
+        code {
+            background: #e8edf3; padding: 0.1rem 0.35rem;
+            border-radius: 3px; font-family: 'Courier New', monospace;
+            font-size: 0.85em; color: #1e3a5f;
+        }
+
+        /* ── Two-column compare ── */
+        .compare { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 0.75rem 0; }
+        .compare-col { flex: 1; min-width: 220px; }
+        .compare-col > h4 {
+            font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+            color: #64748b; margin-bottom: 0.4rem;
+        }
+
+        /* ── Operator table ── */
+        .op-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 0.75rem 0; }
+        .op-table th {
+            background: #1e3a5f; color: white;
+            padding: 0.5rem 0.9rem; text-align: left; font-weight: 600;
+        }
+        .op-table th:first-child { border-radius: 8px 0 0 0; }
+        .op-table th:last-child  { border-radius: 0 8px 0 0; }
+        .op-table td { padding: 0.45rem 0.9rem; border-bottom: 1px solid #e8edf3; color: #334155; }
+        .op-table tr:last-child td { border-bottom: none; }
+        .op-table tr:nth-child(even) td { background: #f8fafc; }
+        .op-table td:first-child { font-family: 'Courier New', monospace; font-weight: 700; color: #1e3a5f; }
+
+        /* ══════════════════════════
+           EXERCISES
+        ══════════════════════════ */
+        .exercise {
+            background: #f8fafc; border: 2px solid #e2e8f0;
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .exercise.knobel { border-color: #e8a020; background: #fffbf0; }
+        .ex-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .ex-num {
+            background: #1e3a5f; color: white;
+            width: 1.9rem; height: 1.9rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.88rem; flex-shrink: 0;
+        }
+        .exercise.knobel .ex-num { background: #e8a020; }
+        .ex-header h3 { margin: 0; border: none; padding: 0; font-size: 1rem; color: #1a2733; }
+        .ex-type {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #64748b; background: #e2e8f0;
+            padding: 0.15rem 0.5rem; border-radius: 1rem; white-space: nowrap;
+        }
+        .ex-type.knobel-tag { background: #fde68a; color: #78350f; }
+        .ex-task     { font-size: 0.93rem; color: #334155; margin-bottom: 0.75rem; }
+        .ex-question { font-size: 0.93rem; color: #1a2733; margin: 1rem 0 0.5rem; font-weight: 600; }
+
+        /* Feedback */
+        .feedback { margin-top: 1rem; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.88rem; display: none; line-height: 1.5; }
+        .feedback.show { display: block; }
+        .feedback.ok  { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+        .feedback.err { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+
+        /* Buttons */
+        .btn {
+            background: #1e3a5f; color: white; border: none;
+            padding: 0.55rem 1.3rem; border-radius: 6px;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer;
+            margin-top: 1rem; transition: background 0.2s;
+        }
+        .btn:hover { background: #2d5488; }
+        .btn.sec { background: transparent; color: #1e3a5f; border: 2px solid #1e3a5f; margin-left: 0.5rem; }
+        .btn.sec:hover { background: #eff6ff; }
+
+        /* Multiple choice */
+        .mc-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+        .mc-list li { margin-bottom: 0.4rem; }
+        .mc-list label {
+            display: flex; align-items: flex-start; gap: 0.7rem;
+            padding: 0.55rem 0.9rem; background: white;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            cursor: pointer; font-size: 0.88rem; transition: border-color 0.2s; line-height: 1.45;
+        }
+        .mc-list label:hover { border-color: #1e3a5f; }
+        .mc-list input[type="radio"] { accent-color: #1e3a5f; flex-shrink: 0; margin-top: 0.2rem; }
+        .mc-list label.ok  { border-color: #86efac; background: #f0fdf4; }
+        .mc-list label.err { border-color: #fca5a5; background: #fef2f2; }
+
+        /* ── Ü1: Drag & Drop (multi-line items) ── */
+        .dnd-wrap  { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .dnd-col   { flex: 1; min-width: 240px; }
+        .dnd-col > h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; }
+
+        .drag-item {
+            padding: 0.5rem 0.9rem;
+            background: #1e2d3d; color: #e2e8f0;
+            border: 2px solid #2d4a6a;
+            border-radius: 7px; margin-bottom: 0.5rem;
+            cursor: grab; font-size: 0.82rem;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6; white-space: pre;
+            transition: all 0.18s; user-select: none;
+        }
+        .drag-item:hover    { border-color: #4ade80; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .drag-item.dragging { opacity: 0.4; cursor: grabbing; }
+        .drag-item.ok-placed  { border-color: #4ade80; background: #0f2d1e; }
+        .drag-item.err-placed { border-color: #f87171; background: #2d0f0f; }
+        /* keyword highlights inside drag items */
+        .drag-item .kw { color: #93c5fd; }
+        .drag-item .fn { color: #86efac; }
+        .drag-item .st { color: #fde68a; }
+        .drag-item .nm { color: #f9a8d4; }
+        .drag-item .lo { color: #c4b5fd; }
+
+        .drop-zone {
+            min-height: 3.2rem;
+            border: 2px dashed #cbd5e1; border-radius: 7px;
+            padding: 0.2rem; margin-bottom: 0.5rem;
+            background: #f8fafc; display: flex; align-items: center;
+            transition: all 0.18s;
+        }
+        .drop-zone.over      { border-color: #1e3a5f; background: #eff6ff; }
+        .drop-zone .dz-label { font-size: 0.68rem; color: #94a3b8; padding: 0 0.6rem; }
+        .drop-zone .drag-item { margin-bottom: 0; width: 100%; }
+
+        /* ── Ü3: Error finder ── */
+        .code-line {
+            display: block; padding: 0.15rem 0.75rem; border-radius: 4px;
+            cursor: pointer; transition: background 0.15s;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            color: #e2e8f0; line-height: 1.8; user-select: none;
+        }
+        .code-line:hover      { background: rgba(255,255,255,0.08); }
+        .code-line.correct-ln { background: rgba(74,222,128,0.2);  outline: 1px solid #4ade80; cursor: default; }
+        .code-line.wrong-ln   { background: rgba(248,113,113,0.2); outline: 1px solid #f87171; }
+        .line-num { color: #475569; margin-right: 1rem; user-select: none; }
+
+        /* ── Ü4: Condition evaluator ── */
+        .scenario-block {
+            background: white; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;
+        }
+        .scenario-label {
+            font-family: 'Courier New', monospace; font-size: 0.82rem;
+            font-weight: 700; color: #1e3a5f;
+            background: #eff6ff; display: inline-block;
+            padding: 0.1rem 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;
+        }
+
+        /* ── Ü5: Knobelaufgabe ── */
+        .knobel-step {
+            background: white; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;
+        }
+        .knobel-step-label {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #e8a020; margin-bottom: 0.4rem;
+        }
+        .knobel-step h4 { font-size: 0.95rem; font-weight: 700; color: #1a2733; margin-bottom: 0.6rem; }
+
+        /* Completion */
+        .completion { text-align: center; padding: 2.5rem 1rem; display: none; }
+        .completion.show { display: block; }
+        .completion .icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
+        .completion h2    { color: #1e3a5f; margin-bottom: 0.5rem; }
+        .completion p     { color: #475569; }
+    </style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+    <div>
+        <div class="badge">KIT12 &middot; LB 1</div>
+        <h1>Verzweigungen: if / elif / else</h1>
+        <div class="sub">Grundlagen der Programmierung &middot; FOS/BOS Bayern</div>
+    </div>
+</header>
+
+<!-- ══════════ PROGRESS ══════════ -->
+<div class="progress-wrap">
+    <span class="progress-label">Fortschritt</span>
+    <div class="progress-step done"   id="ps1"></div>
+    <div class="progress-step done"   id="ps2"></div>
+    <div class="progress-step done"   id="ps3"></div>
+    <div class="progress-step active" id="ps4"></div>
+    <div class="progress-step"        id="ps5"></div>
+    <div class="progress-step"        id="ps6"></div>
+    <div class="progress-step"        id="ps7"></div>
+    <div class="progress-step"        id="ps8"></div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════
+     THEORIE
+══════════════════════════════════════ -->
+
+<!-- T1: if / else -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 1 von 3</div>
+    <h2>Einfache Verzweigung: <code>if</code> / <code>else</code></h2>
+    <p>Eine Verzweigung führt einen Codeblock nur dann aus, wenn eine <strong>Bedingung wahr</strong> (<code>True</code>) ist. Mit <code>else</code> wird ein alternativer Block für den Fall definiert, dass die Bedingung <strong>nicht</strong> erfüllt ist.</p>
+
+    <div class="syntax-box">
+<span class="kw">if</span> <span class="ph">&lt;Bedingung&gt;</span>:
+    <span class="ph">&lt;Anweisung(en) wenn True&gt;</span>
+<span class="kw">else</span>:
+    <span class="ph">&lt;Anweisung(en) wenn False&gt;</span>
+    </div>
+
+    <div class="info-box">
+        <strong>Einrückung ist Pflicht:</strong> In Python gehören alle Zeilen, die zu einem <code>if</code>- oder <code>else</code>-Block gehören, um <strong>4 Leerzeichen</strong> eingerückt. Fehlende oder falsche Einrückung führt zu einem <code>IndentationError</code>.
+    </div>
+
+    <div class="code-block">
+<span class="var">temperatur</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Temperatur in °C: "</span>))
+
+<span class="kw">if</span> <span class="var">temperatur</span> <span class="op">&gt;</span> <span class="nm">35</span>:
+    <span class="fn">print</span>(<span class="st">"Hitzealarm! Bitte viel trinken."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"Temperatur im normalen Bereich."</span>)
+    </div>
+
+    <p>Der <code>else</code>-Zweig ist <strong>optional</strong>. Ein <code>if</code> ohne <code>else</code> tut bei einer falschen Bedingung einfach nichts.</p>
+</div>
+
+<!-- T2: if / elif / else -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 2 von 3</div>
+    <h2>Mehrfache Verzweigung: <code>if</code> / <code>elif</code> / <code>else</code></h2>
+    <p>Mit <code>elif</code> (Kurzform für „else if") können <strong>mehrere Bedingungen</strong> hintereinander geprüft werden. Sobald eine Bedingung <code>True</code> ergibt, wird ihr Block ausgeführt und alle weiteren Bedingungen werden <strong>übersprungen</strong>.</p>
+
+    <div class="syntax-box">
+<span class="kw">if</span> <span class="ph">&lt;Bedingung 1&gt;</span>:
+    <span class="ph">&lt;Anweisungen&gt;</span>
+<span class="kw">elif</span> <span class="ph">&lt;Bedingung 2&gt;</span>:
+    <span class="ph">&lt;Anweisungen&gt;</span>
+<span class="kw">elif</span> <span class="ph">&lt;Bedingung 3&gt;</span>:
+    <span class="ph">&lt;Anweisungen&gt;</span>
+<span class="kw">else</span>:
+    <span class="ph">&lt;Anweisungen (kein Fall passte)&gt;</span>
+    </div>
+
+    <div class="code-block">
+<span class="var">punkte</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Punkte (0–100): "</span>))
+
+<span class="kw">if</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">90</span>:
+    <span class="fn">print</span>(<span class="st">"Note: Sehr gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">75</span>:
+    <span class="fn">print</span>(<span class="st">"Note: Gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">50</span>:
+    <span class="fn">print</span>(<span class="st">"Note: Bestanden"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"Note: Nicht bestanden"</span>)
+    </div>
+
+    <div class="warn-box">
+        <strong>Reihenfolge zählt!</strong> Python prüft die Bedingungen von oben nach unten. Sobald eine zutrifft, werden alle anderen <em>nicht mehr</em> geprüft. Deshalb muss die engste Bedingung zuerst kommen.
+    </div>
+</div>
+
+<!-- T3: Logische Operatoren -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 3 von 3</div>
+    <h2>Logische Operatoren und geschachtelte Bedingungen</h2>
+    <p>Bedingungen können mit <strong>logischen Operatoren</strong> verknüpft werden, um komplexe Entscheidungen in einer einzigen Zeile zu formulieren.</p>
+
+    <table class="op-table">
+        <thead>
+            <tr><th>Operator</th><th>Bedeutung</th><th>Beispiel</th><th>Ergebnis</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>and</td>
+                <td>UND – beide Bedingungen müssen wahr sein</td>
+                <td><code>x &gt; 0 and x &lt; 10</code></td>
+                <td><code>True</code>, wenn x zwischen 1 und 9</td>
+            </tr>
+            <tr>
+                <td>or</td>
+                <td>ODER – mindestens eine Bedingung muss wahr sein</td>
+                <td><code>x &lt; 0 or x &gt; 100</code></td>
+                <td><code>True</code>, wenn x negativ oder über 100</td>
+            </tr>
+            <tr>
+                <td>not</td>
+                <td>NICHT – kehrt den Wahrheitswert um</td>
+                <td><code>not x == 0</code></td>
+                <td><code>True</code>, wenn x ungleich 0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="compare">
+        <div class="compare-col">
+            <h4>Ohne logischen Operator (verschachtelt)</h4>
+            <div class="code-block" style="margin:0; font-size:0.82rem;">
+<span class="kw">if</span> <span class="var">alter</span> <span class="op">&gt;=</span> <span class="nm">18</span>:
+    <span class="kw">if</span> <span class="var">alter</span> <span class="op">&lt;=</span> <span class="nm">67</span>:
+        <span class="fn">print</span>(<span class="st">"Erwerbstätig"</span>)
+            </div>
+        </div>
+        <div class="compare-col">
+            <h4>Mit <code>and</code> (kürzer, klarer)</h4>
+            <div class="code-block" style="margin:0; font-size:0.82rem;">
+<span class="kw">if</span> <span class="var">alter</span> <span class="op">&gt;=</span> <span class="nm">18</span> <span class="lo">and</span> <span class="var">alter</span> <span class="op">&lt;=</span> <span class="nm">67</span>:
+    <span class="fn">print</span>(<span class="st">"Erwerbstätig"</span>)
+            </div>
+        </div>
+    </div>
+
+    <div class="code-block">
+<span class="cm"># Ampelsteuerung mit or</span>
+<span class="var">farbe</span> <span class="op">=</span> <span class="fn">input</span>(<span class="st">"Ampelfarbe: "</span>)
+
+<span class="kw">if</span> <span class="var">farbe</span> <span class="op">==</span> <span class="st">"rot"</span> <span class="lo">or</span> <span class="var">farbe</span> <span class="op">==</span> <span class="st">"gelb"</span>:
+    <span class="fn">print</span>(<span class="st">"Bitte warten!"</span>)
+<span class="kw">elif</span> <span class="var">farbe</span> <span class="op">==</span> <span class="st">"grün"</span>:
+    <span class="fn">print</span>(<span class="st">"Fahren erlaubt."</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"Unbekannte Farbe."</span>)
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     ÜBUNGEN
+══════════════════════════════════════ -->
+<div class="section">
+    <div class="section-label">Übungen</div>
+    <h2>Jetzt bist du dran!</h2>
+    <p>Bearbeite die fünf Aufgaben. Du erhältst nach jeder Aufgabe sofortiges Feedback.</p>
+
+    <!-- ─────────────────────────────────
+         Ü1 – Code-Reihenfolge (DnD)
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex1">
+        <div class="ex-header">
+            <div class="ex-num">1</div>
+            <h3>Verzweigung in die richtige Reihenfolge bringen</h3>
+            <span class="ex-type">Code-Reihenfolge</span>
+        </div>
+        <p class="ex-task">
+            Ein Programm soll eine eingegebene Schulnote (1–6) bewerten. Bringe die vier Code-Blöcke in die richtige Reihenfolge. <strong>Achtung:</strong> Ein Block gehört <em>nicht</em> dazu!
+        </p>
+        <div class="dnd-wrap">
+            <div class="dnd-col">
+                <h4>Verfügbare Blöcke</h4>
+                <div id="pool1">
+                    <div class="drag-item" draggable="true" data-id="b_else"><span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"Nicht bestanden"</span>)</div>
+                    <div class="drag-item" draggable="true" data-id="b_inp">note <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Note (1-6): "</span>))</div>
+                    <div class="drag-item" draggable="true" data-id="b_wrong"><span class="kw">if</span> note <span class="op">&lt;=</span> <span class="nm">4</span>:
+    <span class="fn">print</span>(<span class="st">"Nachschreiben"</span>)</div>
+                    <div class="drag-item" draggable="true" data-id="b_elif"><span class="kw">elif</span> note <span class="op">==</span> <span class="nm">5</span>:
+    <span class="fn">print</span>(<span class="st">"Nachschreiben"</span>)</div>
+                    <div class="drag-item" draggable="true" data-id="b_if"><span class="kw">if</span> note <span class="op">&lt;=</span> <span class="nm">4</span>:
+    <span class="fn">print</span>(<span class="st">"Bestanden"</span>)</div>
+                </div>
+            </div>
+            <div class="dnd-col">
+                <h4>Meine Reihenfolge</h4>
+                <div class="drop-zone" id="dz1_1"><span class="dz-label">1. Block</span></div>
+                <div class="drop-zone" id="dz1_2"><span class="dz-label">2. Block</span></div>
+                <div class="drop-zone" id="dz1_3"><span class="dz-label">3. Block</span></div>
+                <div class="drop-zone" id="dz1_4"><span class="dz-label">4. Block</span></div>
+            </div>
+        </div>
+        <button class="btn"     onclick="checkEx1()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx1()">Zurücksetzen</button>
+        <div class="feedback" id="fb1"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü2 – Code-Vorhersage
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex2">
+        <div class="ex-header">
+            <div class="ex-num">2</div>
+            <h3>Welche Ausgabe erscheint?</h3>
+            <span class="ex-type">Code-Vorhersage</span>
+        </div>
+        <p class="ex-task">Betrachte das folgende Programm. Für vier verschiedene Eingabewerte: Welche Ausgabe erscheint jeweils?</p>
+
+        <div class="code-block">
+<span class="var">punkte</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Punkte (0–100): "</span>))
+
+<span class="kw">if</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">90</span> <span class="lo">and</span> <span class="var">punkte</span> <span class="op">&lt;=</span> <span class="nm">100</span>:
+    <span class="fn">print</span>(<span class="st">"Sehr gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">75</span>:
+    <span class="fn">print</span>(<span class="st">"Gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">50</span>:
+    <span class="fn">print</span>(<span class="st">"Bestanden"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"Nicht bestanden"</span>)
+        </div>
+
+        <div class="scenario-block">
+            <div class="scenario-label">punkte = 82</div>
+            <ul class="mc-list" id="mc2a">
+                <li><label><input type="radio" name="q2a" value="a"> Sehr gut</label></li>
+                <li><label><input type="radio" name="q2a" value="b"> Gut</label></li>
+                <li><label><input type="radio" name="q2a" value="c"> Bestanden</label></li>
+                <li><label><input type="radio" name="q2a" value="d"> Nicht bestanden</label></li>
+            </ul>
+        </div>
+        <div class="scenario-block">
+            <div class="scenario-label">punkte = 45</div>
+            <ul class="mc-list" id="mc2b">
+                <li><label><input type="radio" name="q2b" value="a"> Sehr gut</label></li>
+                <li><label><input type="radio" name="q2b" value="b"> Gut</label></li>
+                <li><label><input type="radio" name="q2b" value="c"> Bestanden</label></li>
+                <li><label><input type="radio" name="q2b" value="d"> Nicht bestanden</label></li>
+            </ul>
+        </div>
+        <div class="scenario-block">
+            <div class="scenario-label">punkte = 90</div>
+            <ul class="mc-list" id="mc2c">
+                <li><label><input type="radio" name="q2c" value="a"> Sehr gut</label></li>
+                <li><label><input type="radio" name="q2c" value="b"> Gut</label></li>
+                <li><label><input type="radio" name="q2c" value="c"> Bestanden</label></li>
+                <li><label><input type="radio" name="q2c" value="d"> Nicht bestanden</label></li>
+            </ul>
+        </div>
+        <div class="scenario-block">
+            <div class="scenario-label">punkte = 74</div>
+            <ul class="mc-list" id="mc2d">
+                <li><label><input type="radio" name="q2d" value="a"> Sehr gut</label></li>
+                <li><label><input type="radio" name="q2d" value="b"> Gut</label></li>
+                <li><label><input type="radio" name="q2d" value="c"> Bestanden</label></li>
+                <li><label><input type="radio" name="q2d" value="d"> Nicht bestanden</label></li>
+            </ul>
+        </div>
+
+        <button class="btn"     onclick="checkEx2()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx2()">Zurücksetzen</button>
+        <div class="feedback" id="fb2"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü3 – Fehlersuche
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex3">
+        <div class="ex-header">
+            <div class="ex-num">3</div>
+            <h3>Syntaxfehler finden</h3>
+            <span class="ex-type">Fehlersuche</span>
+        </div>
+        <p class="ex-task">
+            Das Programm soll prüfen, ob ein eingegebenes Passwort korrekt ist. Es enthält <strong>genau einen Syntaxfehler</strong> – Python verweigert bereits den Start. Klicke auf die fehlerhafte Zeile.
+        </p>
+        <div class="code-block" style="padding: 0.75rem 0;">
+            <span class="code-line" data-line="1" onclick="pickLine3(1)"><span class="line-num">1</span><span class="cm"># Passwort-Prüfung</span></span>
+            <span class="code-line" data-line="2" onclick="pickLine3(2)"><span class="line-num">2</span><span class="var">passwort</span> <span class="op">=</span> <span class="fn">input</span>(<span class="st">"Passwort eingeben: "</span>)</span>
+            <span class="code-line" data-line="3" onclick="pickLine3(3)"><span class="line-num">3</span><span class="kw">if</span> <span class="var">passwort</span> <span class="op">=</span> <span class="st">"geheim123"</span>:</span>
+            <span class="code-line" data-line="4" onclick="pickLine3(4)"><span class="line-num">4</span>    <span class="fn">print</span>(<span class="st">"Zugang gewährt!"</span>)</span>
+            <span class="code-line" data-line="5" onclick="pickLine3(5)"><span class="line-num">5</span><span class="kw">else</span>:</span>
+            <span class="code-line" data-line="6" onclick="pickLine3(6)"><span class="line-num">6</span>    <span class="fn">print</span>(<span class="st">"Falsches Passwort."</span>)</span>
+        </div>
+        <div class="feedback" id="fb3"></div>
+        <button class="btn sec" onclick="resetEx3()">Zurücksetzen</button>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü4 – Bedingungen auswerten
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex4">
+        <div class="ex-header">
+            <div class="ex-num">4</div>
+            <h3>Bedingungen mit logischen Operatoren auswerten</h3>
+            <span class="ex-type">Wahr / Falsch</span>
+        </div>
+        <p class="ex-task">Gegeben sind die Variablen <code>a = 12</code>, <code>b = 5</code> und <code>c = -3</code>. Bestimme für jede Bedingung, ob sie <strong>True</strong> oder <strong>False</strong> ergibt.</p>
+
+        <!-- Q1 -->
+        <p class="ex-question">1 &nbsp; <code>a &gt; 10 and b &gt; 0</code></p>
+        <ul class="mc-list" id="mc4a">
+            <li><label><input type="radio" name="q4a" value="T"> <code>True</code> &nbsp; (12 &gt; 10 ist True, 5 &gt; 0 ist True → True and True)</label></li>
+            <li><label><input type="radio" name="q4a" value="F"> <code>False</code></label></li>
+        </ul>
+
+        <!-- Q2 -->
+        <p class="ex-question">2 &nbsp; <code>b == 5 and c &gt; 0</code></p>
+        <ul class="mc-list" id="mc4b">
+            <li><label><input type="radio" name="q4b" value="T"> <code>True</code></label></li>
+            <li><label><input type="radio" name="q4b" value="F"> <code>False</code> &nbsp; (5 == 5 ist True, aber −3 &gt; 0 ist False → True and False)</label></li>
+        </ul>
+
+        <!-- Q3 -->
+        <p class="ex-question">3 &nbsp; <code>c &lt; 0 or b &gt; 10</code></p>
+        <ul class="mc-list" id="mc4c">
+            <li><label><input type="radio" name="q4c" value="T"> <code>True</code> &nbsp; (−3 &lt; 0 ist True → True or False)</label></li>
+            <li><label><input type="radio" name="q4c" value="F"> <code>False</code></label></li>
+        </ul>
+
+        <!-- Q4 -->
+        <p class="ex-question">4 &nbsp; <code>not (a == 12)</code></p>
+        <ul class="mc-list" id="mc4d">
+            <li><label><input type="radio" name="q4d" value="T"> <code>True</code></label></li>
+            <li><label><input type="radio" name="q4d" value="F"> <code>False</code> &nbsp; (a == 12 ist True, not True ist False)</label></li>
+        </ul>
+
+        <!-- Q5 -->
+        <p class="ex-question">5 &nbsp; <code>a &gt; b and b &gt; c and c &lt; 0</code></p>
+        <ul class="mc-list" id="mc4e">
+            <li><label><input type="radio" name="q4e" value="T"> <code>True</code> &nbsp; (12 &gt; 5 und 5 &gt; −3 und −3 &lt; 0 → alle True)</label></li>
+            <li><label><input type="radio" name="q4e" value="F"> <code>False</code></label></li>
+        </ul>
+
+        <button class="btn"     onclick="checkEx4()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx4()">Zurücksetzen</button>
+        <div class="feedback" id="fb4"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü5 – Knobelaufgabe: Maximum
+    ───────────────────────────────── -->
+    <div class="exercise knobel" id="ex5">
+        <div class="ex-header">
+            <div class="ex-num">5</div>
+            <h3>Knobelaufgabe: Maximum von drei Zahlen</h3>
+            <span class="ex-type knobel-tag">&#129504; Knobelaufgabe</span>
+        </div>
+        <p class="ex-task">
+            Gesucht ist das <strong>Maximum</strong> von drei eingegebenen Zahlen <code>a</code>, <code>b</code> und <code>c</code> – <em>ohne</em> die eingebaute Funktion <code>max()</code> zu nutzen, nur mit <code>if</code> / <code>elif</code> / <code>else</code>.
+        </p>
+
+        <!-- Schritt 1 -->
+        <div class="knobel-step">
+            <div class="knobel-step-label">Schritt 1 &mdash; Den naiven Ansatz analysieren</div>
+            <h4>Was ist das Problem mit diesem Versuch?</h4>
+            <div class="code-block">
+<span class="var">a</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"a: "</span>))
+<span class="var">b</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"b: "</span>))
+<span class="var">c</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"c: "</span>))
+
+<span class="kw">if</span> <span class="var">a</span> <span class="op">&gt;</span> <span class="var">b</span>:
+    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, <span class="var">a</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, <span class="var">b</span>)
+            </div>
+            <p class="ex-question">Für welche Eingabe liefert dieses Programm ein <strong>falsches Ergebnis</strong>?</p>
+            <ul class="mc-list" id="mc5a">
+                <li><label><input type="radio" name="q5a" value="a"> a = 10, b = 7, c = 4 &nbsp;→&nbsp; es gibt "Maximum: 10" aus (korrekt)</label></li>
+                <li><label><input type="radio" name="q5a" value="b"> a = 3, b = 8, c = 12 &nbsp;→&nbsp; es gibt "Maximum: 8" aus, obwohl c = 12 das echte Maximum ist</label></li>
+                <li><label><input type="radio" name="q5a" value="c"> a = 5, b = 5, c = 3 &nbsp;→&nbsp; es gibt "Maximum: 5" aus (korrekt)</label></li>
+                <li><label><input type="radio" name="q5a" value="d"> Das Programm ist immer korrekt, solange a und b verschieden sind.</label></li>
+            </ul>
+            <button class="btn" onclick="checkEx5a()">Überprüfen</button>
+            <button class="btn sec" onclick="resetEx5a()">Zurücksetzen</button>
+            <div class="feedback" id="fb5a"></div>
+        </div>
+
+        <!-- Schritt 2 (gesperrt bis S1 gelöst) -->
+        <div class="knobel-step" id="step5b" style="opacity:0.4; pointer-events:none;">
+            <div class="knobel-step-label">Schritt 2 &mdash; Die richtige Lösung bauen</div>
+            <h4>Bringe die Blöcke in die korrekte Reihenfolge</h4>
+            <p style="font-size:0.93rem; color:#334155; margin-bottom:0.75rem;">
+                Das Programm muss <code>c</code> ebenfalls in den Vergleich einbeziehen. Die korrekte Strategie: <code>a</code> ist das Maximum, wenn es <strong>größer oder gleich</strong> <code>b</code> <em>und</em> größer oder gleich <code>c</code> ist. Analog für <code>b</code>. Wenn keiner der ersten beiden Fälle zutrifft, muss <code>c</code> das Maximum sein.
+            </p>
+            <div class="dnd-wrap">
+                <div class="dnd-col">
+                    <h4>Verfügbare Blöcke</h4>
+                    <div id="pool5b">
+                        <div class="drag-item" draggable="true" data-id="s5_else"><span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, c)</div>
+                        <div class="drag-item" draggable="true" data-id="s5_if"><span class="kw">if</span> a <span class="op">&gt;=</span> b <span class="lo">and</span> a <span class="op">&gt;=</span> c:
+    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, a)</div>
+                        <div class="drag-item" draggable="true" data-id="s5_wrong"><span class="kw">elif</span> c <span class="op">&gt;=</span> a <span class="lo">and</span> c <span class="op">&gt;=</span> b:
+    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, c)</div>
+                        <div class="drag-item" draggable="true" data-id="s5_elif"><span class="kw">elif</span> b <span class="op">&gt;=</span> c:
+    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, b)</div>
+                    </div>
+                </div>
+                <div class="dnd-col">
+                    <h4>Meine Reihenfolge</h4>
+                    <div class="drop-zone" id="sdz1"><span class="dz-label">1. Block</span></div>
+                    <div class="drop-zone" id="sdz2"><span class="dz-label">2. Block</span></div>
+                    <div class="drop-zone" id="sdz3"><span class="dz-label">3. Block</span></div>
+                </div>
+            </div>
+            <button class="btn"     onclick="checkEx5b()">Überprüfen</button>
+            <button class="btn sec" onclick="resetEx5b()">Zurücksetzen</button>
+            <div class="feedback" id="fb5b"></div>
+        </div>
+    </div>
+
+    <!-- Abschluss -->
+    <div class="completion" id="completion">
+        <div class="icon">&#127881;</div>
+        <h2>Ausgezeichnet!</h2>
+        <p>Du hast alle Übungen – einschließlich der Knobelaufgabe – erfolgreich abgeschlossen.<br>
+        Im nächsten Schritt geht es um <strong>Schleifen</strong> in Python (<code>for</code> und <code>while</code>).</p>
+    </div>
+</div>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── Progress ───────────────────────────
+const done = { ex1:false, ex2:false, ex3:false, ex4:false, ex5:false };
+
+function refreshProgress() {
+    const map = { ps4:'ex1', ps5:'ex2', ps6:'ex3', ps7:'ex4', ps8:'ex5' };
+    Object.entries(map).forEach(([psId, exKey]) => {
+        document.getElementById(psId).className =
+            'progress-step ' + (done[exKey] ? 'done' : '');
+    });
+    if (Object.values(done).every(Boolean)) {
+        const c = document.getElementById('completion');
+        c.classList.add('show');
+        c.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+}
+
+// ─── Feedback helpers ──────────────────
+function showFB(id, isOk, msg) {
+    const el = document.getElementById(id);
+    el.className = 'feedback show ' + (isOk ? 'ok' : 'err');
+    el.innerHTML = (isOk ? '&#10003;&nbsp;' : '&#10007;&nbsp;') + msg;
+}
+function hideFB(id) {
+    const el = document.getElementById(id);
+    el.className = 'feedback'; el.innerHTML = '';
+}
+
+// ─── MC helper ─────────────────────────
+function markMC(listId, correctVal) {
+    document.querySelectorAll('#' + listId + ' label').forEach(lbl => {
+        const r = lbl.querySelector('input');
+        if (r.value === correctVal)                   lbl.classList.add('ok');
+        else if (r.checked && r.value !== correctVal) lbl.classList.add('err');
+        r.disabled = true;
+    });
+}
+function resetMC(listId) {
+    document.querySelectorAll('#' + listId + ' input').forEach(r => { r.checked = false; r.disabled = false; });
+    document.querySelectorAll('#' + listId + ' label').forEach(l => l.className = '');
+}
+
+// ════════════════════════════════════════
+// Ü1 – Drag & Drop Notenberechnung
+// ════════════════════════════════════════
+// Correct: b_inp → b_if → b_elif → b_else
+const EX1_CORRECT = ['b_inp', 'b_if', 'b_elif', 'b_else'];
+const EX1_ITEMS = [
+    { id:'b_else',  html:'<span class="kw">else</span>:\n    <span class="fn">print</span>(<span class="st">"Nicht bestanden"</span>)' },
+    { id:'b_inp',   html:'note <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Note (1-6): "</span>))' },
+    { id:'b_wrong', html:'<span class="kw">if</span> note <span class="op">&lt;=</span> <span class="nm">4</span>:\n    <span class="fn">print</span>(<span class="st">"Nachschreiben"</span>)' },
+    { id:'b_elif',  html:'<span class="kw">elif</span> note <span class="op">==</span> <span class="nm">5</span>:\n    <span class="fn">print</span>(<span class="st">"Nachschreiben"</span>)' },
+    { id:'b_if',    html:'<span class="kw">if</span> note <span class="op">&lt;=</span> <span class="nm">4</span>:\n    <span class="fn">print</span>(<span class="st">"Bestanden"</span>)' },
+];
+
+let dragged1 = null;
+
+function initDnD1() {
+    document.querySelectorAll('#pool1 .drag-item, #dz1_1 .drag-item, #dz1_2 .drag-item, #dz1_3 .drag-item, #dz1_4 .drag-item').forEach(item => {
+        item.addEventListener('dragstart', () => { dragged1 = item; setTimeout(() => item.classList.add('dragging'), 0); });
+        item.addEventListener('dragend',   () => { item.classList.remove('dragging'); dragged1 = null; });
+    });
+    ['dz1_1','dz1_2','dz1_3','dz1_4'].forEach((id, i) => {
+        const zone = document.getElementById(id);
+        zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault(); zone.classList.remove('over');
+            if (!dragged1) return;
+            const existing = zone.querySelector('.drag-item');
+            if (existing) document.getElementById('pool1').appendChild(existing);
+            const prev = dragged1.closest('.drop-zone');
+            if (prev) prev.innerHTML = '<span class="dz-label">' + (i+1) + '. Block</span>';
+            zone.innerHTML = ''; zone.appendChild(dragged1);
+            dragged1.classList.remove('ok-placed','err-placed');
+        });
+    });
+}
+initDnD1();
+
+function checkEx1() {
+    const ids   = ['dz1_1','dz1_2','dz1_3','dz1_4'];
+    const placed = ids.map(id => { const it = document.getElementById(id).querySelector('.drag-item'); return it ? it.dataset.id : null; });
+    if (placed.some(p => !p)) { showFB('fb1', false, 'Bitte alle vier Felder befüllen.'); return; }
+    const ok = placed.every((v,i) => v === EX1_CORRECT[i]);
+    ids.forEach((id, i) => {
+        const it = document.getElementById(id).querySelector('.drag-item');
+        if (it) { it.classList.remove('ok-placed','err-placed'); it.classList.add(placed[i] === EX1_CORRECT[i] ? 'ok-placed' : 'err-placed'); }
+    });
+    if (ok) {
+        showFB('fb1', true, 'Richtig! Zuerst die Eingabe, dann <code>if note &lt;= 4</code> für den Bestehenfall, dann <code>elif note == 5</code> für das Nachschreiben, und <code>else</code> für alles andere (Note 6). Der Block mit <code>if note &lt;= 4: print("Nachschreiben")</code> war der Ablenkungsblock – dort war die Bedeutung falsch zugeordnet.');
+        done.ex1 = true;
+    } else {
+        showFB('fb1', false, 'Noch nicht ganz. Denke an die Struktur: Zuerst Eingabe, dann <code>if</code>, dann <code>elif</code>, dann <code>else</code>. Und: Welcher Block gehört gar nicht dazu?');
+    }
+    refreshProgress();
+}
+
+function resetEx1() {
+    const pool = document.getElementById('pool1');
+    pool.innerHTML = '';
+    EX1_ITEMS.forEach(({ id, html }) => {
+        const d = document.createElement('div');
+        d.className = 'drag-item'; d.draggable = true; d.dataset.id = id; d.innerHTML = html;
+        pool.appendChild(d);
+    });
+    ['dz1_1','dz1_2','dz1_3','dz1_4'].forEach((id, i) => {
+        document.getElementById(id).innerHTML = '<span class="dz-label">' + (i+1) + '. Block</span>';
+    });
+    initDnD1(); hideFB('fb1'); done.ex1 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü2 – Code-Vorhersage
+// ════════════════════════════════════════
+// punkte=82 → "Gut"(b),  45 → "Nicht bestanden"(d),  90 → "Sehr gut"(a),  74 → "Bestanden"(c)
+const EX2_ANS = { mc2a:'b', mc2b:'d', mc2c:'a', mc2d:'c' };
+
+function checkEx2() {
+    const keys = Object.keys(EX2_ANS);
+    const names = { mc2a:'q2a', mc2b:'q2b', mc2c:'q2c', mc2d:'q2d' };
+    const missing = keys.some(k => !document.querySelector(`input[name="${names[k]}"]:checked`));
+    if (missing) { showFB('fb2', false, 'Bitte alle vier Szenarien beantworten.'); return; }
+
+    let allOk = true;
+    keys.forEach(k => {
+        const sel = document.querySelector(`input[name="${names[k]}"]:checked`);
+        const ok  = sel && sel.value === EX2_ANS[k];
+        markMC(k, EX2_ANS[k]);
+        if (!ok) allOk = false;
+    });
+
+    if (allOk) {
+        showFB('fb2', true, 'Alle vier Szenarien korrekt! Beachte: Bei 74 Punkten schlägt <code>punkte &gt;= 75</code> fehl, aber <code>punkte &gt;= 50</code> trifft zu → "Bestanden". Bei 90 Punkten trifft die erste Bedingung (<code>&gt;= 90 and &lt;= 100</code>) sofort zu, die <code>elif</code>-Zeilen werden nicht mehr geprüft.');
+        done.ex2 = true;
+    } else {
+        const hints = {
+            mc2a: '82 &gt;= 90? Nein. 82 &gt;= 75? Ja → "Gut".',
+            mc2b: '45 &gt;= 90? Nein. 45 &gt;= 75? Nein. 45 &gt;= 50? Nein → "Nicht bestanden".',
+            mc2c: '90 &gt;= 90 and 90 &lt;= 100? Ja → direkt "Sehr gut".',
+            mc2d: '74 &gt;= 90? Nein. 74 &gt;= 75? Nein. 74 &gt;= 50? Ja → "Bestanden".'
+        };
+        const wrong = keys.filter(k => {
+            const s = document.querySelector(`input[name="${names[k]}"]:checked`);
+            return !s || s.value !== EX2_ANS[k];
+        });
+        showFB('fb2', false, wrong.map(k => hints[k]).join('<br>'));
+    }
+    refreshProgress();
+}
+
+function resetEx2() {
+    ['mc2a','mc2b','mc2c','mc2d'].forEach(id => resetMC(id));
+    hideFB('fb2'); done.ex2 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü3 – Fehlersuche (Zeile 3: = statt ==)
+// ════════════════════════════════════════
+const LINE3_HINTS = {
+    1: 'Kommentare werden nicht ausgeführt – sie verursachen keinen Fehler.',
+    2: '<code>input()</code> mit anschließender Zuweisung ist korrekte Python-Syntax.',
+    4: 'Die eingerückte <code>print()</code>-Zeile ist syntaktisch korrekt.',
+    5: '<code>else:</code> ist korrekt – es schließt den if-Block ab.',
+    6: 'Auch diese <code>print()</code>-Zeile ist syntaktisch einwandfrei.'
+};
+
+function pickLine3(n) {
+    if (done.ex3) return;
+    document.querySelectorAll('.code-line').forEach(el => {
+        if (!el.classList.contains('correct-ln')) el.classList.remove('wrong-ln');
+    });
+    const el = document.querySelector(`.code-line[data-line="${n}"]`);
+    if (n === 3) {
+        el.classList.add('correct-ln');
+        showFB('fb3', true, 'Richtig! In Zeile 3 steht <code>passwort = "geheim123"</code> – ein einfaches <code>=</code> ist eine Zuweisung, kein Vergleich. Python erkennt das als <code>SyntaxError</code>. Korrekt wäre der doppelte Vergleichsoperator <code>==</code>: <code>if passwort == "geheim123":</code>');
+        done.ex3 = true; refreshProgress();
+    } else {
+        el.classList.add('wrong-ln');
+        setTimeout(() => el.classList.remove('wrong-ln'), 800);
+        showFB('fb3', false, LINE3_HINTS[n] || 'Diese Zeile ist korrekt.');
+    }
+}
+
+function resetEx3() {
+    document.querySelectorAll('.code-line').forEach(el => el.classList.remove('correct-ln','wrong-ln'));
+    hideFB('fb3'); done.ex3 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü4 – Bedingungen auswerten
+// ════════════════════════════════════════
+// a=12, b=5, c=-3
+// 1: 12>10 and 5>0  → T  2: 5==5 and -3>0 → F  3: -3<0 or 5>10 → T
+// 4: not(12==12)    → F  5: 12>5 and 5>-3 and -3<0 → T
+const EX4_ANS = { mc4a:'T', mc4b:'F', mc4c:'T', mc4d:'F', mc4e:'T' };
+
+function checkEx4() {
+    const names = { mc4a:'q4a', mc4b:'q4b', mc4c:'q4c', mc4d:'q4d', mc4e:'q4e' };
+    const keys  = Object.keys(EX4_ANS);
+    const missing = keys.some(k => !document.querySelector(`input[name="${names[k]}"]:checked`));
+    if (missing) { showFB('fb4', false, 'Bitte alle fünf Bedingungen auswerten.'); return; }
+    let allOk = true;
+    keys.forEach(k => {
+        markMC(k, EX4_ANS[k]);
+        const sel = document.querySelector(`input[name="${names[k]}"]:checked`);
+        if (!sel || sel.value !== EX4_ANS[k]) allOk = false;
+    });
+    if (allOk) {
+        showFB('fb4', true, 'Alle fünf Bedingungen korrekt ausgewertet! Merke: Bei <code>and</code> müssen <em>alle</em> Teilbedingungen True sein. Bei <code>or</code> genügt <em>eine</em> True. <code>not</code> dreht den Wahrheitswert einfach um.');
+        done.ex4 = true;
+    } else {
+        showFB('fb4', false, 'Noch nicht alle richtig. Gehe jede Teilbedingung einzeln durch: Setze a=12, b=5, c=−3 ein und werte von innen nach außen aus.');
+    }
+    refreshProgress();
+}
+
+function resetEx4() {
+    ['mc4a','mc4b','mc4c','mc4d','mc4e'].forEach(id => resetMC(id));
+    hideFB('fb4'); done.ex4 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü5 – Knobelaufgabe: Maximum
+// ════════════════════════════════════════
+
+// ── Schritt 5a ──
+function checkEx5a() {
+    const a = document.querySelector('input[name="q5a"]:checked');
+    if (!a) { showFB('fb5a', false, 'Bitte eine Antwort auswählen.'); return; }
+    markMC('mc5a', 'b');
+    if (a.value === 'b') {
+        showFB('fb5a', true, 'Genau! Das Programm vergleicht nur a mit b und ignoriert c vollständig. Bei a=3, b=8, c=12 gibt es "Maximum: 8" aus – aber 12 wäre das echte Maximum. Jetzt kommt Schritt 2: der korrekte Algorithmus!');
+        const s2 = document.getElementById('step5b');
+        s2.style.opacity = '1'; s2.style.pointerEvents = 'auto';
+        initDnD5b();
+    } else {
+        showFB('fb5a', false, 'Nicht ganz. Überlege: Was passiert, wenn c größer ist als sowohl a als auch b? Wird c überhaupt berücksichtigt?');
+    }
+}
+function resetEx5a() {
+    resetMC('mc5a'); hideFB('fb5a');
+    const s2 = document.getElementById('step5b');
+    s2.style.opacity = '0.4'; s2.style.pointerEvents = 'none';
+}
+
+// ── Schritt 5b (Drag & Drop) ──
+// Correct: s5_if → s5_elif → s5_else
+const S5B_CORRECT = ['s5_if', 's5_elif', 's5_else'];
+const S5B_ITEMS = [
+    { id:'s5_else',  html:'<span class="kw">else</span>:\n    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, c)' },
+    { id:'s5_if',    html:'<span class="kw">if</span> a <span class="op">&gt;=</span> b <span class="lo">and</span> a <span class="op">&gt;=</span> c:\n    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, a)' },
+    { id:'s5_wrong', html:'<span class="kw">elif</span> c <span class="op">&gt;=</span> a <span class="lo">and</span> c <span class="op">&gt;=</span> b:\n    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, c)' },
+    { id:'s5_elif',  html:'<span class="kw">elif</span> b <span class="op">&gt;=</span> c:\n    <span class="fn">print</span>(<span class="st">"Maximum:"</span>, b)' },
+];
+
+let dragged5b = null;
+
+function initDnD5b() {
+    document.querySelectorAll('#pool5b .drag-item, #sdz1 .drag-item, #sdz2 .drag-item, #sdz3 .drag-item').forEach(item => {
+        item.addEventListener('dragstart', () => { dragged5b = item; setTimeout(() => item.classList.add('dragging'), 0); });
+        item.addEventListener('dragend',   () => { item.classList.remove('dragging'); dragged5b = null; });
+    });
+    ['sdz1','sdz2','sdz3'].forEach((id, i) => {
+        const zone = document.getElementById(id);
+        zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault(); zone.classList.remove('over');
+            if (!dragged5b) return;
+            const existing = zone.querySelector('.drag-item');
+            if (existing) document.getElementById('pool5b').appendChild(existing);
+            const prev = dragged5b.closest('.drop-zone');
+            if (prev) prev.innerHTML = '<span class="dz-label">' + (i+1) + '. Block</span>';
+            zone.innerHTML = ''; zone.appendChild(dragged5b);
+            dragged5b.classList.remove('ok-placed','err-placed');
+        });
+    });
+}
+
+function checkEx5b() {
+    const zones  = ['sdz1','sdz2','sdz3'];
+    const placed = zones.map(id => { const it = document.getElementById(id).querySelector('.drag-item'); return it ? it.dataset.id : null; });
+    if (placed.some(p => !p)) { showFB('fb5b', false, 'Bitte alle drei Felder befüllen.'); return; }
+    const ok = placed.every((v, i) => v === S5B_CORRECT[i]);
+    zones.forEach((id, i) => {
+        const it = document.getElementById(id).querySelector('.drag-item');
+        if (it) { it.classList.remove('ok-placed','err-placed'); it.classList.add(placed[i] === S5B_CORRECT[i] ? 'ok-placed' : 'err-placed'); }
+    });
+    if (ok) {
+        showFB('fb5b', true,
+            'Perfekt! Der vollständige Algorithmus:<br>' +
+            '1. <code>if a &gt;= b and a &gt;= c</code> → a ist das Maximum<br>' +
+            '2. <code>elif b &gt;= c</code> → wenn a schon kein Maximum ist und b &gt;= c, dann ist b das Maximum<br>' +
+            '3. <code>else</code> → dann muss c das Maximum sein (kein weiterer Vergleich nötig!)<br><br>' +
+            'Der Ablenkungsblock (<code>elif c &gt;= a and c &gt;= b</code>) wäre zwar logisch korrekt, ist aber überflüssig: Wenn weder a noch b das Maximum ist, <em>muss</em> c es sein – deshalb reicht ein einfaches <code>else</code>.');
+        done.ex5 = true; refreshProgress();
+    } else {
+        showFB('fb5b', false, 'Noch nicht ganz. Tipp: Was muss <em>zuerst</em> geprüft werden? Und: Muss der letzte Block wirklich noch etwas prüfen, oder reicht <code>else</code>?');
+    }
+}
+
+function resetEx5b() {
+    const pool = document.getElementById('pool5b');
+    pool.innerHTML = '';
+    S5B_ITEMS.forEach(({ id, html }) => {
+        const d = document.createElement('div');
+        d.className = 'drag-item'; d.draggable = true; d.dataset.id = id; d.innerHTML = html;
+        pool.appendChild(d);
+    });
+    ['sdz1','sdz2','sdz3'].forEach((id, i) => {
+        document.getElementById(id).innerHTML = '<span class="dz-label">' + (i+1) + '. Block</span>';
+    });
+    initDnD5b(); hideFB('fb5b'); done.ex5 = false; refreshProgress();
+}
+</script>
+
+</body>
+</html>
