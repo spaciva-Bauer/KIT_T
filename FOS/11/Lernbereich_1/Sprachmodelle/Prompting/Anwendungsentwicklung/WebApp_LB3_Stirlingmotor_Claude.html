@@ -655,308 +655,271 @@ function drawEngine(a) {
   ctx.fillStyle = '#0D0F14';
   ctx.fillRect(0, 0, W, H);
 
-  // ---- LAYOUT CONSTANTS ----
-  // Left cylinder (cold) — vertical, left side
-  const lCylW = W * 0.11;
-  const lCylH = H * 0.42;
-  const lCylX = W * 0.19;
-  const lCylY = H * 0.48;
+  // ---- LAYOUT: wie in der Referenzgrafik ----
+  // Schwungrad — oben links
+  const crankX = W * 0.28;
+  const crankY = H * 0.22;
+  const crankR = H * 0.148;
 
-  // Right cylinder (hot) — vertical, right side
-  const rCylW = W * 0.11;
-  const rCylH = H * 0.42;
-  const rCylX = W * 0.68;
-  const rCylY = H * 0.08;
+  // Kalt-Zylinder (vertikal) — unten links, unterhalb des Schwungrads
+  const cCylW = W * 0.155;
+  const cCylH = H * 0.40;
+  const cCylX = W * 0.07;
+  const cCylY = H * 0.555;
 
-  // Connecting pipe — diagonal from bottom of cold to bottom of hot
-  const coldBotX = lCylX + lCylW / 2;
-  const coldBotY = lCylY + lCylH;
-  // Hot bottom center
-  const hotBotX = rCylX + rCylW / 2;
-  const hotBotY = rCylY + rCylH;
+  // Heiß-Block (horizontal, 90° gedreht zur Kalt-Seite) — oben rechts
+  // Öffnung (links) = cCylW, Tiefe = cCylH → gleiche Abmaße wie Kalt-Zylinder
+  const hBlkH = cCylW;   // Öffnungshöhe (links) = Zylinderbreite Kalt
+  const hBlkW = cCylH;   // Tiefe (horizontal)   = Zylinderhöhe Kalt
+  const hBlkX = W * 0.62;
+  const hBlkY = H * 0.055;
 
-  // ---- CONNECTING PIPE (diagonal) ----
-  const pipeW = W * 0.055;
-  // Draw thick diagonal pipe
+  // ---- KOLBEN-POSITIONEN ----
+  const cCylCenterX = cCylX + cCylW / 2;
+  const hBlkCenterX = hBlkX + hBlkW / 2;
+
+  const coldPistonTravel = cCylH * 0.23;
+  const coldPistonYCenter = cCylY + cCylH * 0.47;
+  const coldPistonY = coldPistonYCenter + Math.sin(a + Math.PI / 2) * coldPistonTravel;
+  const cPH = cCylH * 0.10;
+
+  const hBlkCenterY = hBlkY + hBlkH * 0.50;
+  const hDW = hBlkW * 0.10;  // Verdränger-Breite (vertikale Platte)
+  // Kurbel-Schieber-Kinematik: feste Pleuelstangenlänge (analog blauer Kolben)
+  const hotCrankR = crankR * 0.58;
+  const hotPinX = crankX + Math.cos(a) * hotCrankR;
+  const hotPinY = crankY + Math.sin(a) * hotCrankR;
+  const rodEndXRef  = hBlkX - 30;  // Stangenende außen bei Ruhelage (a=0, Kolben in Mitte)
+  const hotRodLen   = Math.hypot(rodEndXRef - (crankX + hotCrankR), hBlkCenterY - crankY);
+  const hotPistonRodLen = hBlkCenterX - hDW / 2 - rodEndXRef;  // feste Kolbenstangenlänge
+  const hotDY   = hBlkCenterY - hotPinY;
+  const hotDXsq = hotRodLen * hotRodLen - hotDY * hotDY;
+  const rodEndX = hotDXsq >= 0 ? hotPinX + Math.sqrt(hotDXsq) : rodEndXRef;
+  const hotDispX = Math.max(hBlkX + hDW / 2,
+                    Math.min(hBlkX + hBlkW - hDW / 2,
+                             rodEndX + hotPistonRodLen + hDW / 2));
+
+  // ---- DIAGONALES VERBINDUNGSROHR (Kalt→Heiß) ----
+  const pipeStartX = cCylX + cCylW;
+  const pipeStartY = cCylY + cCylH * 0.84;
+  const pipeEndX   = hBlkX + hBlkW * 0.15;  // Anschluss am Boden des Heißblocks
+  const pipeEndY   = hBlkY + hBlkH;
+  const pipeThick  = H * 0.058;
+
+  const pipeAngle = Math.atan2(pipeEndY - pipeStartY, pipeEndX - pipeStartX);
+  const pdx = Math.sin(pipeAngle) * pipeThick / 2;
+  const pdy = Math.cos(pipeAngle) * pipeThick / 2;
+
   ctx.save();
-  // Pipe fill gradient hot→cold
-  const pipeGrad = ctx.createLinearGradient(hotBotX, hotBotY, coldBotX, coldBotY);
-  pipeGrad.addColorStop(0, '#CC2200');
-  pipeGrad.addColorStop(0.5, '#882244');
-  pipeGrad.addColorStop(1, '#1155AA');
-  ctx.strokeStyle = pipeGrad;
-  ctx.lineWidth = pipeW;
-  ctx.lineCap = 'round';
+  const pipeGrad = ctx.createLinearGradient(pipeStartX, pipeStartY, pipeEndX, pipeEndY);
+  pipeGrad.addColorStop(0,    '#1A3FAA');
+  pipeGrad.addColorStop(0.42, '#6B2255');
+  pipeGrad.addColorStop(1,    '#CC2200');
   ctx.beginPath();
-  ctx.moveTo(hotBotX, hotBotY);
-  ctx.lineTo(coldBotX, coldBotY);
-  ctx.stroke();
-  // Pipe walls (outline)
-  const dx = coldBotX - hotBotX, dy = coldBotY - hotBotY;
-  const len = Math.sqrt(dx*dx+dy*dy);
-  const nx = -dy/len * pipeW/2, ny = dx/len * pipeW/2;
+  ctx.moveTo(pipeStartX - pdx, pipeStartY + pdy);
+  ctx.lineTo(pipeEndX   - pdx, pipeEndY   + pdy);
+  ctx.lineTo(pipeEndX   + pdx, pipeEndY   - pdy);
+  ctx.lineTo(pipeStartX + pdx, pipeStartY - pdy);
+  ctx.closePath();
+  ctx.fillStyle = pipeGrad;
+  ctx.fill();
   ctx.strokeStyle = '#3D4550';
   ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(hotBotX+nx, hotBotY+ny);
-  ctx.lineTo(coldBotX+nx, coldBotY+ny);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(hotBotX-nx, hotBotY-ny);
-  ctx.lineTo(coldBotX-nx, coldBotY-ny);
   ctx.stroke();
   ctx.restore();
 
-  // ---- LEFT CYLINDER (COLD) ----
-  // Cooling fins left side
-  const finSpacing = lCylH / 10;
-  drawFins(lCylX - 2, lCylY + 4, 10, finSpacing, 'left', '#1A6ECC');
-  drawFins(lCylX + lCylW + 2, lCylY + 4, 10, finSpacing, 'right', '#1A6ECC');
+  // ---- KALT-ZYLINDER ----
+  // Kühlrippen LINKS
+  const finCount = 9;
+  const finSpacingC = cCylH / (finCount + 1);
+  const finLen = finSpacingC * 1.35;
+  ctx.strokeStyle = '#1A6ECC';
+  ctx.lineWidth = 2.2;
+  for (let i = 0; i < finCount; i++) {
+    const fy = cCylY + finSpacingC * (i + 1);
+    ctx.beginPath(); ctx.moveTo(cCylX - 2, fy); ctx.lineTo(cCylX - finLen, fy); ctx.stroke();
+  }
+  // Kühlrippen RECHTS
+  for (let i = 0; i < finCount; i++) {
+    const fy = cCylY + finSpacingC * (i + 1);
+    ctx.beginPath(); ctx.moveTo(cCylX + cCylW + 2, fy); ctx.lineTo(cCylX + cCylW + finLen, fy); ctx.stroke();
+  }
 
-  // Cylinder body
-  const coldFill = ctx.createLinearGradient(lCylX, lCylY, lCylX + lCylW, lCylY);
-  coldFill.addColorStop(0, '#0D2E5A');
+  // Zylinder-Körper
+  const coldFill = ctx.createLinearGradient(cCylX, cCylY, cCylX + cCylW, cCylY);
+  coldFill.addColorStop(0,   '#0B2650');
   coldFill.addColorStop(0.5, '#1155AA');
-  coldFill.addColorStop(1, '#0D2E5A');
+  coldFill.addColorStop(1,   '#0B2650');
   ctx.fillStyle = coldFill;
-  ctx.fillRect(lCylX, lCylY, lCylW, lCylH);
-  ctx.strokeStyle = '#3A5A8A';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(lCylX, lCylY, lCylW, lCylH);
+  ctx.fillRect(cCylX, cCylY, cCylW, cCylH);
+  ctx.strokeStyle = '#3A5A8A'; ctx.lineWidth = 2;
+  ctx.strokeRect(cCylX, cCylY, cCylW, cCylH);
 
-  // Cold piston — moves up/down, 90° offset from hot
-  const coldPistonTravel = lCylH * 0.32;
-  const coldPistonY_center = lCylY + lCylH * 0.50;
-  const coldPistonPos = coldPistonY_center + Math.sin(a + Math.PI / 2) * coldPistonTravel;
-  const cPH = lCylH * 0.1;
-  ctx.fillStyle = '#5B8DD9';
-  ctx.strokeStyle = '#93C5FD';
-  ctx.lineWidth = 1.5;
-  ctx.fillRect(lCylX + 2, coldPistonPos - cPH/2, lCylW - 4, cPH);
-  ctx.strokeRect(lCylX + 2, coldPistonPos - cPH/2, lCylW - 4, cPH);
+  // Kalt-Kolben
+  ctx.fillStyle = '#5B8DD9'; ctx.strokeStyle = '#93C5FD'; ctx.lineWidth = 1.5;
+  ctx.fillRect(cCylX + 2, coldPistonY - cPH / 2, cCylW - 4, cPH);
+  ctx.strokeRect(cCylX + 2, coldPistonY - cPH / 2, cCylW - 4, cPH);
 
-  // Gas fill below cold piston (cold gas = blue)
-  const coldGasH = lCylY + lCylH - (coldPistonPos + cPH/2);
+  // Kalt-Gas unterhalb Kolben
+  const coldGasH = (cCylY + cCylH) - (coldPistonY + cPH / 2);
   if (coldGasH > 0) {
-    const cg = ctx.createLinearGradient(0, coldPistonPos + cPH/2, 0, lCylY + lCylH);
-    cg.addColorStop(0, 'rgba(28,100,255,0.35)');
-    cg.addColorStop(1, 'rgba(28,100,255,0.08)');
+    const cg = ctx.createLinearGradient(0, coldPistonY + cPH / 2, 0, cCylY + cCylH);
+    cg.addColorStop(0, 'rgba(28,100,255,0.50)');
+    cg.addColorStop(1, 'rgba(28,100,255,0.12)');
     ctx.fillStyle = cg;
-    ctx.fillRect(lCylX + 2, coldPistonPos + cPH/2, lCylW - 4, coldGasH);
+    ctx.fillRect(cCylX + 2, coldPistonY + cPH / 2, cCylW - 4, coldGasH);
   }
 
-  // Label cold
+  // KALT-Label
   ctx.fillStyle = '#93C5FD';
-  ctx.font = `bold ${W*0.017}px Space Mono, monospace`;
+  ctx.font = `bold ${W * 0.018}px Space Mono, monospace`;
   ctx.textAlign = 'center';
-  ctx.fillText('KALT', lCylX + lCylW/2, lCylY - 16);
+  ctx.fillText('KALT', cCylCenterX, cCylY - 12);
 
-  // ---- RIGHT CYLINDER (HOT) ----
-  // Heating fins top
-  const hFinSpacing = rCylW / 10;
-  drawFins(rCylX + 2, rCylY - 2, 10, hFinSpacing, 'top', '#CC3311');
-  // Side fins too
-  drawFins(rCylX - 2, rCylY + 4, 8, rCylH/9, 'left', '#CC3311');
-
-  // Cylinder body
-  const hotFill = ctx.createLinearGradient(rCylX, rCylY, rCylX + rCylW, rCylY);
-  hotFill.addColorStop(0, '#5A1A00');
-  hotFill.addColorStop(0.5, '#CC2200');
-  hotFill.addColorStop(1, '#5A1A00');
-  ctx.fillStyle = hotFill;
-  ctx.fillRect(rCylX, rCylY, rCylW, rCylH);
-  ctx.strokeStyle = '#8A3A2A';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(rCylX, rCylY, rCylW, rCylH);
-
-  // Hot piston — moves up/down
-  const hotPistonTravel = rCylH * 0.32;
-  const hotPistonY_center = rCylY + rCylH * 0.50;
-  const hotPistonPos = hotPistonY_center + Math.sin(a) * hotPistonTravel;
-  const hPH = rCylH * 0.1;
-  ctx.fillStyle = '#E05530';
-  ctx.strokeStyle = '#FCA981';
-  ctx.lineWidth = 1.5;
-  ctx.fillRect(rCylX + 2, hotPistonPos - hPH/2, rCylW - 4, hPH);
-  ctx.strokeRect(rCylX + 2, hotPistonPos - hPH/2, rCylW - 4, hPH);
-
-  // Gas fill below hot piston (hot gas = red)
-  const hotGasH = rCylY + rCylH - (hotPistonPos + hPH/2);
-  if (hotGasH > 0) {
-    const hg = ctx.createLinearGradient(0, hotPistonPos + hPH/2, 0, rCylY + rCylH);
-    hg.addColorStop(0, 'rgba(255,77,28,0.45)');
-    hg.addColorStop(1, 'rgba(255,77,28,0.1)');
-    ctx.fillStyle = hg;
-    ctx.fillRect(rCylX + 2, hotPistonPos + hPH/2, rCylW - 4, hotGasH);
+  // ---- HEISSKÖRPER ----
+  // Heizrippen OBEN
+  const hFinCountTop = 13;
+  const hFinSpTop = hBlkW / (hFinCountTop + 1);
+  const hFinLenTop = hFinSpTop * 1.7;
+  ctx.strokeStyle = '#CC3311'; ctx.lineWidth = 2.2;
+  for (let i = 0; i < hFinCountTop; i++) {
+    const fx = hBlkX + hFinSpTop * (i + 1);
+    ctx.beginPath(); ctx.moveTo(fx, hBlkY - 2); ctx.lineTo(fx, hBlkY - hFinLenTop); ctx.stroke();
+  }
+  // Heizrippen RECHTS
+  const hFinCountR = 11;
+  const hFinSpR = hBlkH / (hFinCountR + 1);
+  const hFinLenR = hFinSpR * 1.4;
+  for (let i = 0; i < hFinCountR; i++) {
+    const fy = hBlkY + hFinSpR * (i + 1);
+    ctx.beginPath(); ctx.moveTo(hBlkX + hBlkW + 2, fy); ctx.lineTo(hBlkX + hBlkW + hFinLenR, fy); ctx.stroke();
   }
 
-  // Label hot
-  ctx.fillStyle = '#FCA981';
-  ctx.font = `bold ${W*0.017}px Space Mono, monospace`;
-  ctx.textAlign = 'center';
-  ctx.fillText('HEISS', rCylX + rCylW/2, rCylY - 18);
-
-  // ---- CRANKSHAFT & FLYWHEEL ----
-  // Two cranks: left crank for cold piston, right crank for hot piston
-  // Left crank (cold cylinder)
-  const lCrankX = lCylX + lCylW / 2;
-  const lCrankY = lCylY - 55;
-  const lCrankR = 28;
-
-  // Right crank (hot cylinder)
-  const rCrankX = rCylX + rCylW / 2;
-  const rCrankY = rCylY - 55;
-  const rCrankR = 28;
-
-  // Shared flywheel in center between the two cylinders
-  const crankX = W * 0.44;
-  const crankY = H * 0.30;
-  const crankR = H * 0.09;
-
-  // Draw shared flywheel
-  ctx.strokeStyle = '#4B5563';
-  ctx.lineWidth = 5;
+  // Heiß-Körper (linke Seite offen = Öffnung Richtung Schwungrad)
+  const hotFill = ctx.createLinearGradient(hBlkX, hBlkY, hBlkX + hBlkW, hBlkY);
+  hotFill.addColorStop(0,   '#5A1A00');
+  hotFill.addColorStop(0.5, '#CC2200');
+  hotFill.addColorStop(1,   '#5A1A00');
+  ctx.fillStyle = hotFill;
+  ctx.fillRect(hBlkX, hBlkY, hBlkW, hBlkH);
+  // 3 Seiten zeichnen, linke Seite (Öffnung) weglassen
+  ctx.strokeStyle = '#8A3A2A'; ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.arc(crankX, crankY, crankR, 0, Math.PI * 2);
+  ctx.moveTo(hBlkX,           hBlkY);            // oben-links
+  ctx.lineTo(hBlkX + hBlkW,   hBlkY);            // Oberkante
+  ctx.lineTo(hBlkX + hBlkW,   hBlkY + hBlkH);   // rechte Seite
+  ctx.lineTo(hBlkX,           hBlkY + hBlkH);    // Unterkante
   ctx.stroke();
-  ctx.strokeStyle = '#374151';
-  ctx.lineWidth = 2;
+
+  // Heiß-Gas rechts vom Verdränger (Richtung Heizquelle)
+  const hotGasW = (hBlkX + hBlkW) - (hotDispX + hDW / 2);
+  if (hotGasW > 0) {
+    const hg = ctx.createLinearGradient(hotDispX + hDW / 2, 0, hBlkX + hBlkW, 0);
+    hg.addColorStop(0, 'rgba(255,77,28,0.20)');
+    hg.addColorStop(1, 'rgba(255,77,28,0.62)');
+    ctx.fillStyle = hg;
+    ctx.fillRect(hotDispX + hDW / 2, hBlkY + 2, hotGasW, hBlkH - 4);
+  }
+
+  // Verdränger (vertikale Platte, bewegt sich links↔rechts)
+  ctx.fillStyle = '#CC3B18'; ctx.strokeStyle = '#FCA981'; ctx.lineWidth = 1.5;
+  ctx.fillRect(hotDispX - hDW / 2, hBlkY + 2, hDW, hBlkH - 4);
+  ctx.strokeRect(hotDispX - hDW / 2, hBlkY + 2, hDW, hBlkH - 4);
+
+  // HEISS-Label
+  ctx.fillStyle = '#FCA981';
+  ctx.font = `bold ${W * 0.018}px Space Mono, monospace`;
+  ctx.textAlign = 'center';
+  ctx.fillText('HEISS', hBlkCenterX, hBlkY + hBlkH + 16);
+
+  // ---- KURBELGETRIEBE & SCHWUNGRAD ----
+  // Kurbelzapfen A → Kaltkolben (90° Versatz)
+  const pinAX = crankX + Math.cos(a + Math.PI / 2) * crankR * 0.58;
+  const pinAY = crankY + Math.sin(a + Math.PI / 2) * crankR * 0.58;
+  // Kurbelzapfen B → Heißverdränger (0°)
+  const pinBX = crankX + Math.cos(a) * crankR * 0.58;
+  const pinBY = crankY + Math.sin(a) * crankR * 0.58;
+
+  // Schwungrad Füll-Kreis
+  ctx.fillStyle = '#1E2330';
+  ctx.beginPath(); ctx.arc(crankX, crankY, crankR, 0, Math.PI * 2); ctx.fill();
+
+  // Schwungrad Rand
+  ctx.strokeStyle = '#4B5563'; ctx.lineWidth = 7;
+  ctx.beginPath(); ctx.arc(crankX, crankY, crankR, 0, Math.PI * 2); ctx.stroke();
+
+  // Schwungrad-Speichen (4, rotierend)
+  ctx.strokeStyle = '#374151'; ctx.lineWidth = 2.5;
   for (let s = 0; s < 4; s++) {
-    const sa = a + s * Math.PI/2;
+    const sa = a + s * Math.PI / 2;
     ctx.beginPath();
     ctx.moveTo(crankX, crankY);
     ctx.lineTo(crankX + Math.cos(sa) * crankR, crankY + Math.sin(sa) * crankR);
     ctx.stroke();
   }
 
-  // Left crank disk (cold)
-  ctx.strokeStyle = '#3A5A8A';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.arc(lCrankX, lCrankY, lCrankR, 0, Math.PI * 2);
-  ctx.stroke();
-  // Left crank arm
-  const pinAX = lCrankX + Math.cos(a + Math.PI / 2) * lCrankR;
-  const pinAY = lCrankY + Math.sin(a + Math.PI / 2) * lCrankR;
-  ctx.strokeStyle = '#5B8DD9';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(lCrankX, lCrankY);
-  ctx.lineTo(pinAX, pinAY);
-  ctx.stroke();
+  // Kurbelarm A (kalt, blau)
+  ctx.strokeStyle = '#4B6EA0'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(crankX, crankY); ctx.lineTo(pinAX, pinAY); ctx.stroke();
 
-  // Right crank disk (hot)
-  ctx.strokeStyle = '#8A3A2A';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.arc(rCrankX, rCrankY, rCrankR, 0, Math.PI * 2);
-  ctx.stroke();
-  // Right crank arm
-  const pinBX = rCrankX + Math.cos(a) * rCrankR;
-  const pinBY = rCrankY + Math.sin(a) * rCrankR;
-  ctx.strokeStyle = '#E05530';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(rCrankX, rCrankY);
-  ctx.lineTo(pinBX, pinBY);
-  ctx.stroke();
+  // Kurbelarm B (heiß, grau)
+  ctx.strokeStyle = '#6B7280'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(crankX, crankY); ctx.lineTo(pinBX, pinBY); ctx.stroke();
 
-  // Flywheel pins — two pins on the flywheel rim, 90° apart (matching the two cranks)
-  const fwPinAX = crankX + Math.cos(a + Math.PI / 2) * crankR * 0.75;
-  const fwPinAY = crankY + Math.sin(a + Math.PI / 2) * crankR * 0.75;
-  const fwPinBX = crankX + Math.cos(a) * crankR * 0.75;
-  const fwPinBY = crankY + Math.sin(a) * crankR * 0.75;
-
-  // Connecting rod: flywheel pin A → left crank center
-  ctx.strokeStyle = '#5B8DD9';
-  ctx.lineWidth = 2.5;
-  ctx.beginPath();
-  ctx.moveTo(fwPinAX, fwPinAY);
-  ctx.lineTo(lCrankX, lCrankY);
-  ctx.stroke();
-
-  // Connecting rod: flywheel pin B → right crank center
-  ctx.strokeStyle = '#E05530';
-  ctx.lineWidth = 2.5;
-  ctx.beginPath();
-  ctx.moveTo(fwPinBX, fwPinBY);
-  ctx.lineTo(rCrankX, rCrankY);
-  ctx.stroke();
-
-  // Flywheel pin dots
-  ctx.fillStyle = '#93C5FD';
-  ctx.beginPath(); ctx.arc(fwPinAX, fwPinAY, 4, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#FCA981';
-  ctx.beginPath(); ctx.arc(fwPinBX, fwPinBY, 4, 0, Math.PI*2); ctx.fill();
-
-  // Connecting rod A — cold piston to left crank pin
-  ctx.strokeStyle = '#8899AA';
-  ctx.lineWidth = 3;
+  // Pleuel A → Kaltkolben oben-mitte
+  ctx.strokeStyle = '#7A8899'; ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(pinAX, pinAY);
-  ctx.lineTo(lCylX + lCylW/2, coldPistonPos - cPH/2);
+  ctx.lineTo(cCylCenterX, coldPistonY - cPH / 2);
   ctx.stroke();
 
-  // Connecting rod B — hot piston to right crank pin
-  ctx.strokeStyle = '#8899AA';
-  ctx.lineWidth = 3;
+  // Kolbenstange: von Verdränger-Linksseite durch die Öffnung nach links (rodEndX aus Kinematik)
+  ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(hotDispX - hDW / 2, hBlkCenterY);
+  ctx.lineTo(rodEndX, hBlkCenterY);
+  ctx.stroke();
+  // Pleuel B → Stangenende (Öffnung Richtung Schwungrad)
+  ctx.strokeStyle = '#7A8899'; ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(pinBX, pinBY);
-  ctx.lineTo(rCylX + rCylW/2, hotPistonPos - hPH/2);
+  ctx.lineTo(rodEndX, hBlkCenterY);
   ctx.stroke();
 
-  // Pin dots
+  // Kurbelzapfen-Punkte
   ctx.fillStyle = '#93C5FD';
-  ctx.beginPath(); ctx.arc(pinAX, pinAY, 5, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#FCA981';
-  ctx.beginPath(); ctx.arc(pinBX, pinBY, 5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(pinAX, pinAY, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#9CA3AF';
+  ctx.beginPath(); ctx.arc(pinBX, pinBY, 5, 0, Math.PI * 2); ctx.fill();
 
-  // Left crank center hub
+  // Schwungrad Nabe
   ctx.fillStyle = '#1F2533';
-  ctx.beginPath(); ctx.arc(lCrankX, lCrankY, 7, 0, Math.PI*2); ctx.fill();
-  ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(lCrankX, lCrankY, 7, 0, Math.PI*2); ctx.stroke();
-
-  // Right crank center hub
-  ctx.fillStyle = '#1F2533';
-  ctx.beginPath(); ctx.arc(rCrankX, rCrankY, 7, 0, Math.PI*2); ctx.fill();
-  ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(rCrankX, rCrankY, 7, 0, Math.PI*2); ctx.stroke();
-
-  // Flywheel center hub
-  ctx.fillStyle = '#1F2533';
-  ctx.beginPath(); ctx.arc(crankX, crankY, 9, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(crankX, crankY, 10, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = '#9CA3AF'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(crankX, crankY, 9, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(crankX, crankY, 10, 0, Math.PI * 2); ctx.stroke();
   ctx.fillStyle = '#D1D5DB';
-  ctx.beginPath(); ctx.arc(crankX, crankY, 4, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(crankX, crankY, 4, 0, Math.PI * 2); ctx.fill();
 
-  // ---- LABELS ----
+  // ---- BESCHRIFTUNGEN ----
   ctx.fillStyle = '#6B7280';
-  ctx.font = `${W*0.016}px Sora, sans-serif`;
+  ctx.font = `${W * 0.016}px Sora, sans-serif`;
   ctx.textAlign = 'center';
-  ctx.fillText('Schwungrad', crankX, crankY + crankR + 14);
-
-  ctx.fillStyle = '#CC3311';
-  ctx.font = `${W*0.014}px Sora, sans-serif`;
-  ctx.fillText('Heizquelle', rCylX + rCylW/2, rCylY + rCylH + 16);
+  ctx.fillText('Schwungrad', crankX, crankY + crankR + 16);
 
   ctx.fillStyle = '#1A6ECC';
-  ctx.fillText('Kühler', lCylX + lCylW/2, lCylY + lCylH + 16);
+  ctx.font = `${W * 0.014}px Sora, sans-serif`;
+  ctx.fillText('Kühler', cCylCenterX, cCylY + cCylH + 16);
+
+  ctx.fillStyle = '#CC3311';
+  ctx.fillText('Heizquelle', hBlkCenterX, hBlkY - hFinLenTop - 6);
 
   ctx.fillStyle = '#6B7280';
-  ctx.font = `${W*0.013}px Sora, sans-serif`;
-  // Pipe label
-  const midPX = (hotBotX + coldBotX)/2 + 12;
-  const midPY = (hotBotY + coldBotY)/2 - 12;
-  ctx.save();
-  ctx.translate(midPX, midPY);
-  const ang2 = Math.atan2(coldBotY - hotBotY, coldBotX - hotBotX);
-  ctx.rotate(ang2);
-  ctx.fillText('Verbindungsrohr', 0, -10);
-  ctx.restore();
+  ctx.font = `${W * 0.013}px Sora, sans-serif`;
+  const midPX = (pipeStartX + pipeEndX) / 2;
+  const midPY = (pipeStartY + pipeEndY) / 2;
+  ctx.fillText('Verbindungsrohr', midPX, midPY + pipeThick / 2 + 13);
 
-  // ---- PHASE UPDATE ----
+  // ---- PHASEN-UPDATE ----
   const phase = getPhase(a);
   const badges = ['ph1','ph2','ph3','ph4'];
   badges.forEach((id,i) => document.getElementById(id).classList.toggle('active-phase', i === phase));
