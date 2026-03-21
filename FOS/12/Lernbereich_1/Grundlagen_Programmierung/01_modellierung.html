@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIT12 – Modellierung: Struktogramm &amp; PAP</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1a2733;
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        header {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        header h1 { font-size: 1.35rem; font-weight: 600; }
+        header .subtitle { font-size: 0.85rem; opacity: 0.7; margin-top: 0.15rem; }
+        .badge {
+            background: #e8a020;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+        }
+
+        /* ── Progress bar ── */
+        .progress-wrap {
+            background: #162d4a;
+            padding: 0.6rem 2rem;
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+        .progress-label {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.7rem;
+            white-space: nowrap;
+            margin-right: 0.25rem;
+        }
+        .progress-step {
+            height: 5px;
+            flex: 1;
+            background: rgba(255,255,255,0.15);
+            border-radius: 3px;
+            transition: background 0.4s;
+        }
+        .progress-step.done    { background: #4ade80; }
+        .progress-step.active  { background: #e8a020; }
+
+        /* ── Layout ── */
+        main {
+            max-width: 880px;
+            margin: 2rem auto;
+            padding: 0 1.5rem 3rem;
+        }
+
+        /* ── Section cards ── */
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #1e3a5f;
+            margin-bottom: 0.4rem;
+        }
+        .section > h2 {
+            font-size: 1.25rem;
+            color: #1e3a5f;
+            margin-bottom: 1rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid #e8edf3;
+        }
+        h3 {
+            font-size: 1rem;
+            color: #1e3a5f;
+            margin: 1.5rem 0 0.6rem;
+        }
+        p { margin-bottom: 0.75rem; color: #334155; font-size: 0.95rem; }
+
+        /* ── Info box ── */
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #1e3a5f;
+            border-radius: 0 8px 8px 0;
+            padding: 0.9rem 1.2rem;
+            margin: 1rem 0;
+            font-size: 0.92rem;
+            color: #1e3a5f;
+        }
+
+        /* ══════════════════════════
+           STRUKTOGRAMM CSS
+        ══════════════════════════ */
+        .strukt-wrap {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            border: 2px solid #1e3a5f;
+            border-radius: 4px;
+            overflow: hidden;
+            display: inline-block;
+            min-width: 280px;
+            margin: 0.75rem 0 1rem;
+        }
+        .strukt-title {
+            background: #1e3a5f;
+            color: white;
+            font-weight: 700;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 0.4rem 0.9rem;
+            border-bottom: 2px solid #1e3a5f;
+        }
+        .strukt-seq {
+            padding: 0.45rem 0.9rem;
+            border-bottom: 1px solid #1e3a5f;
+            background: white;
+        }
+        .strukt-seq:last-child { border-bottom: none; }
+
+        /* Verzweigung */
+        .strukt-cond {
+            padding: 0.45rem 0.9rem;
+            border-bottom: 1px solid #1e3a5f;
+            background: #eef2f8;
+            font-weight: 600;
+            font-style: italic;
+        }
+        .strukt-branches {
+            display: flex;
+            border-bottom: 1px solid #1e3a5f;
+        }
+        .strukt-branch {
+            flex: 1;
+            padding: 0.45rem 0.75rem;
+            border-right: 1px solid #1e3a5f;
+        }
+        .strukt-branch:last-child { border-right: none; }
+        .strukt-branch-lbl {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #1e3a5f;
+            text-transform: uppercase;
+            margin-bottom: 0.2rem;
+        }
+
+        /* Schleife */
+        .strukt-loop {
+            display: flex;
+            border-bottom: 1px solid #1e3a5f;
+        }
+        .strukt-loop:last-child { border-bottom: none; }
+        .strukt-loop-marker {
+            width: 22px;
+            min-width: 22px;
+            background: #dbeafe;
+            border-right: 1px solid #1e3a5f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            writing-mode: vertical-rl;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #1e3a5f;
+            transform: rotate(180deg);
+            letter-spacing: 0.08em;
+        }
+        .strukt-loop-inner { flex: 1; }
+        .strukt-loop-cond {
+            padding: 0.4rem 0.75rem;
+            background: #dbeafe;
+            border-bottom: 1px solid #1e3a5f;
+            font-weight: 600;
+            font-style: italic;
+        }
+        .strukt-loop-body {
+            padding: 0.45rem 0.75rem;
+        }
+
+        /* ══════════════════════════
+           PAP SVG area
+        ══════════════════════════ */
+        .pap-symbols {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin: 1rem 0 0.5rem;
+            align-items: flex-end;
+        }
+        .pap-sym {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .pap-sym span {
+            font-size: 0.78rem;
+            color: #475569;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* ══════════════════════════
+           Vergleich Struktogramm / PAP
+        ══════════════════════════ */
+        .compare {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+            align-items: flex-start;
+        }
+        .compare-col { flex: 1; min-width: 230px; }
+        .compare-col > h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #1e3a5f;
+            margin-bottom: 0.6rem;
+            text-align: center;
+        }
+        .caption {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.4rem;
+            font-style: italic;
+        }
+
+        /* ══════════════════════════
+           EXERCISES
+        ══════════════════════════ */
+        .exercise {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .ex-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .ex-num {
+            background: #1e3a5f;
+            color: white;
+            width: 1.9rem;
+            height: 1.9rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.88rem;
+            flex-shrink: 0;
+        }
+        .ex-header h3 { margin: 0; border: none; padding: 0; font-size: 1rem; color: #1a2733; }
+        .ex-type {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            background: #e2e8f0;
+            padding: 0.15rem 0.5rem;
+            border-radius: 1rem;
+            white-space: nowrap;
+        }
+        .ex-task { font-size: 0.93rem; color: #334155; margin-bottom: 0.75rem; }
+        .ex-question { font-size: 0.93rem; color: #1a2733; margin: 1rem 0 0.5rem; font-weight: 600; }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 1rem;
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            display: none;
+            line-height: 1.5;
+        }
+        .feedback.show { display: block; }
+        .feedback.ok  { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+        .feedback.err { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+
+        /* Buttons */
+        .btn {
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 0.55rem 1.3rem;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #2d5488; }
+        .btn.sec {
+            background: transparent;
+            color: #1e3a5f;
+            border: 2px solid #1e3a5f;
+            margin-left: 0.5rem;
+        }
+        .btn.sec:hover { background: #eff6ff; }
+
+        /* Multiple choice */
+        .mc-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+        .mc-list li { margin-bottom: 0.4rem; }
+        .mc-list label {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.55rem 0.9rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            transition: border-color 0.2s;
+        }
+        .mc-list label:hover { border-color: #1e3a5f; }
+        .mc-list input[type="radio"] { accent-color: #1e3a5f; flex-shrink: 0; }
+        .mc-list label.ok  { border-color: #86efac; background: #f0fdf4; }
+        .mc-list label.err { border-color: #fca5a5; background: #fef2f2; }
+
+        /* ── Ü1 Matching ── */
+        .match-grid {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .match-col { flex: 1; min-width: 200px; }
+        .match-col > h4 {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        .match-item {
+            padding: 0.55rem 0.9rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 7px;
+            margin-bottom: 0.4rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.18s;
+            user-select: none;
+            line-height: 1.4;
+        }
+        .match-item:hover                        { border-color: #1e3a5f; }
+        .match-item.sel                          { border-color: #1e3a5f; background: #eff6ff; }
+        .match-item.matched                      { border-color: #86efac; background: #f0fdf4; color: #166534; cursor: default; }
+        .match-item.wrong                        { border-color: #fca5a5; background: #fef2f2; }
+
+        /* ── Ü4 Drag & Drop ── */
+        .dnd-wrap {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .dnd-col { flex: 1; min-width: 210px; }
+        .dnd-col > h4 {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        .drag-item {
+            padding: 0.55rem 0.9rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 7px;
+            margin-bottom: 0.4rem;
+            cursor: grab;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+            transition: all 0.18s;
+            user-select: none;
+        }
+        .drag-item:hover      { border-color: #1e3a5f; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .drag-item.dragging   { opacity: 0.45; cursor: grabbing; }
+        .drag-item.ok-placed  { border-color: #86efac; background: #f0fdf4; }
+        .drag-item.err-placed { border-color: #fca5a5; background: #fef2f2; }
+
+        .drop-zone {
+            min-height: 2.6rem;
+            border: 2px dashed #cbd5e1;
+            border-radius: 7px;
+            padding: 0.2rem;
+            margin-bottom: 0.4rem;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            transition: all 0.18s;
+            position: relative;
+        }
+        .drop-zone.over       { border-color: #1e3a5f; background: #eff6ff; }
+        .drop-zone .dz-label  { font-size: 0.68rem; color: #94a3b8; padding: 0 0.6rem; }
+        .drop-zone .drag-item { margin-bottom: 0; width: 100%; }
+
+        /* Inline code */
+        code {
+            background: #e8edf3;
+            padding: 0.1rem 0.35rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #1e3a5f;
+        }
+
+        /* Completion */
+        .completion {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            display: none;
+        }
+        .completion.show { display: block; }
+        .completion .icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
+        .completion h2 { color: #1e3a5f; margin-bottom: 0.5rem; }
+        .completion p  { color: #475569; }
+    </style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+    <div>
+        <div class="badge">KIT12 &middot; LB 1</div>
+        <h1>Modellierung: Struktogramm &amp; PAP</h1>
+        <div class="subtitle">Grundlagen der Programmierung &middot; FOS/BOS Bayern</div>
+    </div>
+</header>
+
+<!-- ══════════ PROGRESS ══════════ -->
+<div class="progress-wrap">
+    <span class="progress-label">Fortschritt</span>
+    <div class="progress-step done"   id="ps1" title="Theorie 1"></div>
+    <div class="progress-step done"   id="ps2" title="Theorie 2"></div>
+    <div class="progress-step done"   id="ps3" title="Theorie 3"></div>
+    <div class="progress-step done"   id="ps4" title="Theorie 4"></div>
+    <div class="progress-step active" id="ps5" title="Übung 1"></div>
+    <div class="progress-step"        id="ps6" title="Übung 2"></div>
+    <div class="progress-step"        id="ps7" title="Übung 3"></div>
+    <div class="progress-step"        id="ps8" title="Übung 4"></div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════
+     THEORIE
+══════════════════════════════════════ -->
+
+<!-- T1: Warum modellieren? -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 1 von 4</div>
+    <h2>Warum modellieren wir?</h2>
+    <p>Bevor wir ein Programm schreiben, müssen wir das Problem <strong>durchdenken</strong> und einen Lösungsweg entwickeln. Dieser Schritt nennt sich <strong>Modellierung</strong>.</p>
+    <p>Dabei folgen wir immer diesem Ablauf:</p>
+    <div class="info-box">
+        <strong>Problem</strong> &nbsp;&rarr;&nbsp; <strong>Modell</strong> (Struktogramm oder PAP) &nbsp;&rarr;&nbsp; <strong>Programm</strong> (z.&nbsp;B. Python-Code)
+    </div>
+    <p>Ein Modell hilft dabei, den Lösungsweg zu planen, Fehler frühzeitig zu erkennen und den Algorithmus verständlich darzustellen – unabhängig von einer bestimmten Programmiersprache.</p>
+    <p>Zwei weit verbreitete Darstellungsformen sind das <strong>Struktogramm</strong> (nach Nassi und Shneiderman) und der <strong>Programmablaufplan (PAP)</strong>.</p>
+</div>
+
+<!-- T2: Struktogramm -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 2 von 4</div>
+    <h2>Das Struktogramm</h2>
+    <p>Ein Struktogramm zeigt den Ablauf eines Programms als <strong>ineinandergeschachtelte Rechtecke</strong>. Es gibt vier Grundelemente:</p>
+
+    <h3>1. Sequenz</h3>
+    <p>Anweisungen werden <strong>nacheinander von oben nach unten</strong> ausgeführt. Jede Zeile ist ein eigener Block.</p>
+    <div class="strukt-wrap">
+        <div class="strukt-title">Kreisfläche berechnen</div>
+        <div class="strukt-seq">Eingabe: r</div>
+        <div class="strukt-seq">flaeche = 3.14159 &middot; r &middot; r</div>
+        <div class="strukt-seq">Ausgabe: flaeche</div>
+    </div>
+
+    <h3>2. Einfache Verzweigung (if / else)</h3>
+    <p>Je nach Bedingung wird <strong>einer von zwei Zweigen</strong> ausgeführt. Die Bedingung steht oben, darunter stehen Ja- und Nein-Zweig nebeneinander.</p>
+    <div class="strukt-wrap">
+        <div class="strukt-title">Vorzeichen prüfen</div>
+        <div class="strukt-seq">Eingabe: x</div>
+        <div class="strukt-cond">x &gt; 0 ?</div>
+        <div class="strukt-branches">
+            <div class="strukt-branch">
+                <div class="strukt-branch-lbl">&#10003; Ja</div>
+                Ausgabe: "positiv"
+            </div>
+            <div class="strukt-branch">
+                <div class="strukt-branch-lbl">&#10007; Nein</div>
+                Ausgabe: "nicht positiv"
+            </div>
+        </div>
+    </div>
+
+    <h3>3. Mehrfache Verzweigung (if / elif / else)</h3>
+    <p>Es werden <strong>mehr als zwei Fälle</strong> unterschieden. Alle Zweige stehen nebeneinander unter der Bedingungszeile.</p>
+    <div class="strukt-wrap">
+        <div class="strukt-title">Noten bewerten</div>
+        <div class="strukt-seq">Eingabe: note</div>
+        <div class="strukt-cond">Wert von note</div>
+        <div class="strukt-branches">
+            <div class="strukt-branch">
+                <div class="strukt-branch-lbl">1–4</div>
+                Ausgabe: "bestanden"
+            </div>
+            <div class="strukt-branch">
+                <div class="strukt-branch-lbl">5</div>
+                Ausgabe: "Nachschreiben"
+            </div>
+            <div class="strukt-branch">
+                <div class="strukt-branch-lbl">6</div>
+                Ausgabe: "nicht bestanden"
+            </div>
+        </div>
+    </div>
+
+    <h3>4. Schleife (for / while)</h3>
+    <p>Ein Block wird <strong>wiederholt ausgeführt</strong>, solange eine Bedingung gilt. Der L-förmige Rahmen links kennzeichnet die Schleife.</p>
+    <div class="strukt-wrap">
+        <div class="strukt-title">Zählen bis 4</div>
+        <div class="strukt-loop">
+            <div class="strukt-loop-marker">LOOP</div>
+            <div class="strukt-loop-inner">
+                <div class="strukt-loop-cond">solange i &lt; 5</div>
+                <div class="strukt-loop-body">Ausgabe: i<br>i = i + 1</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- T3: PAP -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 3 von 4</div>
+    <h2>Der Programmablaufplan (PAP)</h2>
+    <p>Der PAP (auch Flussdiagramm) beschreibt den Ablauf mit genormten <strong>Symbolen</strong>, die durch Pfeile verbunden werden. Der Ablauf beginnt immer beim <strong>Start</strong>-Symbol und endet beim <strong>Ende</strong>-Symbol.</p>
+
+    <div class="pap-symbols">
+        <div class="pap-sym">
+            <svg width="110" height="52">
+                <ellipse cx="55" cy="26" rx="50" ry="22" fill="white" stroke="#1e3a5f" stroke-width="2"/>
+                <text x="55" y="31" text-anchor="middle" font-size="13" fill="#1e3a5f" font-family="Segoe UI,Arial,sans-serif" font-weight="600">Start / Ende</text>
+            </svg>
+            <span>Start / Ende</span>
+        </div>
+        <div class="pap-sym">
+            <svg width="110" height="52">
+                <rect x="5" y="6" width="100" height="40" fill="white" stroke="#1e3a5f" stroke-width="2" rx="2"/>
+                <text x="55" y="31" text-anchor="middle" font-size="12" fill="#1e3a5f" font-family="Segoe UI,Arial,sans-serif" font-weight="600">Verarbeitung</text>
+            </svg>
+            <span>Verarbeitung</span>
+        </div>
+        <div class="pap-sym">
+            <svg width="110" height="60">
+                <polygon points="55,4 106,30 55,56 4,30" fill="white" stroke="#1e3a5f" stroke-width="2"/>
+                <text x="55" y="34" text-anchor="middle" font-size="11" fill="#1e3a5f" font-family="Segoe UI,Arial,sans-serif" font-weight="600">Entscheidung</text>
+            </svg>
+            <span>Entscheidung</span>
+        </div>
+        <div class="pap-sym">
+            <svg width="120" height="52">
+                <polygon points="18,6 112,6 106,46 12,46" fill="white" stroke="#1e3a5f" stroke-width="2"/>
+                <text x="62" y="31" text-anchor="middle" font-size="11" fill="#1e3a5f" font-family="Segoe UI,Arial,sans-serif" font-weight="600">Ein- / Ausgabe</text>
+            </svg>
+            <span>Ein- / Ausgabe</span>
+        </div>
+        <div class="pap-sym">
+            <svg width="60" height="52">
+                <defs>
+                    <marker id="arr0" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                        <path d="M0,0 L8,4 L0,8 Z" fill="#1e3a5f"/>
+                    </marker>
+                </defs>
+                <line x1="30" y1="4" x2="30" y2="46" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arr0)"/>
+            </svg>
+            <span>Verbindungspfeil</span>
+        </div>
+    </div>
+
+    <p>An Entscheidungsrauten zweigen sich zwei Pfeile ab – beschriftet mit <strong>Ja</strong> und <strong>Nein</strong>. Am Ende beider Zweige werden die Pfeile wieder zusammengeführt.</p>
+</div>
+
+<!-- T4: Durchgehendes Beispiel -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 4 von 4</div>
+    <h2>Durchgehendes Beispiel: Temperaturwarnung</h2>
+    <p><strong>Problem:</strong> Ein Programm liest eine Temperatur ein. Liegt sie über 35&nbsp;°C, gibt es „Hitzealarm!" aus. Andernfalls „Alles normal."</p>
+    <p>Dasselbe Problem lässt sich sowohl als Struktogramm als auch als PAP darstellen:</p>
+
+    <div class="compare">
+        <div class="compare-col">
+            <h4>Als Struktogramm</h4>
+            <div class="strukt-wrap" style="min-width:0; width:100%">
+                <div class="strukt-title">Temperaturwarnung</div>
+                <div class="strukt-seq">Eingabe: temp</div>
+                <div class="strukt-cond">temp &gt; 35 ?</div>
+                <div class="strukt-branches">
+                    <div class="strukt-branch">
+                        <div class="strukt-branch-lbl">&#10003; Ja</div>
+                        Ausgabe:<br>"Hitzealarm!"
+                    </div>
+                    <div class="strukt-branch">
+                        <div class="strukt-branch-lbl">&#10007; Nein</div>
+                        Ausgabe:<br>"Alles normal."
+                    </div>
+                </div>
+            </div>
+            <p class="caption">Lesen: von oben nach unten, Verzweigung je nach Bedingung.</p>
+        </div>
+
+        <div class="compare-col">
+            <h4>Als PAP</h4>
+            <svg width="210" height="395" viewBox="0 0 210 395" style="display:block; margin:0 auto;">
+                <defs>
+                    <marker id="arr1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                        <path d="M0,0 L8,4 L0,8 Z" fill="#1e3a5f"/>
+                    </marker>
+                </defs>
+                <!-- Start -->
+                <ellipse cx="105" cy="28" rx="55" ry="22" fill="white" stroke="#1e3a5f" stroke-width="2"/>
+                <text x="105" y="33" text-anchor="middle" font-size="13" fill="#1e3a5f" font-family="Segoe UI,Arial" font-weight="600">Start</text>
+                <!-- Arrow down -->
+                <line x1="105" y1="50" x2="105" y2="70" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arr1)"/>
+                <!-- Eingabe -->
+                <polygon points="28,73 182,73 174,113 36,113" fill="white" stroke="#1e3a5f" stroke-width="2"/>
+                <text x="105" y="98" text-anchor="middle" font-size="11" fill="#1e3a5f" font-family="Segoe UI,Arial">Eingabe: temp</text>
+                <!-- Arrow down -->
+                <line x1="105" y1="113" x2="105" y2="133" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arr1)"/>
+                <!-- Entscheidung -->
+                <polygon points="105,136 193,176 105,216 17,176" fill="white" stroke="#1e3a5f" stroke-width="2"/>
+                <text x="105" y="180" text-anchor="middle" font-size="10.5" fill="#1e3a5f" font-family="Segoe UI,Arial">temp &gt; 35?</text>
+                <!-- Ja links -->
+                <line x1="17" y1="176" x2="17" y2="245" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arr1)"/>
+                <text x="10" y="218" font-size="10" fill="#166534" font-family="Segoe UI,Arial" font-weight="700">Ja</text>
+                <!-- Nein rechts -->
+                <line x1="193" y1="176" x2="193" y2="245" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arr1)"/>
+                <text x="196" y="218" font-size="10" fill="#991b1b" font-family="Segoe UI,Arial" font-weight="700">Nein</text>
+                <!-- Ausgabe Hitzealarm -->
+                <polygon points="0,248 88,248 80,285 8,285" fill="white" stroke="#1e3a5f" stroke-width="2"/>
+                <text x="44" y="271" text-anchor="middle" font-size="9.5" fill="#1e3a5f" font-family="Segoe UI,Arial">"Hitzealarm!"</text>
+                <!-- Ausgabe Alles normal -->
+                <polygon points="122,248 210,248 202,285 130,285" fill="white" stroke="#1e3a5f" stroke-width="2"/>
+                <text x="166" y="271" text-anchor="middle" font-size="9.5" fill="#1e3a5f" font-family="Segoe UI,Arial">"Alles normal."</text>
+                <!-- Zusammenführung -->
+                <line x1="44"  y1="285" x2="44"  y2="320" stroke="#1e3a5f" stroke-width="2"/>
+                <line x1="166" y1="285" x2="166" y2="320" stroke="#1e3a5f" stroke-width="2"/>
+                <line x1="44"  y1="320" x2="166" y2="320" stroke="#1e3a5f" stroke-width="2"/>
+                <line x1="105" y1="320" x2="105" y2="340" stroke="#1e3a5f" stroke-width="2" marker-end="url(#arr1)"/>
+                <!-- Ende -->
+                <ellipse cx="105" cy="365" rx="55" ry="22" fill="white" stroke="#1e3a5f" stroke-width="2"/>
+                <text x="105" y="370" text-anchor="middle" font-size="13" fill="#1e3a5f" font-family="Segoe UI,Arial" font-weight="600">Ende</text>
+            </svg>
+            <p class="caption">Lesen: Pfeilen folgen, an Rauten den richtigen Zweig wählen.</p>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <strong>Hinweis:</strong> Den zugehörigen Python-Code bearbeiten wir im Jupyter-Notebook. Das Modell ist sprachunabhängig – es lässt sich in jede Programmiersprache übersetzen.
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     ÜBUNGEN
+══════════════════════════════════════ -->
+<div class="section">
+    <div class="section-label">Übungen</div>
+    <h2>Jetzt bist du dran!</h2>
+    <p>Bearbeite die vier Aufgaben. Du erhältst nach jeder Aufgabe sofortiges Feedback.</p>
+
+    <!-- ─────────────────────────────────
+         Ü1 – Zuordnung
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex1">
+        <div class="ex-header">
+            <div class="ex-num">1</div>
+            <h3>Struktogramm-Elemente zuordnen</h3>
+            <span class="ex-type">Zuordnung</span>
+        </div>
+        <p class="ex-task">Klicke zuerst auf eine Darstellung links, dann auf die passende Bedeutung rechts. Bei richtiger Zuordnung werden beide grün markiert.</p>
+        <div class="match-grid">
+            <div class="match-col">
+                <h4>Darstellung im Struktogramm</h4>
+                <div class="match-item" id="ml-seq"   onclick="matchLeft('seq')">Gestapelte Rechtecke untereinander</div>
+                <div class="match-item" id="ml-if"    onclick="matchLeft('if')">Zwei nebeneinanderliegende Felder mit Bedingung oben</div>
+                <div class="match-item" id="ml-loop"  onclick="matchLeft('loop')">Rechteck mit L-förmigem Rand links und Bedingung oben</div>
+                <div class="match-item" id="ml-multi" onclick="matchLeft('multi')">Drei oder mehr nebeneinanderliegende Felder mit Bedingung oben</div>
+            </div>
+            <div class="match-col">
+                <h4>Bedeutung</h4>
+                <div class="match-item" id="mr-loop"  onclick="matchRight('loop')">Schleife (Wiederholung)</div>
+                <div class="match-item" id="mr-seq"   onclick="matchRight('seq')">Sequenz (Folge von Anweisungen)</div>
+                <div class="match-item" id="mr-multi" onclick="matchRight('multi')">Mehrfache Verzweigung</div>
+                <div class="match-item" id="mr-if"    onclick="matchRight('if')">Einfache Verzweigung (Ja / Nein)</div>
+            </div>
+        </div>
+        <div class="feedback" id="fb1"></div>
+        <button class="btn sec" onclick="resetEx1()">Zurücksetzen</button>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü2 – PAP-Symbole
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex2">
+        <div class="ex-header">
+            <div class="ex-num">2</div>
+            <h3>PAP-Symbole erkennen</h3>
+            <span class="ex-type">Multiple Choice</span>
+        </div>
+        <p class="ex-task">Beantworte beide Fragen zu den Symbolen des Programmablaufplans.</p>
+
+        <p class="ex-question">Frage 1: Welches Symbol steht im PAP für eine <strong>Entscheidung</strong> (z.&nbsp;B. eine if-Abfrage)?</p>
+        <ul class="mc-list" id="mc2a">
+            <li><label><input type="radio" name="q2a" value="a"> Rechteck</label></li>
+            <li><label><input type="radio" name="q2a" value="b"> Raute (Rhombus)</label></li>
+            <li><label><input type="radio" name="q2a" value="c"> Oval / Ellipse</label></li>
+            <li><label><input type="radio" name="q2a" value="d"> Parallelogramm</label></li>
+        </ul>
+
+        <p class="ex-question">Frage 2: Was symbolisiert das <strong>Oval / die Ellipse</strong> im PAP?</p>
+        <ul class="mc-list" id="mc2b">
+            <li><label><input type="radio" name="q2b" value="a"> Eine Berechnung oder Zuweisung</label></li>
+            <li><label><input type="radio" name="q2b" value="b"> Eine Ein- oder Ausgabe</label></li>
+            <li><label><input type="radio" name="q2b" value="c"> Start oder Ende des Programms</label></li>
+            <li><label><input type="radio" name="q2b" value="d"> Eine Schleife</label></li>
+        </ul>
+
+        <button class="btn"     onclick="checkEx2()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx2()">Zurücksetzen</button>
+        <div class="feedback" id="fb2"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü3 – Struktogramm lesen
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex3">
+        <div class="ex-header">
+            <div class="ex-num">3</div>
+            <h3>Struktogramm lesen und verstehen</h3>
+            <span class="ex-type">Code-Vorhersage</span>
+        </div>
+        <p class="ex-task">Analysiere das folgende Struktogramm und beantworte die zwei Fragen dazu.</p>
+
+        <!-- Nested if struktogramm -->
+        <div class="strukt-wrap">
+            <div class="strukt-title">Ampelfarbe</div>
+            <div class="strukt-seq">Eingabe: farbe</div>
+            <div class="strukt-cond">farbe == "rot" ?</div>
+            <div class="strukt-branches">
+                <div class="strukt-branch">
+                    <div class="strukt-branch-lbl">&#10003; Ja</div>
+                    Ausgabe: "Halt!"
+                </div>
+                <div class="strukt-branch" style="padding:0;">
+                    <div class="strukt-branch-lbl" style="padding:0.45rem 0.75rem 0;">&#10007; Nein</div>
+                    <!-- nested if inside Nein branch -->
+                    <div style="border-top:1px solid #1e3a5f;">
+                        <div class="strukt-cond" style="border-bottom:1px solid #1e3a5f;">farbe == "grün" ?</div>
+                        <div style="display:flex;">
+                            <div style="flex:1; padding:0.45rem 0.6rem; border-right:1px solid #1e3a5f;">
+                                <div class="strukt-branch-lbl">&#10003; Ja</div>
+                                Ausgabe: "Fahren!"
+                            </div>
+                            <div style="flex:1; padding:0.45rem 0.6rem;">
+                                <div class="strukt-branch-lbl">&#10007; Nein</div>
+                                Ausgabe: "Achtung!"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="ex-question">Frage 1: Was gibt das Programm aus, wenn die Eingabe <code>"gelb"</code> ist?</p>
+        <ul class="mc-list" id="mc3a">
+            <li><label><input type="radio" name="q3a" value="a"> "Halt!"</label></li>
+            <li><label><input type="radio" name="q3a" value="b"> "Fahren!"</label></li>
+            <li><label><input type="radio" name="q3a" value="c"> "Achtung!"</label></li>
+            <li><label><input type="radio" name="q3a" value="d"> Keine Ausgabe</label></li>
+        </ul>
+
+        <p class="ex-question">Frage 2: Welche Kontrollstruktur zeigt dieses Struktogramm?</p>
+        <ul class="mc-list" id="mc3b">
+            <li><label><input type="radio" name="q3b" value="a"> Eine einfache Verzweigung (if/else)</label></li>
+            <li><label><input type="radio" name="q3b" value="b"> Eine Schleife</label></li>
+            <li><label><input type="radio" name="q3b" value="c"> Eine geschachtelte (mehrfache) Verzweigung</label></li>
+            <li><label><input type="radio" name="q3b" value="d"> Eine reine Sequenz ohne Verzweigung</label></li>
+        </ul>
+
+        <button class="btn"     onclick="checkEx3()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx3()">Zurücksetzen</button>
+        <div class="feedback" id="fb3"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü4 – Drag & Drop
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex4">
+        <div class="ex-header">
+            <div class="ex-num">4</div>
+            <h3>Struktogramm-Blöcke in die richtige Reihenfolge bringen</h3>
+            <span class="ex-type">Drag &amp; Drop</span>
+        </div>
+        <p class="ex-task">
+            <strong>Aufgabe:</strong> Ein Programm soll den <strong>Umfang eines Kreises</strong> berechnen:
+            <code>U = 2 &middot; &pi; &middot; r</code><br>
+            Ziehe die Struktogramm-Blöcke aus dem linken Pool in die richtige Reihenfolge rechts. Nicht alle Blöcke werden benötigt!
+        </p>
+        <div class="dnd-wrap">
+            <div class="dnd-col">
+                <h4>Verfügbare Blöcke</h4>
+                <div id="sourcePool">
+                    <div class="drag-item" draggable="true" data-id="b_calc">U = 2 &middot; 3.14159 &middot; r</div>
+                    <div class="drag-item" draggable="true" data-id="b_inp_r">Eingabe: r</div>
+                    <div class="drag-item" draggable="true" data-id="b_out">Ausgabe: U</div>
+                    <div class="drag-item" draggable="true" data-id="b_wrong">Eingabe: U</div>
+                    <div class="drag-item" draggable="true" data-id="b_loop">solange r &gt; 0</div>
+                </div>
+            </div>
+            <div class="dnd-col">
+                <h4>Meine Reihenfolge</h4>
+                <div class="drop-zone" id="dz1"><span class="dz-label">1. Schritt</span></div>
+                <div class="drop-zone" id="dz2"><span class="dz-label">2. Schritt</span></div>
+                <div class="drop-zone" id="dz3"><span class="dz-label">3. Schritt</span></div>
+            </div>
+        </div>
+        <button class="btn"     onclick="checkEx4()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx4()">Zurücksetzen</button>
+        <div class="feedback" id="fb4"></div>
+    </div>
+
+    <!-- Abschluss -->
+    <div class="completion" id="completion">
+        <div class="icon">&#127881;</div>
+        <h2>Sehr gut gemacht!</h2>
+        <p>Du hast alle Übungen erfolgreich abgeschlossen.<br>
+        Im nächsten Schritt geht es um <strong>Datentypen und Variablen</strong> in Python.</p>
+    </div>
+</div>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── Progress ───────────────────────────
+const done = { ex1: false, ex2: false, ex3: false, ex4: false };
+
+function refreshProgress() {
+    const map = { ps5:'ex1', ps6:'ex2', ps7:'ex3', ps8:'ex4' };
+    Object.entries(map).forEach(([psId, exKey]) => {
+        const el = document.getElementById(psId);
+        el.className = 'progress-step ' + (done[exKey] ? 'done' : '');
+    });
+    if (Object.values(done).every(Boolean)) {
+        document.getElementById('completion').classList.add('show');
+    }
+}
+
+// ─── Feedback helpers ──────────────────
+function showFB(id, isOk, msg) {
+    const el = document.getElementById(id);
+    el.className = 'feedback show ' + (isOk ? 'ok' : 'err');
+    el.innerHTML = (isOk ? '&#10003;&nbsp;' : '&#10007;&nbsp;') + msg;
+}
+function hideFB(id) {
+    const el = document.getElementById(id);
+    el.className = 'feedback';
+    el.innerHTML = '';
+}
+
+// ─── MC helper ─────────────────────────
+function markMC(listId, name, correctVal) {
+    document.querySelectorAll('#' + listId + ' label').forEach(lbl => {
+        const r = lbl.querySelector('input');
+        if (r.value === correctVal)                          lbl.classList.add('ok');
+        else if (r.checked && r.value !== correctVal)        lbl.classList.add('err');
+        r.disabled = true;
+    });
+}
+function resetMC(listId, name) {
+    document.querySelectorAll('#' + listId + ' input').forEach(r => {
+        r.checked  = false;
+        r.disabled = false;
+    });
+    document.querySelectorAll('#' + listId + ' label').forEach(l => l.className = '');
+}
+
+// ════════════════════════════════════════
+// Ü1 – Matching
+// ════════════════════════════════════════
+let selLeft = null;
+const matchedL = new Set();
+const matchedR = new Set();
+const PAIRS = { seq:'seq', if:'if', loop:'loop', multi:'multi' };
+
+function matchLeft(id) {
+    if (matchedL.has(id)) return;
+    document.querySelectorAll('[id^="ml-"]').forEach(el => {
+        if (!el.classList.contains('matched')) el.classList.remove('sel');
+    });
+    selLeft = id;
+    document.getElementById('ml-' + id).classList.add('sel');
+}
+
+function matchRight(id) {
+    if (!selLeft || matchedR.has(id)) return;
+    const lEl = document.getElementById('ml-' + selLeft);
+    const rEl = document.getElementById('mr-' + id);
+    if (PAIRS[selLeft] === id) {
+        lEl.classList.remove('sel');
+        lEl.classList.add('matched');
+        rEl.classList.add('matched');
+        matchedL.add(selLeft);
+        matchedR.add(id);
+        selLeft = null;
+        if (matchedL.size === 4) {
+            showFB('fb1', true, 'Alle vier Elemente richtig zugeordnet!');
+            done.ex1 = true;
+            refreshProgress();
+        }
+    } else {
+        lEl.classList.add('wrong');
+        rEl.classList.add('wrong');
+        setTimeout(() => {
+            lEl.classList.remove('wrong', 'sel');
+            rEl.classList.remove('wrong');
+            selLeft = null;
+        }, 700);
+        showFB('fb1', false, 'Nicht ganz – versuch es noch einmal.');
+    }
+}
+
+function resetEx1() {
+    selLeft = null;
+    matchedL.clear();
+    matchedR.clear();
+    document.querySelectorAll('[id^="ml-"], [id^="mr-"]').forEach(el => {
+        el.className = 'match-item';
+    });
+    hideFB('fb1');
+    done.ex1 = false;
+    refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü2 – PAP Multiple Choice
+// ════════════════════════════════════════
+function checkEx2() {
+    const a1 = document.querySelector('input[name="q2a"]:checked');
+    const a2 = document.querySelector('input[name="q2b"]:checked');
+    if (!a1 || !a2) { showFB('fb2', false, 'Bitte beantworte beide Fragen.'); return; }
+    markMC('mc2a', 'q2a', 'b');
+    markMC('mc2b', 'q2b', 'c');
+    if (a1.value === 'b' && a2.value === 'c') {
+        showFB('fb2', true, 'Beide Antworten richtig! Die Raute steht für Entscheidungen, das Oval markiert Start und Ende.');
+        done.ex2 = true;
+    } else {
+        showFB('fb2', false, 'Noch nicht ganz. Richtig: Die <strong>Raute</strong> steht für Entscheidungen (if-Abfragen). Das <strong>Oval</strong> markiert Start oder Ende des Programms.');
+    }
+    refreshProgress();
+}
+
+function resetEx2() {
+    resetMC('mc2a', 'q2a');
+    resetMC('mc2b', 'q2b');
+    hideFB('fb2');
+    done.ex2 = false;
+    refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü3 – Struktogramm lesen
+// ════════════════════════════════════════
+function checkEx3() {
+    const a1 = document.querySelector('input[name="q3a"]:checked');
+    const a2 = document.querySelector('input[name="q3b"]:checked');
+    if (!a1 || !a2) { showFB('fb3', false, 'Bitte beantworte beide Fragen.'); return; }
+    markMC('mc3a', 'q3a', 'c');
+    markMC('mc3b', 'q3b', 'c');
+    const ok1 = a1.value === 'c';
+    const ok2 = a2.value === 'c';
+    if (ok1 && ok2) {
+        showFB('fb3', true, 'Richtig! "gelb" ist weder "rot" noch "grün" – beide Bedingungen sind Nein, daher landet man bei "Achtung!". Das Struktogramm zeigt eine geschachtelte Verzweigung.');
+        done.ex3 = true;
+    } else {
+        let hint = '';
+        if (!ok1) hint += '<strong>Frage 1:</strong> "gelb" ist nicht "rot" → kein "Halt!". Im Nein-Zweig: "gelb" ist auch nicht "grün" → kein "Fahren!". Damit bleibt nur der letzte Nein-Zweig. ';
+        if (!ok2) hint += '<strong>Frage 2:</strong> Im Nein-Zweig der ersten Abfrage steckt eine zweite if-Abfrage – das ist eine geschachtelte Verzweigung.';
+        showFB('fb3', false, hint);
+    }
+    refreshProgress();
+}
+
+function resetEx3() {
+    resetMC('mc3a', 'q3a');
+    resetMC('mc3b', 'q3b');
+    hideFB('fb3');
+    done.ex3 = false;
+    refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü4 – Drag & Drop
+// ════════════════════════════════════════
+// Correct order: b_inp_r → b_calc → b_out
+const CORRECT = ['b_inp_r', 'b_calc', 'b_out'];
+
+const ORIGINAL_ITEMS = [
+    { id: 'b_calc',   html: 'U = 2 &middot; 3.14159 &middot; r' },
+    { id: 'b_inp_r',  html: 'Eingabe: r' },
+    { id: 'b_out',    html: 'Ausgabe: U' },
+    { id: 'b_wrong',  html: 'Eingabe: U' },
+    { id: 'b_loop',   html: 'solange r &gt; 0' },
+];
+
+let dragged = null;
+
+function initDnD() {
+    document.querySelectorAll('.drag-item').forEach(item => {
+        item.addEventListener('dragstart', () => {
+            dragged = item;
+            setTimeout(() => item.classList.add('dragging'), 0);
+        });
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging');
+            dragged = null;
+        });
+    });
+
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            zone.classList.remove('over');
+            if (!dragged) return;
+
+            // Return existing item in zone back to pool
+            const existing = zone.querySelector('.drag-item');
+            if (existing) returnToPool(existing);
+
+            // Remove from previous zone if any
+            const prevZone = dragged.closest('.drop-zone');
+            if (prevZone) prevZone.innerHTML = '<span class="dz-label">' + prevZone.dataset.step + '. Schritt</span>';
+
+            zone.innerHTML = '';
+            zone.appendChild(dragged);
+            dragged.classList.remove('ok-placed', 'err-placed');
+        });
+    });
+}
+
+function returnToPool(item) {
+    item.classList.remove('ok-placed', 'err-placed', 'dragging');
+    document.getElementById('sourcePool').appendChild(item);
+}
+
+// Assign step labels for reset
+document.querySelectorAll('.drop-zone').forEach((z, i) => z.dataset.step = i + 1);
+
+initDnD();
+
+function checkEx4() {
+    const zones = ['dz1', 'dz2', 'dz3'];
+    const placed = zones.map(id => {
+        const item = document.getElementById(id).querySelector('.drag-item');
+        return item ? item.dataset.id : null;
+    });
+
+    if (placed.some(p => p === null)) {
+        showFB('fb4', false, 'Bitte alle drei Felder befüllen.');
+        return;
+    }
+
+    const isOk = placed.every((val, i) => val === CORRECT[i]);
+
+    // Colour each placed item
+    zones.forEach((id, i) => {
+        const item = document.getElementById(id).querySelector('.drag-item');
+        if (item) {
+            item.classList.remove('ok-placed', 'err-placed');
+            item.classList.add(placed[i] === CORRECT[i] ? 'ok-placed' : 'err-placed');
+        }
+    });
+
+    if (isOk) {
+        showFB('fb4', true, 'Perfekt! Reihenfolge: (1) Eingabe r &rarr; (2) Umfang berechnen &rarr; (3) Ausgabe U. "Eingabe: U" und die Schleife wurden nicht benötigt.');
+        done.ex4 = true;
+    } else {
+        showFB('fb4', false, 'Noch nicht ganz. Tipp: Was muss zuerst bekannt sein, bevor gerechnet werden kann? Was geschieht ganz am Ende?');
+    }
+    refreshProgress();
+}
+
+function resetEx4() {
+    const pool = document.getElementById('sourcePool');
+    pool.innerHTML = '';
+    ORIGINAL_ITEMS.forEach(({ id, html }) => {
+        const div = document.createElement('div');
+        div.className   = 'drag-item';
+        div.draggable   = true;
+        div.dataset.id  = id;
+        div.innerHTML   = html;
+        pool.appendChild(div);
+    });
+    ['dz1','dz2','dz3'].forEach((id, i) => {
+        document.getElementById(id).innerHTML =
+            '<span class="dz-label">' + (i + 1) + '. Schritt</span>';
+    });
+    initDnD();
+    hideFB('fb4');
+    done.ex4 = false;
+    refreshProgress();
+}
+</script>
+
+</body>
+</html>
