@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIT12 – Grundfunktionen in Python</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1a2733;
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        header {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        header h1   { font-size: 1.35rem; font-weight: 600; }
+        header .sub { font-size: 0.85rem; opacity: 0.7; margin-top: 0.15rem; }
+        .badge {
+            background: #e8a020; color: white;
+            font-size: 0.7rem; font-weight: 700;
+            padding: 0.2rem 0.55rem; border-radius: 1rem;
+            text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+        }
+
+        /* ── Progress ── */
+        .progress-wrap {
+            background: #162d4a; padding: 0.6rem 2rem;
+            display: flex; gap: 0.4rem; align-items: center;
+        }
+        .progress-label { color: rgba(255,255,255,0.5); font-size: 0.7rem; white-space: nowrap; margin-right: 0.25rem; }
+        .progress-step  { height: 5px; flex: 1; background: rgba(255,255,255,0.15); border-radius: 3px; transition: background 0.4s; }
+        .progress-step.done   { background: #4ade80; }
+        .progress-step.active { background: #e8a020; }
+
+        /* ── Layout ── */
+        main { max-width: 880px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
+
+        /* ── Section cards ── */
+        .section {
+            background: white; border-radius: 12px;
+            padding: 2rem; margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+        .section-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.1em; color: #1e3a5f; margin-bottom: 0.4rem;
+        }
+        .section > h2 {
+            font-size: 1.25rem; color: #1e3a5f;
+            margin-bottom: 1rem; padding-bottom: 0.6rem;
+            border-bottom: 2px solid #e8edf3;
+        }
+        h3 { font-size: 1rem; color: #1e3a5f; margin: 1.5rem 0 0.6rem; }
+        p  { margin-bottom: 0.75rem; color: #334155; font-size: 0.95rem; }
+
+        /* ── Info / warning boxes ── */
+        .info-box {
+            background: #eff6ff; border-left: 4px solid #1e3a5f;
+            border-radius: 0 8px 8px 0; padding: 0.9rem 1.2rem;
+            margin: 1rem 0; font-size: 0.92rem; color: #1e3a5f;
+        }
+        .warn-box {
+            background: #fff7ed; border-left: 4px solid #e8a020;
+            border-radius: 0 8px 8px 0; padding: 0.9rem 1.2rem;
+            margin: 1rem 0; font-size: 0.92rem; color: #78350f;
+        }
+
+        /* ── Code blocks ── */
+        .code-block {
+            background: #1e2d3d; color: #e2e8f0;
+            border-radius: 8px; padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            line-height: 1.8; margin: 0.75rem 0; overflow-x: auto;
+        }
+        .code-block .kw { color: #93c5fd; }
+        .code-block .fn { color: #86efac; }
+        .code-block .st { color: #fde68a; }
+        .code-block .nm { color: #f9a8d4; }
+        .code-block .cm { color: #64748b; font-style: italic; }
+        .code-block .op { color: #cbd5e1; }
+
+        /* Inline code */
+        code {
+            background: #e8edf3; padding: 0.1rem 0.35rem;
+            border-radius: 3px; font-family: 'Courier New', monospace;
+            font-size: 0.85em; color: #1e3a5f;
+        }
+
+        /* ── Function signature cards ── */
+        .fn-grid { display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.75rem 0; }
+        .fn-card {
+            flex: 1; min-width: 220px;
+            border: 2px solid #e2e8f0; border-radius: 10px; overflow: hidden;
+        }
+        .fn-card-head {
+            background: #1e3a5f; color: white;
+            padding: 0.5rem 1rem; font-family: 'Courier New', monospace;
+            font-size: 0.88rem; font-weight: 700;
+        }
+        .fn-card-body { padding: 0.75rem 1rem; font-size: 0.88rem; color: #334155; }
+        .fn-card-body p { margin-bottom: 0.4rem; font-size: 0.88rem; }
+        .fn-card-body code { font-size: 0.82em; }
+
+        /* ── Two-column layout for output examples ── */
+        .output-pair {
+            display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.75rem 0;
+        }
+        .output-pair > div { flex: 1; min-width: 200px; }
+        .output-pair > div > h4 {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            color: #64748b; margin-bottom: 0.35rem;
+        }
+        .output-box {
+            background: #0f1f2e; color: #4ade80;
+            border-radius: 8px; padding: 0.7rem 1rem;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            line-height: 1.8;
+        }
+        .output-box .prompt { color: #64748b; }
+
+        /* ══════════════════════════
+           EXERCISES
+        ══════════════════════════ */
+        .exercise {
+            background: #f8fafc; border: 2px solid #e2e8f0;
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .exercise.knobel { border-color: #e8a020; background: #fffbf0; }
+        .ex-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .ex-num {
+            background: #1e3a5f; color: white;
+            width: 1.9rem; height: 1.9rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.88rem; flex-shrink: 0;
+        }
+        .exercise.knobel .ex-num { background: #e8a020; }
+        .ex-header h3 { margin: 0; border: none; padding: 0; font-size: 1rem; color: #1a2733; }
+        .ex-type {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #64748b; background: #e2e8f0;
+            padding: 0.15rem 0.5rem; border-radius: 1rem; white-space: nowrap;
+        }
+        .ex-type.knobel-tag { background: #fde68a; color: #78350f; }
+        .ex-task     { font-size: 0.93rem; color: #334155; margin-bottom: 0.75rem; }
+        .ex-question { font-size: 0.93rem; color: #1a2733; margin: 1rem 0 0.5rem; font-weight: 600; }
+
+        /* Feedback */
+        .feedback { margin-top: 1rem; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.88rem; display: none; line-height: 1.5; }
+        .feedback.show { display: block; }
+        .feedback.ok  { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+        .feedback.err { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+
+        /* Buttons */
+        .btn {
+            background: #1e3a5f; color: white; border: none;
+            padding: 0.55rem 1.3rem; border-radius: 6px;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer;
+            margin-top: 1rem; transition: background 0.2s;
+        }
+        .btn:hover { background: #2d5488; }
+        .btn.sec { background: transparent; color: #1e3a5f; border: 2px solid #1e3a5f; margin-left: 0.5rem; }
+        .btn.sec:hover { background: #eff6ff; }
+
+        /* Multiple choice */
+        .mc-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+        .mc-list li { margin-bottom: 0.4rem; }
+        .mc-list label {
+            display: flex; align-items: flex-start; gap: 0.7rem;
+            padding: 0.55rem 0.9rem; background: white;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            cursor: pointer; font-size: 0.88rem; transition: border-color 0.2s;
+            line-height: 1.4;
+        }
+        .mc-list label:hover { border-color: #1e3a5f; }
+        .mc-list input[type="radio"] { accent-color: #1e3a5f; flex-shrink: 0; margin-top: 0.2rem; }
+        .mc-list label.ok  { border-color: #86efac; background: #f0fdf4; }
+        .mc-list label.err { border-color: #fca5a5; background: #fef2f2; }
+
+        /* ── Ü1 Drag & Drop (Reihenfolge) ── */
+        .dnd-wrap { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .dnd-col  { flex: 1; min-width: 220px; }
+        .dnd-col > h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; }
+        .drag-item {
+            padding: 0.55rem 0.9rem; background: white;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            margin-bottom: 0.4rem; cursor: grab;
+            font-size: 0.85rem; font-family: 'Courier New', monospace;
+            transition: all 0.18s; user-select: none;
+        }
+        .drag-item:hover    { border-color: #1e3a5f; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .drag-item.dragging { opacity: 0.45; cursor: grabbing; }
+        .drag-item.ok-placed  { border-color: #86efac; background: #f0fdf4; }
+        .drag-item.err-placed { border-color: #fca5a5; background: #fef2f2; }
+        .drop-zone {
+            min-height: 2.6rem; border: 2px dashed #cbd5e1;
+            border-radius: 7px; padding: 0.2rem; margin-bottom: 0.4rem;
+            background: #f8fafc; display: flex; align-items: center; transition: all 0.18s;
+        }
+        .drop-zone.over      { border-color: #1e3a5f; background: #eff6ff; }
+        .drop-zone .dz-label { font-size: 0.68rem; color: #94a3b8; padding: 0 0.6rem; }
+        .drop-zone .drag-item { margin-bottom: 0; width: 100%; }
+
+        /* ── Ü2 Output matching ── */
+        .output-match { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; }
+        .output-row   { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .output-row .code-block { flex: 2; min-width: 200px; margin: 0; font-size: 0.82rem; padding: 0.6rem 1rem; line-height: 1.7; }
+        .output-row .arrow { color: #94a3b8; font-size: 1.2rem; flex-shrink: 0; }
+        .output-select {
+            flex: 1; min-width: 160px;
+            padding: 0.5rem 0.75rem;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            font-family: 'Courier New', monospace; font-size: 0.85rem;
+            background: white; color: #1a2733; cursor: pointer; outline: none;
+        }
+        .output-select:focus { border-color: #1e3a5f; }
+        .output-select.ok  { border-color: #86efac; background: #f0fdf4; color: #166534; }
+        .output-select.err { border-color: #fca5a5; background: #fef2f2; color: #991b1b; }
+
+        /* ── Ü3 Error finder ── */
+        .code-line {
+            display: block; padding: 0.15rem 0.75rem;
+            border-radius: 4px; cursor: pointer;
+            transition: background 0.15s;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            color: #e2e8f0; line-height: 1.8; user-select: none;
+        }
+        .code-line:hover      { background: rgba(255,255,255,0.08); }
+        .code-line.correct-ln { background: rgba(74,222,128,0.2);  outline: 1px solid #4ade80; cursor: default; }
+        .code-line.wrong-ln   { background: rgba(248,113,113,0.2); outline: 1px solid #f87171; }
+        .line-num { color: #475569; margin-right: 1rem; user-select: none; }
+
+        /* ── Ü4 Multiple choice ── */
+        /* uses mc-list above */
+
+        /* ── Ü5 Knobelaufgabe ── */
+        .knobel-step {
+            background: white; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;
+        }
+        .knobel-step-label {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #e8a020; margin-bottom: 0.4rem;
+        }
+        .knobel-step h4 { font-size: 0.95rem; font-weight: 700; color: #1a2733; margin-bottom: 0.6rem; }
+
+        /* Completion */
+        .completion { text-align: center; padding: 2.5rem 1rem; display: none; }
+        .completion.show { display: block; }
+        .completion .icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
+        .completion h2    { color: #1e3a5f; margin-bottom: 0.5rem; }
+        .completion p     { color: #475569; }
+    </style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+    <div>
+        <div class="badge">KIT12 &middot; LB 1</div>
+        <h1>Grundfunktionen: Ein- und Ausgabe</h1>
+        <div class="sub">Grundlagen der Programmierung &middot; FOS/BOS Bayern</div>
+    </div>
+</header>
+
+<!-- ══════════ PROGRESS ══════════ -->
+<!-- 3 Theorie + 5 Übungen = 8 Schritte -->
+<div class="progress-wrap">
+    <span class="progress-label">Fortschritt</span>
+    <div class="progress-step done"   id="ps1"></div>
+    <div class="progress-step done"   id="ps2"></div>
+    <div class="progress-step done"   id="ps3"></div>
+    <div class="progress-step active" id="ps4"></div>
+    <div class="progress-step"        id="ps5"></div>
+    <div class="progress-step"        id="ps6"></div>
+    <div class="progress-step"        id="ps7"></div>
+    <div class="progress-step"        id="ps8"></div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════
+     THEORIE
+══════════════════════════════════════ -->
+
+<!-- T1: print() -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 1 von 3</div>
+    <h2>Ausgabe mit <code>print()</code></h2>
+    <p>Die Funktion <code>print()</code> gibt Werte auf dem Bildschirm aus. Sie akzeptiert beliebig viele Argumente, die durch Kommas getrennt werden.</p>
+
+    <div class="fn-grid">
+        <div class="fn-card">
+            <div class="fn-card-head">print(*objekte, sep=' ', end='\n')</div>
+            <div class="fn-card-body">
+                <p><strong>objekte</strong> – beliebig viele Werte, werden mit <code>sep</code> getrennt ausgegeben</p>
+                <p><strong>sep</strong> – Trennzeichen zwischen den Werten (Standard: Leerzeichen)</p>
+                <p><strong>end</strong> – Zeichen am Ende der Ausgabe (Standard: Zeilenumbruch)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="code-block">
+<span class="cm"># Einfache Ausgaben</span>
+<span class="fn">print</span>(<span class="st">"Hallo Welt"</span>)              <span class="cm"># Hallo Welt</span>
+<span class="fn">print</span>(<span class="nm">42</span>)                        <span class="cm"># 42</span>
+<span class="fn">print</span>(<span class="nm">3.14</span>, <span class="kw">True</span>)               <span class="cm"># 3.14 True</span>
+
+<span class="cm"># Mehrere Werte mit sep trennen</span>
+<span class="fn">print</span>(<span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>, sep=<span class="st">"-"</span>)    <span class="cm"># a-b-c</span>
+
+<span class="cm"># Ohne Zeilenumbruch am Ende</span>
+<span class="fn">print</span>(<span class="st">"Ergebnis:"</span>, end=<span class="st">" "</span>)
+<span class="fn">print</span>(<span class="nm">100</span>)                         <span class="cm"># Ergebnis: 100</span>
+
+<span class="cm"># Variablen ausgeben</span>
+<span class="var">name</span> <span class="op">=</span> <span class="st">"Lena"</span>
+<span class="var">alter</span> <span class="op">=</span> <span class="nm">18</span>
+<span class="fn">print</span>(<span class="st">"Name:"</span>, <span class="var">name</span>, <span class="st">"| Alter:"</span>, <span class="var">alter</span>)  <span class="cm"># Name: Lena | Alter: 18</span>
+    </div>
+
+    <div class="info-box">
+        <strong>Komma vs. Plus:</strong> Mit einem <strong>Komma</strong> in <code>print()</code> können Werte verschiedener Typen ohne Umwandlung ausgegeben werden (Python fügt automatisch ein Leerzeichen ein). Das <strong>Plus</strong> dagegen verkettet nur Strings – eine Zahl muss dann erst mit <code>str()</code> umgewandelt werden.
+    </div>
+
+    <div class="output-pair">
+        <div>
+            <h4>Code</h4>
+            <div class="code-block" style="margin:0;">
+<span class="var">p</span> <span class="op">=</span> <span class="nm">95</span>
+<span class="fn">print</span>(<span class="st">"Punkte:"</span>, <span class="var">p</span>)
+<span class="fn">print</span>(<span class="st">"Punkte: "</span> <span class="op">+</span> <span class="fn">str</span>(<span class="var">p</span>))
+            </div>
+        </div>
+        <div>
+            <h4>Ausgabe (beide identisch)</h4>
+            <div class="output-box">
+                Punkte: 95<br>
+                Punkte: 95
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- T2: input() -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 2 von 3</div>
+    <h2>Eingabe mit <code>input()</code></h2>
+    <p>Die Funktion <code>input()</code> hält das Programm an und wartet auf eine Tastatureingabe des Benutzers. Das Ergebnis ist <strong>immer ein String (<code>str</code>)</strong>.</p>
+
+    <div class="fn-grid">
+        <div class="fn-card">
+            <div class="fn-card-head">input(aufforderung='')</div>
+            <div class="fn-card-body">
+                <p><strong>aufforderung</strong> – optionaler Text, der vor der Eingabe angezeigt wird</p>
+                <p><strong>Rückgabewert</strong> – die eingegebene Zeichenkette als <code>str</code></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="code-block">
+<span class="cm"># Eingabe als String speichern</span>
+<span class="var">name</span>  <span class="op">=</span> <span class="fn">input</span>(<span class="st">"Dein Name: "</span>)
+
+<span class="cm"># Eingabe als Zahl: Typumwandlung notwendig!</span>
+<span class="var">alter</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Dein Alter: "</span>))
+<span class="var">preis</span> <span class="op">=</span> <span class="fn">float</span>(<span class="fn">input</span>(<span class="st">"Preis in €: "</span>))
+
+<span class="cm"># Verarbeitung und Ausgabe</span>
+<span class="fn">print</span>(<span class="st">"Hallo"</span>, <span class="var">name</span> <span class="op">+</span> <span class="st">"!"</span>)
+<span class="fn">print</span>(<span class="st">"In 10 Jahren bist du"</span>, <span class="var">alter</span> <span class="op">+</span> <span class="nm">10</span>, <span class="st">"Jahre alt."</span>)
+    </div>
+
+    <div class="warn-box">
+        <strong>Wichtig:</strong> <code>input()</code> gibt <em>immer</em> einen <code>str</code> zurück – auch wenn der Benutzer eine Zahl tippt. Für Rechenoperationen ist <code>int()</code> oder <code>float()</code> zwingend erforderlich.
+    </div>
+</div>
+
+<!-- T3: Kommentare & Formatierung -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 3 von 3</div>
+    <h2>Kommentare und Programmstruktur</h2>
+    <p>Kommentare erklären den Code und werden von Python <strong>nicht ausgeführt</strong>. Sie beginnen mit dem Rautenzeichen <code>#</code>.</p>
+
+    <h3>Einzeilige Kommentare</h3>
+    <div class="code-block">
+<span class="cm"># Dieses Programm berechnet die Fläche eines Rechtecks</span>
+
+<span class="var">laenge</span> <span class="op">=</span> <span class="fn">float</span>(<span class="fn">input</span>(<span class="st">"Länge in m: "</span>))   <span class="cm"># Eingabe der Länge</span>
+<span class="var">breite</span> <span class="op">=</span> <span class="fn">float</span>(<span class="fn">input</span>(<span class="st">"Breite in m: "</span>))   <span class="cm"># Eingabe der Breite</span>
+
+<span class="var">flaeche</span> <span class="op">=</span> <span class="var">laenge</span> <span class="op">*</span> <span class="var">breite</span>               <span class="cm"># Berechnung</span>
+
+<span class="fn">print</span>(<span class="st">"Fläche:"</span>, <span class="var">flaeche</span>, <span class="st">"m²"</span>)           <span class="cm"># Ausgabe</span>
+    </div>
+
+    <h3>Guter Programmierstil</h3>
+    <p>Ein gut strukturiertes Programm folgt dem Muster <strong>EVA</strong>: erst Eingabe, dann Verarbeitung, dann Ausgabe. Leere Zeilen zwischen diesen Blöcken verbessern die Lesbarkeit.</p>
+
+    <div class="output-pair">
+        <div>
+            <h4>&#10007; Schlecht lesbar</h4>
+            <div class="code-block" style="margin:0; font-size:0.82rem;">
+<span class="var">x</span><span class="op">=</span><span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"x:"</span>))<span class="op">;</span><span class="var">y</span><span class="op">=</span><span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"y:"</span>))<span class="op">;</span><span class="fn">print</span>(<span class="var">x</span><span class="op">+</span><span class="var">y</span>)
+            </div>
+        </div>
+        <div>
+            <h4>&#10003; Gut lesbar (EVA)</h4>
+            <div class="code-block" style="margin:0; font-size:0.82rem;">
+<span class="cm"># Eingabe</span>
+<span class="var">x</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Erste Zahl: "</span>))
+<span class="var">y</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Zweite Zahl: "</span>))
+
+<span class="cm"># Verarbeitung</span>
+<span class="var">summe</span> <span class="op">=</span> <span class="var">x</span> <span class="op">+</span> <span class="var">y</span>
+
+<span class="cm"># Ausgabe</span>
+<span class="fn">print</span>(<span class="st">"Summe:"</span>, <span class="var">summe</span>)
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     ÜBUNGEN
+══════════════════════════════════════ -->
+<div class="section">
+    <div class="section-label">Übungen</div>
+    <h2>Jetzt bist du dran!</h2>
+    <p>Bearbeite die fünf Aufgaben. Du erhältst nach jeder Aufgabe sofortiges Feedback.</p>
+
+    <!-- ─────────────────────────────────
+         Ü1 – Reihenfolge (EVA-Prinzip)
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex1">
+        <div class="ex-header">
+            <div class="ex-num">1</div>
+            <h3>Programm in die richtige Reihenfolge bringen</h3>
+            <span class="ex-type">Code-Reihenfolge</span>
+        </div>
+        <p class="ex-task">
+            Ein Programm soll den <strong>Brutto-Preis</strong> berechnen: Netto-Preis einlesen, Mehrwertsteuer (19&nbsp;%) addieren und das Ergebnis ausgeben. Bringe die Code-Zeilen in die richtige EVA-Reihenfolge.
+        </p>
+        <div class="dnd-wrap">
+            <div class="dnd-col">
+                <h4>Verfügbare Zeilen</h4>
+                <div id="pool1">
+                    <div class="drag-item" draggable="true" data-id="e1_out">print("Brutto:", brutto, "€")</div>
+                    <div class="drag-item" draggable="true" data-id="e1_calc">brutto = netto * 1.19</div>
+                    <div class="drag-item" draggable="true" data-id="e1_inp">netto = float(input("Netto-Preis in €: "))</div>
+                    <div class="drag-item" draggable="true" data-id="e1_wrong">netto = print("Netto-Preis")</div>
+                </div>
+            </div>
+            <div class="dnd-col">
+                <h4>Meine Reihenfolge</h4>
+                <div class="drop-zone" id="d1_1"><span class="dz-label">1. Zeile</span></div>
+                <div class="drop-zone" id="d1_2"><span class="dz-label">2. Zeile</span></div>
+                <div class="drop-zone" id="d1_3"><span class="dz-label">3. Zeile</span></div>
+            </div>
+        </div>
+        <button class="btn"     onclick="checkEx1()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx1()">Zurücksetzen</button>
+        <div class="feedback" id="fb1"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü2 – Ausgabe zuordnen
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex2">
+        <div class="ex-header">
+            <div class="ex-num">2</div>
+            <h3>Was gibt <code>print()</code> aus?</h3>
+            <span class="ex-type">Code-Vorhersage</span>
+        </div>
+        <p class="ex-task">Wähle für jeden Code-Ausschnitt die korrekte Ausgabe aus dem Dropdown.</p>
+
+        <div class="output-match" id="outputMatch">
+            <!-- Row 1 -->
+            <div class="output-row">
+                <div class="code-block">
+<span class="fn">print</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>)
+                </div>
+                <div class="arrow">&#8594;</div>
+                <select class="output-select" id="os1">
+                    <option value="">-- Ausgabe wählen --</option>
+                    <option value="a">A B C</option>
+                    <option value="b">ABC</option>
+                    <option value="c">A, B, C</option>
+                    <option value="d">"A" "B" "C"</option>
+                </select>
+            </div>
+            <!-- Row 2 -->
+            <div class="output-row">
+                <div class="code-block">
+<span class="fn">print</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, sep=<span class="st">""</span>)
+                </div>
+                <div class="arrow">&#8594;</div>
+                <select class="output-select" id="os2">
+                    <option value="">-- Ausgabe wählen --</option>
+                    <option value="a">A B C</option>
+                    <option value="b">ABC</option>
+                    <option value="c">A, B, C</option>
+                    <option value="d">"A""B""C"</option>
+                </select>
+            </div>
+            <!-- Row 3 -->
+            <div class="output-row">
+                <div class="code-block">
+<span class="var">x</span> <span class="op">=</span> <span class="nm">4</span>
+<span class="fn">print</span>(<span class="st">"x ="</span>, <span class="var">x</span>, end=<span class="st">"!"</span>)
+                </div>
+                <div class="arrow">&#8594;</div>
+                <select class="output-select" id="os3">
+                    <option value="">-- Ausgabe wählen --</option>
+                    <option value="a">x = 4</option>
+                    <option value="b">x = 4!</option>
+                    <option value="c">x = 4 end=!</option>
+                    <option value="d">x=4!</option>
+                </select>
+            </div>
+            <!-- Row 4 -->
+            <div class="output-row">
+                <div class="code-block">
+<span class="fn">print</span>(<span class="nm">10</span> <span class="op">//</span> <span class="nm">3</span>, <span class="nm">10</span> <span class="op">%</span> <span class="nm">3</span>)
+                </div>
+                <div class="arrow">&#8594;</div>
+                <select class="output-select" id="os4">
+                    <option value="">-- Ausgabe wählen --</option>
+                    <option value="a">3.33 0.99</option>
+                    <option value="b">3 1</option>
+                    <option value="c">3 0</option>
+                    <option value="d">10 3</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn"     onclick="checkEx2()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx2()">Zurücksetzen</button>
+        <div class="feedback" id="fb2"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü3 – Fehler finden
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex3">
+        <div class="ex-header">
+            <div class="ex-num">3</div>
+            <h3>Fehler im Code finden</h3>
+            <span class="ex-type">Fehlersuche</span>
+        </div>
+        <p class="ex-task">Das Programm soll das Alter einlesen und ausgeben, in wie vielen Jahren die Person 100 Jahre alt wird. Es enthält <strong>genau einen Fehler</strong>. Klicke auf die fehlerhafte Zeile.</p>
+        <div class="code-block" style="padding:0.75rem 0;">
+            <span class="code-line" data-line="1" onclick="pickLine(1)"><span class="line-num">1</span><span class="cm"># Altersrechner</span></span>
+            <span class="code-line" data-line="2" onclick="pickLine(2)"><span class="line-num">2</span><span class="var">alter</span> <span class="op">=</span> <span class="fn">input</span>(<span class="st">"Dein Alter: "</span>)</span>
+            <span class="code-line" data-line="3" onclick="pickLine(3)"><span class="line-num">3</span><span class="var">jahre_bis_100</span> <span class="op">=</span> <span class="nm">100</span> <span class="op">-</span> <span class="var">alter</span></span>
+            <span class="code-line" data-line="4" onclick="pickLine(4)"><span class="line-num">4</span><span class="fn">print</span>(<span class="st">"Noch"</span>, <span class="var">jahre_bis_100</span>, <span class="st">"Jahre bis 100."</span>)</span>
+        </div>
+        <div class="feedback" id="fb3"></div>
+        <button class="btn sec" onclick="resetEx3()">Zurücksetzen</button>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü4 – Multiple Choice print/input
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex4">
+        <div class="ex-header">
+            <div class="ex-num">4</div>
+            <h3>Verständnisfragen zu <code>print()</code> und <code>input()</code></h3>
+            <span class="ex-type">Multiple Choice</span>
+        </div>
+        <p class="ex-task">Beantworte alle drei Fragen.</p>
+
+        <p class="ex-question">Frage 1: Welche Ausgabe erzeugt <code>print("Ha" * 3)</code>?</p>
+        <ul class="mc-list" id="mc4a">
+            <li><label><input type="radio" name="q4a" value="a"> <code>Ha Ha Ha</code></label></li>
+            <li><label><input type="radio" name="q4a" value="b"> <code>HaHaHa</code></label></li>
+            <li><label><input type="radio" name="q4a" value="c"> <code>Ha3</code></label></li>
+            <li><label><input type="radio" name="q4a" value="d"> Fehlermeldung</label></li>
+        </ul>
+
+        <p class="ex-question">Frage 2: Ein Benutzer gibt bei <code>input()</code> die Zahl <code>7</code> ein. Was stimmt?</p>
+        <ul class="mc-list" id="mc4b">
+            <li><label><input type="radio" name="q4b" value="a"> Die Variable hat den Typ <code>int</code>, weil 7 eine ganze Zahl ist.</label></li>
+            <li><label><input type="radio" name="q4b" value="b"> Die Variable hat den Typ <code>str</code>, weil <code>input()</code> immer Text zurückgibt.</label></li>
+            <li><label><input type="radio" name="q4b" value="c"> Python erkennt automatisch, dass es eine Zahl ist, und speichert sie als <code>int</code>.</label></li>
+            <li><label><input type="radio" name="q4b" value="d"> Die Variable hat den Typ <code>float</code>, weil Eingaben immer Dezimalzahlen sind.</label></li>
+        </ul>
+
+        <p class="ex-question">Frage 3: Was bewirkt <code>print("X", end="")</code> im Vergleich zu <code>print("X")</code>?</p>
+        <ul class="mc-list" id="mc4c">
+            <li><label><input type="radio" name="q4c" value="a"> Es wird nichts ausgegeben.</label></li>
+            <li><label><input type="radio" name="q4c" value="b"> Es wird <code>X</code> ausgegeben, anschließend kein Zeilenumbruch.</label></li>
+            <li><label><input type="radio" name="q4c" value="c"> Es wird <code>X end=""</code> ausgegeben.</label></li>
+            <li><label><input type="radio" name="q4c" value="d"> Es wird <code>X</code> gefolgt von zwei Leerzeichen ausgegeben.</label></li>
+        </ul>
+
+        <button class="btn"     onclick="checkEx4()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx4()">Zurücksetzen</button>
+        <div class="feedback" id="fb4"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü5 – Knobelaufgabe: Geheimtext
+    ───────────────────────────────── -->
+    <div class="exercise knobel" id="ex5">
+        <div class="ex-header">
+            <div class="ex-num">5</div>
+            <h3>Knobelaufgabe: Was gibt dieses Programm aus?</h3>
+            <span class="ex-type knobel-tag">&#129504; Knobelaufgabe</span>
+        </div>
+        <p class="ex-task">
+            Analysiere das folgende Programm sorgfältig. Es enthält einige Überraschungen beim Umgang mit <code>print()</code>, <code>sep</code> und <code>end</code>.
+        </p>
+
+        <div class="code-block">
+<span class="var">a</span> <span class="op">=</span> <span class="st">"Info"</span>
+<span class="var">b</span> <span class="op">=</span> <span class="st">"matik"</span>
+<span class="fn">print</span>(<span class="var">a</span>, <span class="var">b</span>, sep=<span class="st">""</span>, end=<span class="st">" ist"</span>)
+<span class="fn">print</span>(<span class="st">" cool"</span>, end=<span class="st">"!\n"</span>)
+<span class="fn">print</span>(<span class="st">"Zeile"</span>, <span class="nm">1</span> <span class="op">+</span> <span class="nm">1</span>)
+<span class="fn">print</span>(<span class="st">"*"</span> <span class="op">*</span> <span class="nm">12</span>)
+        </div>
+
+        <p class="ex-question">Was ist die vollständige Ausgabe dieses Programms (Zeile für Zeile)?</p>
+        <ul class="mc-list" id="mc5">
+            <li><label><input type="radio" name="q5" value="a">
+                <span>Zeile 1: <code>Info matik ist</code><br>
+                Zeile 2: <code> cool!</code><br>
+                Zeile 3: <code>Zeile 2</code><br>
+                Zeile 4: <code>************</code></span>
+            </label></li>
+            <li><label><input type="radio" name="q5" value="b">
+                <span>Zeile 1: <code>Informatik ist cool!</code><br>
+                Zeile 2: <code>Zeile 2</code><br>
+                Zeile 3: <code>************</code></span>
+            </label></li>
+            <li><label><input type="radio" name="q5" value="c">
+                <span>Zeile 1: <code>Informatik ist cool!</code><br>
+                Zeile 2: <code>Zeile 1 + 1</code><br>
+                Zeile 3: <code>* * 12</code></span>
+            </label></li>
+            <li><label><input type="radio" name="q5" value="d">
+                <span>Zeile 1: <code>Info matik ist cool!</code><br>
+                Zeile 2: <code>Zeile 2</code><br>
+                Zeile 3: <code>* * * * * * * * * * * *</code></span>
+            </label></li>
+        </ul>
+
+        <button class="btn"     onclick="checkEx5()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx5()">Zurücksetzen</button>
+        <div class="feedback" id="fb5"></div>
+    </div>
+
+    <!-- Abschluss -->
+    <div class="completion" id="completion">
+        <div class="icon">&#127881;</div>
+        <h2>Hervorragend!</h2>
+        <p>Du hast alle Übungen erfolgreich abgeschlossen.<br>
+        Im nächsten Schritt geht es um <strong>Verzweigungen</strong> in Python (<code>if</code> / <code>elif</code> / <code>else</code>).</p>
+    </div>
+</div>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── Progress ───────────────────────────
+const done = { ex1:false, ex2:false, ex3:false, ex4:false, ex5:false };
+
+function refreshProgress() {
+    const map = { ps4:'ex1', ps5:'ex2', ps6:'ex3', ps7:'ex4', ps8:'ex5' };
+    Object.entries(map).forEach(([psId, exKey]) => {
+        document.getElementById(psId).className =
+            'progress-step ' + (done[exKey] ? 'done' : '');
+    });
+    if (Object.values(done).every(Boolean)) {
+        const c = document.getElementById('completion');
+        c.classList.add('show');
+        c.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+}
+
+// ─── Feedback helpers ──────────────────
+function showFB(id, isOk, msg) {
+    const el = document.getElementById(id);
+    el.className = 'feedback show ' + (isOk ? 'ok' : 'err');
+    el.innerHTML = (isOk ? '&#10003;&nbsp;' : '&#10007;&nbsp;') + msg;
+}
+function hideFB(id) {
+    const el = document.getElementById(id);
+    el.className = 'feedback'; el.innerHTML = '';
+}
+
+// ─── MC helper ─────────────────────────
+function markMC(listId, correctVal) {
+    document.querySelectorAll('#' + listId + ' label').forEach(lbl => {
+        const r = lbl.querySelector('input');
+        if (r.value === correctVal)                   lbl.classList.add('ok');
+        else if (r.checked && r.value !== correctVal) lbl.classList.add('err');
+        r.disabled = true;
+    });
+}
+function resetMC(listId) {
+    document.querySelectorAll('#' + listId + ' input').forEach(r => { r.checked = false; r.disabled = false; });
+    document.querySelectorAll('#' + listId + ' label').forEach(l => l.className = '');
+}
+
+// ════════════════════════════════════════
+// Ü1 – Drag & Drop EVA-Reihenfolge
+// ════════════════════════════════════════
+// Correct: e1_inp → e1_calc → e1_out
+const EX1_CORRECT = ['e1_inp', 'e1_calc', 'e1_out'];
+const EX1_ITEMS   = [
+    { id:'e1_out',  text:'print("Brutto:", brutto, "€")' },
+    { id:'e1_calc', text:'brutto = netto * 1.19' },
+    { id:'e1_inp',  text:'netto = float(input("Netto-Preis in €: "))' },
+    { id:'e1_wrong',text:'netto = print("Netto-Preis")' },
+];
+
+let dragged1 = null;
+
+function initDnD1() {
+    document.querySelectorAll('#pool1 .drag-item, #d1_1 .drag-item, #d1_2 .drag-item, #d1_3 .drag-item').forEach(item => {
+        item.addEventListener('dragstart', () => { dragged1 = item; setTimeout(() => item.classList.add('dragging'), 0); });
+        item.addEventListener('dragend', () => { item.classList.remove('dragging'); dragged1 = null; });
+    });
+    ['d1_1','d1_2','d1_3'].forEach((id, i) => {
+        const zone = document.getElementById(id);
+        zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault(); zone.classList.remove('over');
+            if (!dragged1) return;
+            const existing = zone.querySelector('.drag-item');
+            if (existing) document.getElementById('pool1').appendChild(existing);
+            const prev = dragged1.closest('.drop-zone');
+            if (prev) prev.innerHTML = '<span class="dz-label">' + (i+1) + '. Zeile</span>';
+            zone.innerHTML = ''; zone.appendChild(dragged1);
+            dragged1.classList.remove('ok-placed','err-placed');
+        });
+    });
+}
+initDnD1();
+
+function checkEx1() {
+    const zones = ['d1_1','d1_2','d1_3'];
+    const placed = zones.map(id => { const it = document.getElementById(id).querySelector('.drag-item'); return it ? it.dataset.id : null; });
+    if (placed.some(p => !p)) { showFB('fb1', false, 'Bitte alle drei Felder befüllen.'); return; }
+    const ok = placed.every((v,i) => v === EX1_CORRECT[i]);
+    zones.forEach((id, i) => {
+        const it = document.getElementById(id).querySelector('.drag-item');
+        if (it) { it.classList.remove('ok-placed','err-placed'); it.classList.add(placed[i] === EX1_CORRECT[i] ? 'ok-placed' : 'err-placed'); }
+    });
+    if (ok) {
+        showFB('fb1', true, 'Richtig! Die korrekte EVA-Reihenfolge: (1) Eingabe mit <code>input()</code> → (2) Verarbeitung (Berechnung) → (3) Ausgabe mit <code>print()</code>. Zu beachten: <code>print()</code> hat keinen sinnvollen Rückgabewert – es wäre falsch, sein Ergebnis einer Variablen zuzuweisen.');
+        done.ex1 = true;
+    } else {
+        showFB('fb1', false, 'Noch nicht ganz. Denke an das EVA-Prinzip: Was muss zuerst bekannt sein, damit gerechnet werden kann?');
+    }
+    refreshProgress();
+}
+
+function resetEx1() {
+    const pool = document.getElementById('pool1');
+    pool.innerHTML = '';
+    EX1_ITEMS.forEach(({ id, text }) => {
+        const d = document.createElement('div');
+        d.className = 'drag-item'; d.draggable = true; d.dataset.id = id; d.textContent = text;
+        pool.appendChild(d);
+    });
+    ['d1_1','d1_2','d1_3'].forEach((id, i) => {
+        document.getElementById(id).innerHTML = '<span class="dz-label">' + (i+1) + '. Zeile</span>';
+    });
+    initDnD1(); hideFB('fb1'); done.ex1 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü2 – Ausgabe zuordnen
+// ════════════════════════════════════════
+// os1→a (A B C), os2→b (ABC), os3→b (x = 4!), os4→b (3 1)
+const EX2_ANS = { os1:'a', os2:'b', os3:'b', os4:'b' };
+
+function checkEx2() {
+    const ids = ['os1','os2','os3','os4'];
+    const missing = ids.some(id => !document.getElementById(id).value);
+    if (missing) { showFB('fb2', false, 'Bitte alle vier Zeilen ausfüllen.'); return; }
+    let allOk = true;
+    ids.forEach(id => {
+        const sel = document.getElementById(id);
+        const ok = sel.value === EX2_ANS[id];
+        sel.className = 'output-select ' + (ok ? 'ok' : 'err');
+        sel.disabled = true;
+        if (!ok) allOk = false;
+    });
+    if (allOk) {
+        showFB('fb2', true, 'Alle vier Ausgaben korrekt! Beachte: <code>sep=""</code> entfernt das Leerzeichen zwischen den Werten, <code>end="!"</code> ersetzt den Zeilenumbruch durch ein <code>!</code>, und arithmetische Ausdrücke werden vor der Ausgabe berechnet.');
+        done.ex2 = true;
+    } else {
+        showFB('fb2', false, 'Noch nicht alle richtig (rot markiert). Tipp: Schau bei <code>sep</code> und <code>end</code> genau hin – welchen Standardwert haben sie?');
+        ids.forEach(id => { const sel = document.getElementById(id); if (sel.value !== EX2_ANS[id]) sel.disabled = false; });
+    }
+    refreshProgress();
+}
+
+function resetEx2() {
+    ['os1','os2','os3','os4'].forEach(id => {
+        const sel = document.getElementById(id); sel.value = ''; sel.className = 'output-select'; sel.disabled = false;
+    });
+    hideFB('fb2'); done.ex2 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü3 – Fehlersuche (Zeile 3)
+// input() gibt str zurück, 100 - str → TypeError
+// ════════════════════════════════════════
+function pickLine(n) {
+    if (done.ex3) return;
+    document.querySelectorAll('.code-line').forEach(el => {
+        if (!el.classList.contains('correct-ln')) el.classList.remove('wrong-ln');
+    });
+    const el = document.querySelector(`.code-line[data-line="${n}"]`);
+    if (n === 3) {
+        el.classList.add('correct-ln');
+        showFB('fb3', true, 'Richtig! In Zeile 3 wird <code>100 - alter</code> berechnet. Da <code>input()</code> immer einen <code>str</code> zurückgibt, versucht Python, eine Zahl von einem String abzuziehen – das ergibt einen <code>TypeError</code>. Die Lösung: <code>alter = int(input(...))</code> in Zeile 2.');
+        done.ex3 = true; refreshProgress();
+    } else {
+        el.classList.add('wrong-ln');
+        setTimeout(() => el.classList.remove('wrong-ln'), 800);
+        const hints = {
+            1: 'Kommentare werden nicht ausgeführt – sie können keinen Fehler verursachen.',
+            2: 'Diese Zeile ist syntaktisch korrekt. Das Problem liegt im Rückgabetyp von <code>input()</code> – aber der Fehler tritt erst beim <em>Verwenden</em> der Variable auf.',
+            4: 'Die Ausgabe-Zeile ist korrekt – sofern <code>jahre_bis_100</code> korrekt berechnet wurde.'
+        };
+        showFB('fb3', false, hints[n] || 'Diese Zeile ist korrekt.');
+    }
+}
+
+function resetEx3() {
+    document.querySelectorAll('.code-line').forEach(el => el.classList.remove('correct-ln','wrong-ln'));
+    hideFB('fb3'); done.ex3 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü4 – Multiple Choice
+// ════════════════════════════════════════
+function checkEx4() {
+    const a1 = document.querySelector('input[name="q4a"]:checked');
+    const a2 = document.querySelector('input[name="q4b"]:checked');
+    const a3 = document.querySelector('input[name="q4c"]:checked');
+    if (!a1 || !a2 || !a3) { showFB('fb4', false, 'Bitte beantworte alle drei Fragen.'); return; }
+    markMC('mc4a','b'); markMC('mc4b','b'); markMC('mc4c','b');
+    const allOk = a1.value==='b' && a2.value==='b' && a3.value==='b';
+    if (allOk) {
+        showFB('fb4', true, 'Alle drei Antworten richtig! <code>"Ha" * 3</code> wiederholt den String dreimal. <code>input()</code> gibt immer <code>str</code> zurück. Und <code>end=""</code> unterdrückt den automatischen Zeilenumbruch nach der Ausgabe.');
+        done.ex4 = true;
+    } else {
+        let h = '';
+        if (a1.value !== 'b') h += '<strong>F1:</strong> <code>*</code> bei Strings bedeutet Wiederholung ohne Trennzeichen. ';
+        if (a2.value !== 'b') h += '<strong>F2:</strong> <code>input()</code> gibt immer <code>str</code> zurück – Python erkennt den Typ <em>nicht</em> automatisch. ';
+        if (a3.value !== 'b') h += '<strong>F3:</strong> <code>end</code> ersetzt den Standard-Zeilenumbruch. <code>end=""</code> bedeutet: kein Zeichen am Ende.';
+        showFB('fb4', false, h);
+    }
+    refreshProgress();
+}
+
+function resetEx4() {
+    ['mc4a','mc4b','mc4c'].forEach(id => resetMC(id));
+    hideFB('fb4'); done.ex4 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü5 – Knobelaufgabe
+// ════════════════════════════════════════
+// print(a, b, sep="", end=" ist") → "Informatik ist" (kein Zeilenumbruch)
+// print(" cool", end="!\n")       → " cool!" + newline
+// Gesamt Zeile 1: "Informatik ist cool!"
+// print("Zeile", 1+1)             → "Zeile 2"
+// print("*" * 12)                 → "************"
+// → Answer b
+function checkEx5() {
+    const a = document.querySelector('input[name="q5"]:checked');
+    if (!a) { showFB('fb5', false, 'Bitte eine Antwort auswählen.'); return; }
+    markMC('mc5', 'b');
+    if (a.value === 'b') {
+        showFB('fb5', true,
+            'Richtig! Schritt für Schritt:<br>' +
+            '&bull; <code>print(a, b, sep="", end=" ist")</code> gibt <code>Informatik ist</code> aus – <code>sep=""</code> entfernt das Leerzeichen, <code>end=" ist"</code> hängt statt Zeilenumbruch den Text " ist" an.<br>' +
+            '&bull; Das nächste <code>print(" cool", end="!\\n")</code> setzt direkt dahinter an: <code> cool!</code>, dann ein echter Zeilenumbruch (<code>\\n</code>).<br>' +
+            '&bull; <code>1 + 1</code> wird zu <code>2</code> berechnet, bevor es ausgegeben wird.<br>' +
+            '&bull; <code>"*" * 12</code> wiederholt den Stern zwölfmal ohne Leerzeichen.');
+        done.ex5 = true;
+    } else {
+        showFB('fb5', false,
+            'Noch nicht ganz. Tipp: Beachte dass <code>end=" ist"</code> den Zeilenumbruch <em>ersetzt</em> – die nächste <code>print()</code>-Ausgabe setzt direkt dahinter an. Was ist das Ergebnis von <code>1 + 1</code> in Python?');
+    }
+    refreshProgress();
+}
+
+function resetEx5() {
+    resetMC('mc5');
+    hideFB('fb5'); done.ex5 = false; refreshProgress();
+}
+</script>
+
+</body>
+</html>

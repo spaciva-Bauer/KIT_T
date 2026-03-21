@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIT12 – Variablen &amp; Datentypen</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1a2733;
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        header {
+            background: #1e3a5f;
+            color: white;
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        header h1   { font-size: 1.35rem; font-weight: 600; }
+        header .sub { font-size: 0.85rem; opacity: 0.7; margin-top: 0.15rem; }
+        .badge {
+            background: #e8a020;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+        }
+
+        /* ── Progress ── */
+        .progress-wrap {
+            background: #162d4a;
+            padding: 0.6rem 2rem;
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+        .progress-label { color: rgba(255,255,255,0.5); font-size: 0.7rem; white-space: nowrap; margin-right: 0.25rem; }
+        .progress-step  { height: 5px; flex: 1; background: rgba(255,255,255,0.15); border-radius: 3px; transition: background 0.4s; }
+        .progress-step.done   { background: #4ade80; }
+        .progress-step.active { background: #e8a020; }
+
+        /* ── Layout ── */
+        main { max-width: 880px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
+
+        /* ── Section cards ── */
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+        .section-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.1em; color: #1e3a5f; margin-bottom: 0.4rem;
+        }
+        .section > h2 {
+            font-size: 1.25rem; color: #1e3a5f;
+            margin-bottom: 1rem; padding-bottom: 0.6rem;
+            border-bottom: 2px solid #e8edf3;
+        }
+        h3 { font-size: 1rem; color: #1e3a5f; margin: 1.5rem 0 0.6rem; }
+        p  { margin-bottom: 0.75rem; color: #334155; font-size: 0.95rem; }
+
+        /* ── Info / warning boxes ── */
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #1e3a5f;
+            border-radius: 0 8px 8px 0;
+            padding: 0.9rem 1.2rem;
+            margin: 1rem 0;
+            font-size: 0.92rem;
+            color: #1e3a5f;
+        }
+        .warn-box {
+            background: #fff7ed;
+            border-left: 4px solid #e8a020;
+            border-radius: 0 8px 8px 0;
+            padding: 0.9rem 1.2rem;
+            margin: 1rem 0;
+            font-size: 0.92rem;
+            color: #78350f;
+        }
+
+        /* ── Code blocks ── */
+        .code-block {
+            background: #1e2d3d;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.8;
+            margin: 0.75rem 0;
+            overflow-x: auto;
+        }
+        .code-block .kw { color: #93c5fd; }
+        .code-block .fn { color: #86efac; }
+        .code-block .st { color: #fde68a; }
+        .code-block .nm { color: #f9a8d4; }
+        .code-block .cm { color: #64748b; font-style: italic; }
+        .code-block .op { color: #cbd5e1; }
+
+        /* Inline code */
+        code {
+            background: #e8edf3;
+            padding: 0.1rem 0.35rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #1e3a5f;
+        }
+
+        /* ── Data type table ── */
+        .dtype-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            margin: 0.75rem 0 1rem;
+        }
+        .dtype-table th {
+            background: #1e3a5f; color: white;
+            padding: 0.55rem 0.9rem; text-align: left; font-weight: 600;
+        }
+        .dtype-table th:first-child { border-radius: 8px 0 0 0; }
+        .dtype-table th:last-child  { border-radius: 0 8px 0 0; }
+        .dtype-table td {
+            padding: 0.5rem 0.9rem;
+            border-bottom: 1px solid #e8edf3;
+            vertical-align: top;
+        }
+        .dtype-table tr:last-child td { border-bottom: none; }
+        .dtype-table tr:nth-child(even) td { background: #f8fafc; }
+        .dtype-tag {
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem; font-weight: 700;
+            padding: 0.1rem 0.5rem; border-radius: 4px; color: white;
+        }
+        .tag-int   { background: #2563eb; }
+        .tag-float { background: #7c3aed; }
+        .tag-str   { background: #c2410c; }
+        .tag-bool  { background: #065f46; }
+
+        /* ── Operator grid ── */
+        .op-grid { display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.75rem 0; }
+        .op-card {
+            flex: 1; min-width: 160px;
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 0.8rem;
+        }
+        .op-card h4 { font-size: 0.8rem; font-weight: 700; color: #1e3a5f; margin-bottom: 0.4rem; text-transform: uppercase; }
+        .op-card table { width: 100%; font-size: 0.83rem; border-collapse: collapse; }
+        .op-card td { padding: 0.2rem 0.4rem; }
+        .op-card td:first-child { font-family: 'Courier New', monospace; font-weight: 700; color: #1e3a5f; width: 2.5rem; }
+        .op-card td:last-child  { color: #475569; }
+
+        /* ══════════════════════════
+           EXERCISES
+        ══════════════════════════ */
+        .exercise {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        /* Knobelaufgabe: golden border */
+        .exercise.knobel {
+            border-color: #e8a020;
+            background: #fffbf0;
+        }
+        .ex-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .ex-num {
+            background: #1e3a5f; color: white;
+            width: 1.9rem; height: 1.9rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.88rem; flex-shrink: 0;
+        }
+        .exercise.knobel .ex-num { background: #e8a020; }
+        .ex-header h3 { margin: 0; border: none; padding: 0; font-size: 1rem; color: #1a2733; }
+        .ex-type {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #64748b; background: #e2e8f0;
+            padding: 0.15rem 0.5rem; border-radius: 1rem; white-space: nowrap;
+        }
+        .ex-type.knobel-tag { background: #fde68a; color: #78350f; }
+        .ex-task     { font-size: 0.93rem; color: #334155; margin-bottom: 0.75rem; }
+        .ex-question { font-size: 0.93rem; color: #1a2733; margin: 1rem 0 0.5rem; font-weight: 600; }
+
+        /* Feedback */
+        .feedback { margin-top: 1rem; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.88rem; display: none; line-height: 1.5; }
+        .feedback.show { display: block; }
+        .feedback.ok  { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+        .feedback.err { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+
+        /* Buttons */
+        .btn {
+            background: #1e3a5f; color: white; border: none;
+            padding: 0.55rem 1.3rem; border-radius: 6px;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer;
+            margin-top: 1rem; transition: background 0.2s;
+        }
+        .btn:hover { background: #2d5488; }
+        .btn.sec {
+            background: transparent; color: #1e3a5f;
+            border: 2px solid #1e3a5f; margin-left: 0.5rem;
+        }
+        .btn.sec:hover { background: #eff6ff; }
+
+        /* Multiple choice */
+        .mc-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+        .mc-list li { margin-bottom: 0.4rem; }
+        .mc-list label {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.55rem 0.9rem; background: white;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            cursor: pointer; font-size: 0.88rem; transition: border-color 0.2s;
+        }
+        .mc-list label:hover { border-color: #1e3a5f; }
+        .mc-list input[type="radio"] { accent-color: #1e3a5f; flex-shrink: 0; }
+        .mc-list label.ok  { border-color: #86efac; background: #f0fdf4; }
+        .mc-list label.err { border-color: #fca5a5; background: #fef2f2; }
+
+        /* ── Ü1 & Matching ── */
+        .match-grid { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .match-col  { flex: 1; min-width: 180px; }
+        .match-col > h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; }
+        .match-item {
+            padding: 0.55rem 0.9rem; background: white;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            margin-bottom: 0.4rem; cursor: pointer;
+            font-size: 0.88rem; font-family: 'Courier New', monospace;
+            transition: all 0.18s; user-select: none;
+        }
+        .match-item.right-col { font-family: 'Segoe UI', Arial, sans-serif; }
+        .match-item:hover   { border-color: #1e3a5f; }
+        .match-item.sel     { border-color: #1e3a5f; background: #eff6ff; }
+        .match-item.matched { border-color: #86efac; background: #f0fdf4; color: #166534; cursor: default; }
+        .match-item.wrong   { border-color: #fca5a5; background: #fef2f2; }
+
+        /* ── Ü3 Error finder ── */
+        .code-line {
+            display: block;
+            padding: 0.15rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #e2e8f0;
+            line-height: 1.8;
+            user-select: none;
+        }
+        .code-line:hover        { background: rgba(255,255,255,0.08); }
+        .code-line.selected     { background: rgba(248,113,113,0.25); outline: 1px solid #f87171; }
+        .code-line.correct-ln   { background: rgba(74,222,128,0.2);   outline: 1px solid #4ade80; cursor: default; }
+        .code-line.wrong-ln     { background: rgba(248,113,113,0.2);  outline: 1px solid #f87171; }
+        .line-num { color: #475569; margin-right: 1rem; user-select: none; }
+
+        /* ── Ü4 Trace table ── */
+        .trace-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            margin: 0.75rem 0;
+            font-family: 'Courier New', monospace;
+        }
+        .trace-table th {
+            background: #1e3a5f; color: white;
+            padding: 0.5rem 0.75rem; text-align: center; font-weight: 600;
+        }
+        .trace-table th:first-child { border-radius: 8px 0 0 0; text-align: left; }
+        .trace-table th:last-child  { border-radius: 0 8px 0 0; }
+        .trace-table td {
+            padding: 0.45rem 0.75rem;
+            border-bottom: 1px solid #e8edf3;
+            text-align: center; color: #334155;
+        }
+        .trace-table td:first-child { text-align: left; background: #1e2d3d; color: #e2e8f0; }
+        .trace-table tr:last-child td { border-bottom: none; }
+        .trace-table td.changed { background: #fef9c3; font-weight: 700; color: #713f12; }
+        .trace-table td.dash    { color: #94a3b8; }
+
+        /* Trace answer input */
+        .trace-input {
+            width: 5rem;
+            padding: 0.3rem 0.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .trace-input:focus { border-color: #1e3a5f; }
+        .trace-input.ok  { border-color: #86efac; background: #f0fdf4; color: #166534; }
+        .trace-input.err { border-color: #fca5a5; background: #fef2f2; color: #991b1b; }
+
+        /* ── Ü5 Knobelaufgabe ── */
+        .knobel-step {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .knobel-step-label {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #e8a020; margin-bottom: 0.4rem;
+        }
+        .knobel-step h4 { font-size: 0.95rem; font-weight: 700; color: #1a2733; margin-bottom: 0.6rem; }
+
+        /* Drag & Drop */
+        .dnd-wrap  { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .dnd-col   { flex: 1; min-width: 210px; }
+        .dnd-col > h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; }
+        .drag-item {
+            padding: 0.55rem 0.9rem; background: white;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            margin-bottom: 0.4rem; cursor: grab;
+            font-size: 0.85rem; font-family: 'Courier New', monospace;
+            transition: all 0.18s; user-select: none;
+        }
+        .drag-item:hover      { border-color: #1e3a5f; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .drag-item.dragging   { opacity: 0.45; cursor: grabbing; }
+        .drag-item.ok-placed  { border-color: #86efac; background: #f0fdf4; }
+        .drag-item.err-placed { border-color: #fca5a5; background: #fef2f2; }
+        .drop-zone {
+            min-height: 2.6rem;
+            border: 2px dashed #cbd5e1; border-radius: 7px;
+            padding: 0.2rem; margin-bottom: 0.4rem;
+            background: #f8fafc; display: flex; align-items: center;
+            transition: all 0.18s;
+        }
+        .drop-zone.over      { border-color: #e8a020; background: #fffbf0; }
+        .drop-zone .dz-label { font-size: 0.68rem; color: #94a3b8; padding: 0 0.6rem; }
+        .drop-zone .drag-item { margin-bottom: 0; width: 100%; }
+
+        /* Completion */
+        .completion { text-align: center; padding: 2.5rem 1rem; display: none; }
+        .completion.show { display: block; }
+        .completion .icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
+        .completion h2    { color: #1e3a5f; margin-bottom: 0.5rem; }
+        .completion p     { color: #475569; }
+    </style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+    <div>
+        <div class="badge">KIT12 &middot; LB 1</div>
+        <h1>Variablen &amp; Datentypen in Python</h1>
+        <div class="sub">Grundlagen der Programmierung &middot; FOS/BOS Bayern</div>
+    </div>
+</header>
+
+<!-- ══════════ PROGRESS ══════════ -->
+<!-- 3 Theorie + 5 Übungen = 8 Schritte -->
+<div class="progress-wrap">
+    <span class="progress-label">Fortschritt</span>
+    <div class="progress-step done"   id="ps1" title="Theorie 1"></div>
+    <div class="progress-step done"   id="ps2" title="Theorie 2"></div>
+    <div class="progress-step done"   id="ps3" title="Theorie 3"></div>
+    <div class="progress-step active" id="ps4" title="Übung 1"></div>
+    <div class="progress-step"        id="ps5" title="Übung 2"></div>
+    <div class="progress-step"        id="ps6" title="Übung 3"></div>
+    <div class="progress-step"        id="ps7" title="Übung 4"></div>
+    <div class="progress-step"        id="ps8" title="Übung 5 – Knobelaufgabe"></div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════
+     THEORIE
+══════════════════════════════════════ -->
+
+<!-- T1: Variablen & Zuweisung -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 1 von 3</div>
+    <h2>Variablen und Zuweisung</h2>
+    <p>Eine <strong>Variable</strong> ist ein benannter Speicherplatz, in dem ein Wert abgelegt werden kann. In Python wird einer Variablen mit dem Gleichheitszeichen <code>=</code> ein Wert <strong>zugewiesen</strong>.</p>
+    <div class="info-box">
+        <strong>Syntax:</strong>&nbsp; <code>variablenname = Wert</code><br>
+        Der Name steht links, der Wert rechts. Das <code>=</code> ist kein mathematisches Gleichzeichen, sondern ein <em>Zuweisungsoperator</em>.
+    </div>
+    <div class="code-block">
+<span class="cm"># Variablen anlegen und Werte zuweisen</span>
+<span class="var">vorname</span> <span class="op">=</span> <span class="st">"Lena"</span>
+<span class="var">alter</span>   <span class="op">=</span> <span class="nm">18</span>
+<span class="var">groesse</span> <span class="op">=</span> <span class="nm">1.72</span>
+<span class="var">aktiv</span>   <span class="op">=</span> <span class="kw">True</span>
+
+<span class="cm"># Wert überschreiben – der alte Wert geht verloren</span>
+<span class="var">alter</span>   <span class="op">=</span> <span class="nm">19</span>
+    </div>
+    <p>Variablennamen dürfen Buchstaben, Ziffern und Unterstriche enthalten, müssen jedoch mit einem Buchstaben oder Unterstrich beginnen. Groß- und Kleinschreibung wird unterschieden (<code>Alter</code> ≠ <code>alter</code>).</p>
+    <div class="warn-box">
+        <strong>Achtung:</strong> Python-Schlüsselwörter wie <code>if</code>, <code>for</code>, <code>while</code>, <code>True</code>, <code>False</code> dürfen <em>nicht</em> als Variablennamen verwendet werden.
+    </div>
+</div>
+
+<!-- T2: Datentypen -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 2 von 3</div>
+    <h2>Die vier Grunddatentypen</h2>
+    <p>Jeder Wert in Python hat einen <strong>Datentyp</strong>. Python erkennt den Typ automatisch anhand des zugewiesenen Werts (<em>dynamische Typisierung</em>). Mit <code>type()</code> kann der Typ abgefragt werden.</p>
+
+    <table class="dtype-table">
+        <thead>
+            <tr>
+                <th>Datentyp</th>
+                <th>Bedeutung</th>
+                <th>Beispielwerte</th>
+                <th>Python-Beispiel</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="dtype-tag tag-int">int</span></td>
+                <td>Ganze Zahl</td>
+                <td>0, 42, &minus;7</td>
+                <td><code>alter = 18</code></td>
+            </tr>
+            <tr>
+                <td><span class="dtype-tag tag-float">float</span></td>
+                <td>Dezimalzahl</td>
+                <td>3.14, &minus;0.5, 1.0</td>
+                <td><code>groesse = 1.72</code></td>
+            </tr>
+            <tr>
+                <td><span class="dtype-tag tag-str">str</span></td>
+                <td>Zeichenkette (Text)</td>
+                <td>"Hallo", 'Python'</td>
+                <td><code>name = "Lena"</code></td>
+            </tr>
+            <tr>
+                <td><span class="dtype-tag tag-bool">bool</span></td>
+                <td>Wahrheitswert</td>
+                <td>True, False</td>
+                <td><code>aktiv = True</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="code-block">
+<span class="cm"># type() zeigt den Datentyp an</span>
+<span class="var">x</span> <span class="op">=</span> <span class="nm">42</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="var">x</span>))    <span class="cm"># &lt;class 'int'&gt;</span>
+
+<span class="var">pi</span> <span class="op">=</span> <span class="nm">3.14159</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="var">pi</span>))   <span class="cm"># &lt;class 'float'&gt;</span>
+
+<span class="var">gruss</span> <span class="op">=</span> <span class="st">"Hallo!"</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="var">gruss</span>)) <span class="cm"># &lt;class 'str'&gt;</span>
+    </div>
+</div>
+
+<!-- T3: Operatoren -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 3 von 3</div>
+    <h2>Operatoren</h2>
+    <p>Mit Operatoren werden Werte und Variablen verknüpft. Das Ergebnis hängt von den beteiligten Datentypen ab.</p>
+
+    <div class="op-grid">
+        <div class="op-card">
+            <h4>Arithmetische Operatoren</h4>
+            <table>
+                <tr><td>+</td><td>Addition</td></tr>
+                <tr><td>&minus;</td><td>Subtraktion</td></tr>
+                <tr><td>*</td><td>Multiplikation</td></tr>
+                <tr><td>/</td><td>Division → immer <code>float</code></td></tr>
+                <tr><td>//</td><td>Ganzzahldivision</td></tr>
+                <tr><td>%</td><td>Rest (Modulo)</td></tr>
+                <tr><td>**</td><td>Potenz</td></tr>
+            </table>
+        </div>
+        <div class="op-card">
+            <h4>Vergleichsoperatoren</h4>
+            <table>
+                <tr><td>==</td><td>gleich</td></tr>
+                <tr><td>!=</td><td>ungleich</td></tr>
+                <tr><td>&lt;</td><td>kleiner als</td></tr>
+                <tr><td>&gt;</td><td>größer als</td></tr>
+                <tr><td>&lt;=</td><td>kleiner oder gleich</td></tr>
+                <tr><td>&gt;=</td><td>größer oder gleich</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="code-block">
+<span class="cm"># / liefert immer float, // schneidet den Rest ab</span>
+<span class="fn">print</span>(<span class="nm">7</span> <span class="op">/</span> <span class="nm">2</span>)    <span class="cm"># 3.5</span>
+<span class="fn">print</span>(<span class="nm">7</span> <span class="op">//</span> <span class="nm">2</span>)   <span class="cm"># 3</span>
+<span class="fn">print</span>(<span class="nm">7</span> <span class="op">%</span> <span class="nm">2</span>)    <span class="cm"># 1  (Rest)</span>
+<span class="fn">print</span>(<span class="nm">2</span> <span class="op">**</span> <span class="nm">8</span>)   <span class="cm"># 256</span>
+
+<span class="cm"># + bei Strings bedeutet Verkettung, nicht Addition</span>
+<span class="fn">print</span>(<span class="st">"Hallo"</span> <span class="op">+</span> <span class="st">" Welt"</span>)  <span class="cm"># Hallo Welt</span>
+<span class="fn">print</span>(<span class="st">"Ha"</span> <span class="op">*</span> <span class="nm">3</span>)           <span class="cm"># HaHaHa</span>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     ÜBUNGEN
+══════════════════════════════════════ -->
+<div class="section">
+    <div class="section-label">Übungen</div>
+    <h2>Jetzt bist du dran!</h2>
+    <p>Bearbeite die fünf Aufgaben. Du erhältst nach jeder Aufgabe sofortiges Feedback.</p>
+
+    <!-- ─────────────────────────────────
+         Ü1 – Zuordnung Wert → Datentyp
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex1">
+        <div class="ex-header">
+            <div class="ex-num">1</div>
+            <h3>Wert dem Datentyp zuordnen</h3>
+            <span class="ex-type">Zuordnung</span>
+        </div>
+        <p class="ex-task">Klicke zuerst auf einen Python-Wert links, dann auf den passenden Datentyp rechts.</p>
+        <div class="match-grid">
+            <div class="match-col">
+                <h4>Python-Wert</h4>
+                <div class="match-item" id="ml-a" data-id="a" onclick="matchLeft('a')">42</div>
+                <div class="match-item" id="ml-b" data-id="b" onclick="matchLeft('b')">"Informatik"</div>
+                <div class="match-item" id="ml-c" data-id="c" onclick="matchLeft('c')">3.14</div>
+                <div class="match-item" id="ml-d" data-id="d" onclick="matchLeft('d')">True</div>
+            </div>
+            <div class="match-col">
+                <h4>Datentyp</h4>
+                <div class="match-item right-col" id="mr-float" data-id="float" onclick="matchRight('float')"><span class="dtype-tag tag-float">float</span> &nbsp;Dezimalzahl</div>
+                <div class="match-item right-col" id="mr-bool"  data-id="bool"  onclick="matchRight('bool')"><span class="dtype-tag tag-bool">bool</span> &nbsp;Wahrheitswert</div>
+                <div class="match-item right-col" id="mr-str"   data-id="str"   onclick="matchRight('str')"><span class="dtype-tag tag-str">str</span> &nbsp;Zeichenkette</div>
+                <div class="match-item right-col" id="mr-int"   data-id="int"   onclick="matchRight('int')"><span class="dtype-tag tag-int">int</span> &nbsp;Ganze Zahl</div>
+            </div>
+        </div>
+        <div class="feedback" id="fb1"></div>
+        <button class="btn sec" onclick="resetEx1()">Zurücksetzen</button>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü2 – Datentypen nach Ausdruck
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex2">
+        <div class="ex-header">
+            <div class="ex-num">2</div>
+            <h3>Welchen Datentyp hat das Ergebnis?</h3>
+            <span class="ex-type">Multiple Choice</span>
+        </div>
+        <p class="ex-task">Analysiere die Code-Ausschnitte und bestimme den Datentyp der jeweiligen Variable.</p>
+
+        <p class="ex-question">Frage 1: Welchen Datentyp hat <code>ergebnis</code>?</p>
+        <div class="code-block" style="margin-bottom:0.5rem;">
+<span class="var">x</span> <span class="op">=</span> <span class="nm">10</span>
+<span class="var">y</span> <span class="op">=</span> <span class="nm">4</span>
+<span class="var">ergebnis</span> <span class="op">=</span> <span class="var">x</span> <span class="op">/</span> <span class="var">y</span>
+        </div>
+        <ul class="mc-list" id="mc2a">
+            <li><label><input type="radio" name="q2a" value="a"> <code>int</code> – weil beide Ausgangswerte ganze Zahlen sind</label></li>
+            <li><label><input type="radio" name="q2a" value="b"> <code>float</code> – weil die Division <code>/</code> in Python immer eine Dezimalzahl liefert</label></li>
+            <li><label><input type="radio" name="q2a" value="c"> <code>str</code> – weil das Ergebnis ausgegeben werden soll</label></li>
+            <li><label><input type="radio" name="q2a" value="d"> <code>bool</code> – weil ein Vergleich durchgeführt wird</label></li>
+        </ul>
+
+        <p class="ex-question">Frage 2: Welchen Datentyp hat <code>antwort</code>?</p>
+        <div class="code-block" style="margin-bottom:0.5rem;">
+<span class="var">antwort</span> <span class="op">=</span> <span class="fn">input</span>(<span class="st">"Wie heißt du? "</span>)
+        </div>
+        <ul class="mc-list" id="mc2b">
+            <li><label><input type="radio" name="q2b" value="a"> <code>int</code> – wenn der Benutzer eine Zahl eingibt</label></li>
+            <li><label><input type="radio" name="q2b" value="b"> <code>float</code> – bei Dezimalzahlen</label></li>
+            <li><label><input type="radio" name="q2b" value="c"> <code>str</code> – <code>input()</code> liefert immer einen String</label></li>
+            <li><label><input type="radio" name="q2b" value="d"> Hängt davon ab, was der Benutzer eingibt</label></li>
+        </ul>
+
+        <button class="btn"     onclick="checkEx2()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx2()">Zurücksetzen</button>
+        <div class="feedback" id="fb2"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü3 – Fehler finden (TypeError)
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex3">
+        <div class="ex-header">
+            <div class="ex-num">3</div>
+            <h3>Fehler im Code finden</h3>
+            <span class="ex-type">Fehlersuche</span>
+        </div>
+        <p class="ex-task">Das Programm soll die Körpergröße in Zentimetern einlesen, in Meter umrechnen und eine Nachricht ausgeben. Es enthält <strong>genau einen Fehler</strong>. Klicke auf die fehlerhafte Zeile.</p>
+        <div class="code-block" style="padding:0.75rem 0;">
+            <span class="code-line" data-line="1" onclick="selectLine(1)"><span class="line-num">1</span><span class="var">cm</span> <span class="op">=</span> <span class="fn">input</span>(<span class="st">"Körpergröße in cm: "</span>)</span>
+            <span class="code-line" data-line="2" onclick="selectLine(2)"><span class="line-num">2</span><span class="var">meter</span> <span class="op">=</span> <span class="fn">int</span>(<span class="var">cm</span>) <span class="op">/</span> <span class="nm">100</span></span>
+            <span class="code-line" data-line="3" onclick="selectLine(3)"><span class="line-num">3</span><span class="fn">print</span>(<span class="st">"Das sind "</span> <span class="op">+</span> <span class="var">meter</span> <span class="op">+</span> <span class="st">" Meter."</span>)</span>
+            <span class="code-line" data-line="4" onclick="selectLine(4)"><span class="line-num">4</span><span class="fn">print</span>(<span class="st">"Alles erledigt."</span>)</span>
+        </div>
+        <div class="feedback" id="fb3"></div>
+        <button class="btn sec" onclick="resetEx3()">Zurücksetzen</button>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü4 – Variablen verfolgen (Trace)
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex4">
+        <div class="ex-header">
+            <div class="ex-num">4</div>
+            <h3>Variablen Schritt für Schritt verfolgen</h3>
+            <span class="ex-type">Code-Vorhersage</span>
+        </div>
+        <p class="ex-task">Verfolge die Werte der Variablen Zeile für Zeile. Trage in die grauen Felder ein, welchen Wert die jeweilige Variable nach der Ausführung dieser Zeile hat. Noch nicht definierte Variablen bleiben leer (<code>–</code>).</p>
+
+        <div class="code-block">
+<span class="nm">1</span>  <span class="var">a</span> <span class="op">=</span> <span class="nm">10</span>
+<span class="nm">2</span>  <span class="var">b</span> <span class="op">=</span> <span class="nm">3</span>
+<span class="nm">3</span>  <span class="var">c</span> <span class="op">=</span> <span class="var">a</span> <span class="op">+</span> <span class="var">b</span>
+<span class="nm">4</span>  <span class="var">a</span> <span class="op">=</span> <span class="var">a</span> <span class="op">*</span> <span class="nm">2</span>
+<span class="nm">5</span>  <span class="var">b</span> <span class="op">=</span> <span class="var">c</span> <span class="op">-</span> <span class="nm">1</span>
+        </div>
+
+        <table class="trace-table" id="traceTable">
+            <thead>
+                <tr>
+                    <th>Zeile</th>
+                    <th>a</th>
+                    <th>b</th>
+                    <th>c</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>nach Zeile 1</td>
+                    <td><input class="trace-input" id="t1a" placeholder="?"></td>
+                    <td class="dash">–</td>
+                    <td class="dash">–</td>
+                </tr>
+                <tr>
+                    <td>nach Zeile 2</td>
+                    <td><input class="trace-input" id="t2a" placeholder="?"></td>
+                    <td><input class="trace-input" id="t2b" placeholder="?"></td>
+                    <td class="dash">–</td>
+                </tr>
+                <tr>
+                    <td>nach Zeile 3</td>
+                    <td><input class="trace-input" id="t3a" placeholder="?"></td>
+                    <td><input class="trace-input" id="t3b" placeholder="?"></td>
+                    <td><input class="trace-input" id="t3c" placeholder="?"></td>
+                </tr>
+                <tr>
+                    <td>nach Zeile 4</td>
+                    <td><input class="trace-input" id="t4a" placeholder="?"></td>
+                    <td><input class="trace-input" id="t4b" placeholder="?"></td>
+                    <td><input class="trace-input" id="t4c" placeholder="?"></td>
+                </tr>
+                <tr>
+                    <td>nach Zeile 5</td>
+                    <td><input class="trace-input" id="t5a" placeholder="?"></td>
+                    <td><input class="trace-input" id="t5b" placeholder="?"></td>
+                    <td><input class="trace-input" id="t5c" placeholder="?"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button class="btn"     onclick="checkEx4()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx4()">Zurücksetzen</button>
+        <div class="feedback" id="fb4"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü5 – Knobelaufgabe: Variablentausch
+    ───────────────────────────────── -->
+    <div class="exercise knobel" id="ex5">
+        <div class="ex-header">
+            <div class="ex-num">5</div>
+            <h3>Knobelaufgabe: Zwei Variablen tauschen</h3>
+            <span class="ex-type knobel-tag">&#129504; Knobelaufgabe</span>
+        </div>
+        <p class="ex-task">
+            <strong>Ausgangssituation:</strong> Zwei Variablen <code>a = 5</code> und <code>b = 10</code> sollen so vertauscht werden, dass anschließend <code>a = 10</code> und <code>b = 5</code> gilt.
+        </p>
+
+        <!-- Schritt 1: naiver Versuch -->
+        <div class="knobel-step">
+            <div class="knobel-step-label">Schritt 1 &mdash; Der naive Versuch</div>
+            <h4>Was passiert, wenn man es so versucht?</h4>
+            <div class="code-block">
+<span class="var">a</span> <span class="op">=</span> <span class="nm">5</span>
+<span class="var">b</span> <span class="op">=</span> <span class="nm">10</span>
+
+<span class="var">a</span> <span class="op">=</span> <span class="var">b</span>    <span class="cm"># Zeile 4</span>
+<span class="var">b</span> <span class="op">=</span> <span class="var">a</span>    <span class="cm"># Zeile 5</span>
+<span class="fn">print</span>(<span class="var">a</span>, <span class="var">b</span>)
+            </div>
+            <p class="ex-question">Was gibt <code>print(a, b)</code> am Ende aus?</p>
+            <ul class="mc-list" id="mc5a">
+                <li><label><input type="radio" name="q5a" value="a"> <code>5 10</code> – nichts hat sich geändert</label></li>
+                <li><label><input type="radio" name="q5a" value="b"> <code>10 5</code> – der Tausch hat funktioniert</label></li>
+                <li><label><input type="radio" name="q5a" value="c"> <code>10 10</code> – der ursprüngliche Wert von a ist verloren</label></li>
+                <li><label><input type="radio" name="q5a" value="d"> <code>5 5</code> – der Wert von b wurde nicht übernommen</label></li>
+            </ul>
+            <button class="btn" onclick="checkEx5a()">Überprüfen</button>
+            <button class="btn sec" onclick="resetEx5a()">Zurücksetzen</button>
+            <div class="feedback" id="fb5a"></div>
+        </div>
+
+        <!-- Schritt 2: Lösung mit temp -->
+        <div class="knobel-step" id="step5b" style="opacity:0.4; pointer-events:none;">
+            <div class="knobel-step-label">Schritt 2 &mdash; Die Lösung mit einer Hilfsvariable</div>
+            <h4>Den richtigen Tausch durchführen</h4>
+            <p style="font-size:0.93rem; color:#334155; margin-bottom:0.75rem;">
+                Das Problem: Sobald <code>a = b</code> ausgeführt wird, ist der alte Wert von <code>a</code> überschrieben und verloren. Die Lösung ist eine <strong>temporäre Hilfsvariable</strong> (<code>temp</code>), die den Wert von <code>a</code> sichert, bevor er überschrieben wird.
+            </p>
+            <p style="font-size:0.93rem; color:#334155; margin-bottom:0.75rem;">
+                Bringe die drei Zeilen des korrekten Tausches in die richtige Reihenfolge. Ziehe sie aus dem Pool in die nummerierten Felder.
+            </p>
+            <div class="dnd-wrap">
+                <div class="dnd-col">
+                    <h4>Verfügbare Zeilen</h4>
+                    <div id="swapPool">
+                        <div class="drag-item" draggable="true" data-id="s_ab">a = b</div>
+                        <div class="drag-item" draggable="true" data-id="s_bt">b = temp</div>
+                        <div class="drag-item" draggable="true" data-id="s_ta">temp = a</div>
+                    </div>
+                </div>
+                <div class="dnd-col">
+                    <h4>Meine Reihenfolge</h4>
+                    <div class="drop-zone" id="sdz1"><span class="dz-label">1. Zeile</span></div>
+                    <div class="drop-zone" id="sdz2"><span class="dz-label">2. Zeile</span></div>
+                    <div class="drop-zone" id="sdz3"><span class="dz-label">3. Zeile</span></div>
+                </div>
+            </div>
+            <button class="btn"     onclick="checkEx5b()">Überprüfen</button>
+            <button class="btn sec" onclick="resetEx5b()">Zurücksetzen</button>
+            <div class="feedback" id="fb5b"></div>
+        </div>
+    </div>
+
+    <!-- Abschluss -->
+    <div class="completion" id="completion">
+        <div class="icon">&#127881;</div>
+        <h2>Ausgezeichnet!</h2>
+        <p>Du hast alle Übungen – einschließlich der Knobelaufgabe – erfolgreich abgeschlossen.<br>
+        Im nächsten Schritt geht es um <strong>Ein- und Ausgabe sowie grundlegende Funktionen</strong> in Python.</p>
+    </div>
+</div>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── Progress ───────────────────────────
+const done = { ex1:false, ex2:false, ex3:false, ex4:false, ex5:false };
+
+function refreshProgress() {
+    const map = { ps4:'ex1', ps5:'ex2', ps6:'ex3', ps7:'ex4', ps8:'ex5' };
+    Object.entries(map).forEach(([psId, exKey]) => {
+        const el = document.getElementById(psId);
+        el.className = 'progress-step ' + (done[exKey] ? 'done' : '');
+    });
+    if (Object.values(done).every(Boolean)) {
+        const c = document.getElementById('completion');
+        c.classList.add('show');
+        c.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+}
+
+// ─── Feedback helpers ──────────────────
+function showFB(id, isOk, msg) {
+    const el = document.getElementById(id);
+    el.className = 'feedback show ' + (isOk ? 'ok' : 'err');
+    el.innerHTML = (isOk ? '&#10003;&nbsp;' : '&#10007;&nbsp;') + msg;
+}
+function hideFB(id) {
+    const el = document.getElementById(id);
+    el.className = 'feedback';
+    el.innerHTML = '';
+}
+
+// ─── MC helper ─────────────────────────
+function markMC(listId, correctVal) {
+    document.querySelectorAll('#' + listId + ' label').forEach(lbl => {
+        const r = lbl.querySelector('input');
+        if (r.value === correctVal)                   lbl.classList.add('ok');
+        else if (r.checked && r.value !== correctVal) lbl.classList.add('err');
+        r.disabled = true;
+    });
+}
+function resetMC(listId) {
+    document.querySelectorAll('#' + listId + ' input').forEach(r => {
+        r.checked = false; r.disabled = false;
+    });
+    document.querySelectorAll('#' + listId + ' label').forEach(l => l.className = '');
+}
+
+// ════════════════════════════════════════
+// Ü1 – Matching
+// ════════════════════════════════════════
+const PAIRS = { a:'int', b:'str', c:'float', d:'bool' };
+let selLeft = null;
+const matchedL = new Set();
+const matchedR = new Set();
+
+function matchLeft(id) {
+    if (matchedL.has(id)) return;
+    document.querySelectorAll('[id^="ml-"]').forEach(el => {
+        if (!el.classList.contains('matched')) el.classList.remove('sel');
+    });
+    selLeft = id;
+    document.getElementById('ml-' + id).classList.add('sel');
+}
+
+function matchRight(id) {
+    if (!selLeft || matchedR.has(id)) return;
+    const lEl = document.getElementById('ml-' + selLeft);
+    const rEl = document.getElementById('mr-' + id);
+    if (PAIRS[selLeft] === id) {
+        lEl.classList.remove('sel'); lEl.classList.add('matched');
+        rEl.classList.add('matched');
+        matchedL.add(selLeft); matchedR.add(id);
+        selLeft = null;
+        if (matchedL.size === 4) {
+            showFB('fb1', true, 'Alle vier Zuordnungen richtig!');
+            done.ex1 = true; refreshProgress();
+        }
+    } else {
+        lEl.classList.add('wrong'); rEl.classList.add('wrong');
+        setTimeout(() => {
+            lEl.classList.remove('wrong','sel');
+            rEl.classList.remove('wrong');
+            selLeft = null;
+        }, 700);
+        showFB('fb1', false, 'Nicht ganz – versuch es noch einmal.');
+    }
+}
+
+function resetEx1() {
+    selLeft = null; matchedL.clear(); matchedR.clear();
+    document.querySelectorAll('[id^="ml-"], [id^="mr-"]').forEach(el => {
+        el.className = el.classList.contains('right-col') ? 'match-item right-col' : 'match-item';
+    });
+    hideFB('fb1'); done.ex1 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü2 – Multiple Choice
+// ════════════════════════════════════════
+function checkEx2() {
+    const a1 = document.querySelector('input[name="q2a"]:checked');
+    const a2 = document.querySelector('input[name="q2b"]:checked');
+    if (!a1 || !a2) { showFB('fb2', false, 'Bitte beantworte beide Fragen.'); return; }
+    markMC('mc2a', 'b'); markMC('mc2b', 'c');
+    if (a1.value === 'b' && a2.value === 'c') {
+        showFB('fb2', true, 'Beide Antworten richtig! Die Division <code>/</code> liefert in Python 3 immer einen <code>float</code>. Und <code>input()</code> gibt stets einen <code>str</code> zurück – unabhängig von der Eingabe.');
+        done.ex2 = true;
+    } else {
+        let h = '';
+        if (a1.value !== 'b') h += '<strong>Frage 1:</strong> In Python 3 liefert <code>/</code> immer <code>float</code> – auch bei zwei ganzen Zahlen (10 / 4 = 2.5). ';
+        if (a2.value !== 'c') h += '<strong>Frage 2:</strong> <code>input()</code> gibt immer <code>str</code> zurück, egal was der Benutzer tippt.';
+        showFB('fb2', false, h);
+    }
+    refreshProgress();
+}
+
+function resetEx2() {
+    resetMC('mc2a'); resetMC('mc2b');
+    hideFB('fb2'); done.ex2 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü3 – Fehlersuche (Zeile 3)
+// ════════════════════════════════════════
+function selectLine(n) {
+    if (done.ex3) return;
+    document.querySelectorAll('.code-line').forEach(el => {
+        if (!el.classList.contains('correct-ln')) el.classList.remove('selected','wrong-ln');
+    });
+    const el = document.querySelector(`.code-line[data-line="${n}"]`);
+    if (n === 3) {
+        el.classList.add('correct-ln');
+        showFB('fb3', true, 'Richtig! In Zeile 3 wird <code>meter</code> (ein <code>float</code>) mit <code>+</code> an einen String gehängt – das ergibt einen <code>TypeError</code>. Lösung: <code>str(meter)</code> oder ein Komma in <code>print()</code> verwenden.');
+        done.ex3 = true; refreshProgress();
+    } else {
+        el.classList.add('wrong-ln');
+        setTimeout(() => el.classList.remove('wrong-ln'), 800);
+        showFB('fb3', false, 'Diese Zeile ist korrekt. Suche die Stelle, wo ein <code>float</code> und ein <code>str</code> mit <code>+</code> verknüpft werden.');
+    }
+}
+
+function resetEx3() {
+    document.querySelectorAll('.code-line').forEach(el => el.classList.remove('selected','correct-ln','wrong-ln'));
+    hideFB('fb3'); done.ex3 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü4 – Trace (Variablen verfolgen)
+// ════════════════════════════════════════
+// a=10, b=3 → c=13 → a=20 → b=12
+// Row layout: [after line 1], [after line 2], ...
+// Expected values (row, col): use id pattern t{row}{col}
+// t1a=10,  t2a=10, t2b=3,  t3a=10, t3b=3,  t3c=13, t4a=20, t4b=3, t4c=13, t5a=20, t5b=12, t5c=13
+const TRACE_ANSWERS = {
+    t1a:'10',
+    t2a:'10', t2b:'3',
+    t3a:'10', t3b:'3',  t3c:'13',
+    t4a:'20', t4b:'3',  t4c:'13',
+    t5a:'20', t5b:'12', t5c:'13'
+};
+
+function checkEx4() {
+    let allOk = true;
+    Object.entries(TRACE_ANSWERS).forEach(([id, expected]) => {
+        const inp = document.getElementById(id);
+        if (!inp) return;
+        const val = inp.value.trim();
+        const ok = (val === expected);
+        inp.className = 'trace-input ' + (ok ? 'ok' : 'err');
+        if (!ok) allOk = false;
+        inp.disabled = true;
+    });
+    if (allOk) {
+        showFB('fb4', true, 'Alle Werte korrekt! Wichtige Beobachtung: Als in Zeile 4 <code>a = a * 2</code> ausgeführt wurde, hat sich der Wert von <code>c</code> <em>nicht</em> automatisch mitgeändert – <code>c</code> enthält den Wert aus dem Moment seiner Zuweisung, nicht eine dauerhafte Verknüpfung.');
+        done.ex4 = true;
+    } else {
+        showFB('fb4', false, 'Noch nicht alle Werte stimmen (rot markiert). Tipp: Führe jede Zeile einzeln durch und überlege, welche Variablen sich <em>wirklich</em> ändern.');
+        // re-enable wrong ones
+        Object.entries(TRACE_ANSWERS).forEach(([id, expected]) => {
+            const inp = document.getElementById(id);
+            if (inp && inp.value.trim() !== expected) inp.disabled = false;
+        });
+    }
+    refreshProgress();
+}
+
+function resetEx4() {
+    Object.keys(TRACE_ANSWERS).forEach(id => {
+        const inp = document.getElementById(id);
+        if (inp) { inp.value = ''; inp.className = 'trace-input'; inp.disabled = false; }
+    });
+    hideFB('fb4'); done.ex4 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü5 – Knobelaufgabe
+// ════════════════════════════════════════
+
+// ── Schritt 5a: naive approach MC ──
+function checkEx5a() {
+    const a = document.querySelector('input[name="q5a"]:checked');
+    if (!a) { showFB('fb5a', false, 'Bitte eine Antwort auswählen.'); return; }
+    markMC('mc5a', 'c');
+    if (a.value === 'c') {
+        showFB('fb5a', true, 'Richtig! Nach <code>a = b</code> hat <code>a</code> den Wert 10. Dann ist aber <code>a = 10</code> – die nächste Zuweisung <code>b = a</code> setzt <code>b</code> also ebenfalls auf 10. Der ursprüngliche Wert 5 ist verloren gegangen. Jetzt kommt Schritt 2!');
+        // Unlock step 2
+        const step2 = document.getElementById('step5b');
+        step2.style.opacity = '1';
+        step2.style.pointerEvents = 'auto';
+        initSwapDnD();
+    } else {
+        showFB('fb5a', false, 'Nicht ganz. Führe die Zeilen einzeln durch: Nach <code>a = b</code> hat <code>a</code> den Wert 10. Was hat dann <code>a</code> in <code>b = a</code>?');
+    }
+}
+
+function resetEx5a() {
+    resetMC('mc5a');
+    hideFB('fb5a');
+    const step2 = document.getElementById('step5b');
+    step2.style.opacity = '0.4';
+    step2.style.pointerEvents = 'none';
+}
+
+// ── Schritt 5b: Drag & Drop swap ──
+// Correct order: s_ta → s_ab → s_bt
+const SWAP_CORRECT = ['s_ta', 's_ab', 's_bt'];
+const SWAP_ITEMS = [
+    { id:'s_ab', text:'a = b' },
+    { id:'s_bt', text:'b = temp' },
+    { id:'s_ta', text:'temp = a' },
+];
+
+let swapDragged = null;
+
+function initSwapDnD() {
+    document.querySelectorAll('#swapPool .drag-item, #sdz1 .drag-item, #sdz2 .drag-item, #sdz3 .drag-item').forEach(item => {
+        item.addEventListener('dragstart', () => {
+            swapDragged = item;
+            setTimeout(() => item.classList.add('dragging'), 0);
+        });
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging');
+            swapDragged = null;
+        });
+    });
+
+    ['sdz1','sdz2','sdz3'].forEach((id, i) => {
+        const zone = document.getElementById(id);
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            zone.classList.remove('over');
+            if (!swapDragged) return;
+            const existing = zone.querySelector('.drag-item');
+            if (existing) document.getElementById('swapPool').appendChild(existing);
+            const prev = swapDragged.closest('.drop-zone');
+            if (prev) prev.innerHTML = '<span class="dz-label">' + (i+1) + '. Zeile</span>';
+            zone.innerHTML = '';
+            zone.appendChild(swapDragged);
+            swapDragged.classList.remove('ok-placed','err-placed');
+        });
+    });
+}
+
+// Assign step labels
+document.querySelectorAll('#sdz1, #sdz2, #sdz3').forEach((z, i) => z.dataset.step = i + 1);
+
+function checkEx5b() {
+    const zones = ['sdz1','sdz2','sdz3'];
+    const placed = zones.map(id => {
+        const item = document.getElementById(id).querySelector('.drag-item');
+        return item ? item.dataset.id : null;
+    });
+    if (placed.some(p => p === null)) { showFB('fb5b', false, 'Bitte alle drei Felder befüllen.'); return; }
+
+    const isOk = placed.every((v, i) => v === SWAP_CORRECT[i]);
+    zones.forEach((id, i) => {
+        const item = document.getElementById(id).querySelector('.drag-item');
+        if (item) {
+            item.classList.remove('ok-placed','err-placed');
+            item.classList.add(placed[i] === SWAP_CORRECT[i] ? 'ok-placed' : 'err-placed');
+        }
+    });
+
+    if (isOk) {
+        showFB('fb5b', true,
+            'Perfekt! Der korrekte Ablauf:<br>' +
+            '1. <code>temp = a</code> &ndash; Wert von a (= 5) in temp retten<br>' +
+            '2. <code>a = b</code> &ndash; a bekommt den Wert von b (= 10)<br>' +
+            '3. <code>b = temp</code> &ndash; b bekommt den gesicherten Wert (= 5)<br><br>' +
+            'Dieses Prinzip der Hilfsvariable ist grundlegend in der Programmierung – z.&nbsp;B. beim Sortieren von Daten.');
+        done.ex5 = true; refreshProgress();
+    } else {
+        showFB('fb5b', false, 'Noch nicht ganz. Denke daran: Welcher Wert muss <em>zuerst</em> gesichert werden, bevor er verloren gehen kann?');
+    }
+}
+
+function resetEx5b() {
+    const pool = document.getElementById('swapPool');
+    pool.innerHTML = '';
+    SWAP_ITEMS.forEach(({ id, text }) => {
+        const div = document.createElement('div');
+        div.className = 'drag-item';
+        div.draggable = true;
+        div.dataset.id = id;
+        div.textContent = text;
+        pool.appendChild(div);
+    });
+    ['sdz1','sdz2','sdz3'].forEach((id, i) => {
+        document.getElementById(id).innerHTML = '<span class="dz-label">' + (i+1) + '. Zeile</span>';
+    });
+    initSwapDnD();
+    hideFB('fb5b'); done.ex5 = false; refreshProgress();
+}
+</script>
+
+</body>
+</html>
