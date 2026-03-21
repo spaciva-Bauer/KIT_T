@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIT12 – Testfälle</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1a2733;
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        header {
+            background: #1e3a5f; color: white;
+            padding: 1.25rem 2rem;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        header h1   { font-size: 1.35rem; font-weight: 600; }
+        header .sub { font-size: 0.85rem; opacity: 0.7; margin-top: 0.15rem; }
+        .badge {
+            background: #e8a020; color: white;
+            font-size: 0.7rem; font-weight: 700;
+            padding: 0.2rem 0.55rem; border-radius: 1rem;
+            text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+        }
+
+        /* ── Progress ── */
+        .progress-wrap {
+            background: #162d4a; padding: 0.6rem 2rem;
+            display: flex; gap: 0.4rem; align-items: center;
+        }
+        .progress-label { color: rgba(255,255,255,0.5); font-size: 0.7rem; white-space: nowrap; margin-right: 0.25rem; }
+        .progress-step  { height: 5px; flex: 1; background: rgba(255,255,255,0.15); border-radius: 3px; transition: background 0.4s; }
+        .progress-step.done   { background: #4ade80; }
+        .progress-step.active { background: #e8a020; }
+
+        /* ── Layout ── */
+        main { max-width: 880px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
+
+        /* ── Section cards ── */
+        .section {
+            background: white; border-radius: 12px;
+            padding: 2rem; margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+        .section-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.1em; color: #1e3a5f; margin-bottom: 0.4rem;
+        }
+        .section > h2 {
+            font-size: 1.25rem; color: #1e3a5f;
+            margin-bottom: 1rem; padding-bottom: 0.6rem;
+            border-bottom: 2px solid #e8edf3;
+        }
+        h3 { font-size: 1rem; color: #1e3a5f; margin: 1.5rem 0 0.6rem; }
+        p  { margin-bottom: 0.75rem; color: #334155; font-size: 0.95rem; }
+
+        /* ── Boxes ── */
+        .info-box {
+            background: #eff6ff; border-left: 4px solid #1e3a5f;
+            border-radius: 0 8px 8px 0; padding: 0.9rem 1.2rem;
+            margin: 1rem 0; font-size: 0.92rem; color: #1e3a5f;
+        }
+        .warn-box {
+            background: #fff7ed; border-left: 4px solid #e8a020;
+            border-radius: 0 8px 8px 0; padding: 0.9rem 1.2rem;
+            margin: 1rem 0; font-size: 0.92rem; color: #78350f;
+        }
+
+        /* ── Code blocks ── */
+        .code-block {
+            background: #1e2d3d; color: #e2e8f0;
+            border-radius: 8px; padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace; font-size: 0.875rem;
+            line-height: 1.8; margin: 0.75rem 0; overflow-x: auto;
+        }
+        .code-block .kw { color: #93c5fd; }
+        .code-block .fn { color: #86efac; }
+        .code-block .st { color: #fde68a; }
+        .code-block .nm { color: #f9a8d4; }
+        .code-block .cm { color: #64748b; font-style: italic; }
+        .code-block .op { color: #cbd5e1; }
+        .code-block .lo { color: #c4b5fd; }
+        .code-block .bug { background: rgba(248,113,113,0.2); outline: 1px solid #f87171; border-radius: 3px; padding: 0 2px; }
+
+        code {
+            background: #e8edf3; padding: 0.1rem 0.35rem;
+            border-radius: 3px; font-family: 'Courier New', monospace;
+            font-size: 0.85em; color: #1e3a5f;
+        }
+
+        /* ── Type badges ── */
+        .type-badge {
+            display: inline-block; font-size: 0.72rem; font-weight: 700;
+            padding: 0.15rem 0.55rem; border-radius: 1rem; margin-left: 0.3rem;
+        }
+        .nf { background: #dbeafe; color: #1e40af; }
+        .gf { background: #fef9c3; color: #854d0e; }
+        .ff { background: #fee2e2; color: #991b1b; }
+
+        /* ── Test case table ── */
+        .test-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.875rem; margin: 1rem 0;
+        }
+        .test-table th {
+            background: #1e3a5f; color: white;
+            padding: 0.55rem 0.9rem; text-align: left; font-weight: 600;
+        }
+        .test-table th:first-child { border-radius: 8px 0 0 0; }
+        .test-table th:last-child  { border-radius: 0 8px 0 0; }
+        .test-table td {
+            padding: 0.5rem 0.9rem;
+            border-bottom: 1px solid #e8edf3;
+            vertical-align: middle; color: #334155;
+        }
+        .test-table td:first-child  { font-weight: 600; color: #1e3a5f; }
+        .test-table td.mono         { font-family: 'Courier New', monospace; }
+        .test-table tr:last-child td { border-bottom: none; }
+        .test-table tr:nth-child(even) td { background: #f8fafc; }
+        .test-table tr:nth-child(even) td:first-child { background: #f0f4f9; }
+
+        /* Pass/fail cells */
+        .pass { color: #166534; font-weight: 700; }
+        .fail { color: #991b1b; font-weight: 700; }
+        .tbd  { color: #94a3b8; font-style: italic; }
+
+        /* ── Äquivalenzklassen visual ── */
+        .eq-visual {
+            display: flex; gap: 0.3rem; align-items: stretch;
+            margin: 1rem 0; font-size: 0.82rem; flex-wrap: wrap;
+        }
+        .eq-class {
+            flex: 1; min-width: 100px;
+            border-radius: 8px; padding: 0.6rem 0.75rem;
+            text-align: center; font-weight: 600;
+        }
+        .eq-class.invalid { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .eq-class.valid   { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+        .eq-arrow { display: flex; align-items: center; color: #94a3b8; font-size: 1rem; padding: 0 0.1rem; }
+        .eq-class .eq-range { font-size: 0.72rem; font-weight: 400; margin-top: 0.15rem; opacity: 0.8; }
+        .eq-class .eq-output { font-size: 0.78rem; font-family: 'Courier New', monospace; margin-top: 0.2rem; }
+
+        /* ── Grenzwert markers ── */
+        .boundary-row {
+            display: flex; gap: 0; align-items: center;
+            margin: 0.75rem 0 1rem; overflow-x: auto; padding-bottom: 0.25rem;
+        }
+        .bv-num {
+            background: #1e3a5f; color: white;
+            padding: 0.35rem 0.6rem; font-family: 'Courier New', monospace;
+            font-size: 0.82rem; font-weight: 700; border-radius: 6px; white-space: nowrap;
+        }
+        .bv-arrow { color: #94a3b8; font-size: 0.8rem; padding: 0 0.3rem; white-space: nowrap; }
+        .bv-region {
+            background: #eff6ff; border: 1px solid #bfdbfe;
+            color: #1e40af; padding: 0.35rem 0.75rem;
+            font-size: 0.78rem; white-space: nowrap; border-radius: 4px;
+        }
+
+        /* ══════════════════════════
+           EXERCISES
+        ══════════════════════════ */
+        .exercise {
+            background: #f8fafc; border: 2px solid #e2e8f0;
+            border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .exercise.knobel { border-color: #e8a020; background: #fffbf0; }
+        .ex-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .ex-num {
+            background: #1e3a5f; color: white;
+            width: 1.9rem; height: 1.9rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.88rem; flex-shrink: 0;
+        }
+        .exercise.knobel .ex-num { background: #e8a020; }
+        .ex-header h3 { margin: 0; border: none; padding: 0; font-size: 1rem; color: #1a2733; }
+        .ex-type {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #64748b; background: #e2e8f0;
+            padding: 0.15rem 0.5rem; border-radius: 1rem; white-space: nowrap;
+        }
+        .ex-type.knobel-tag { background: #fde68a; color: #78350f; }
+        .ex-task     { font-size: 0.93rem; color: #334155; margin-bottom: 0.75rem; }
+        .ex-question { font-size: 0.93rem; color: #1a2733; margin: 1rem 0 0.5rem; font-weight: 600; }
+
+        /* Feedback */
+        .feedback { margin-top: 1rem; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.88rem; display: none; line-height: 1.5; }
+        .feedback.show { display: block; }
+        .feedback.ok  { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+        .feedback.err { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+
+        /* Buttons */
+        .btn {
+            background: #1e3a5f; color: white; border: none;
+            padding: 0.55rem 1.3rem; border-radius: 6px;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer;
+            margin-top: 1rem; transition: background 0.2s;
+        }
+        .btn:hover { background: #2d5488; }
+        .btn.sec { background: transparent; color: #1e3a5f; border: 2px solid #1e3a5f; margin-left: 0.5rem; }
+        .btn.sec:hover { background: #eff6ff; }
+
+        /* Multiple choice */
+        .mc-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+        .mc-list li { margin-bottom: 0.4rem; }
+        .mc-list label {
+            display: flex; align-items: flex-start; gap: 0.7rem;
+            padding: 0.55rem 0.9rem; background: white;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            cursor: pointer; font-size: 0.88rem; transition: border-color 0.2s; line-height: 1.45;
+        }
+        .mc-list label:hover { border-color: #1e3a5f; }
+        .mc-list input[type="radio"] { accent-color: #1e3a5f; flex-shrink: 0; margin-top: 0.2rem; }
+        .mc-list label.ok  { border-color: #86efac; background: #f0fdf4; }
+        .mc-list label.err { border-color: #fca5a5; background: #fef2f2; }
+
+        /* ── Ü1 Matching ── */
+        .match-grid { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .match-col  { flex: 1; min-width: 190px; }
+        .match-col > h4 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; }
+        .match-item {
+            padding: 0.55rem 0.9rem; background: white;
+            border: 2px solid #e2e8f0; border-radius: 7px;
+            margin-bottom: 0.4rem; cursor: pointer;
+            font-size: 0.875rem; transition: all 0.18s; user-select: none;
+            line-height: 1.4;
+        }
+        .match-item.mono { font-family: 'Courier New', monospace; }
+        .match-item:hover   { border-color: #1e3a5f; }
+        .match-item.sel     { border-color: #1e3a5f; background: #eff6ff; }
+        .match-item.matched { border-color: #86efac; background: #f0fdf4; color: #166534; cursor: default; }
+        .match-item.wrong   { border-color: #fca5a5; background: #fef2f2; }
+
+        /* ── Ü4 Fill-in table ── */
+        .fill-input {
+            width: 100%; max-width: 140px;
+            padding: 0.3rem 0.5rem; border: 2px solid #e2e8f0;
+            border-radius: 5px; font-family: 'Courier New', monospace;
+            font-size: 0.85rem; outline: none; transition: border-color 0.2s;
+            text-align: center;
+        }
+        .fill-input:focus { border-color: #1e3a5f; }
+        .fill-input.ok  { border-color: #86efac; background: #f0fdf4; color: #166534; }
+        .fill-input.err { border-color: #fca5a5; background: #fef2f2; color: #991b1b; }
+
+        /* ── Ü5 Knobelaufgabe ── */
+        .knobel-step {
+            background: white; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem;
+        }
+        .knobel-step-label {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #e8a020; margin-bottom: 0.4rem;
+        }
+        .knobel-step h4 { font-size: 0.95rem; font-weight: 700; color: #1a2733; margin-bottom: 0.6rem; }
+
+        /* Completion */
+        .completion { text-align: center; padding: 2.5rem 1rem; display: none; }
+        .completion.show { display: block; }
+        .completion .icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
+        .completion h2    { color: #1e3a5f; margin-bottom: 0.5rem; }
+        .completion p     { color: #475569; }
+    </style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+    <div>
+        <div class="badge">KIT12 &middot; LB 1</div>
+        <h1>Testfälle entwerfen und auswerten</h1>
+        <div class="sub">Grundlagen der Programmierung &middot; FOS/BOS Bayern</div>
+    </div>
+</header>
+
+<!-- ══════════ PROGRESS ══════════ -->
+<div class="progress-wrap">
+    <span class="progress-label">Fortschritt</span>
+    <div class="progress-step done"   id="ps1"></div>
+    <div class="progress-step done"   id="ps2"></div>
+    <div class="progress-step done"   id="ps3"></div>
+    <div class="progress-step active" id="ps4"></div>
+    <div class="progress-step"        id="ps5"></div>
+    <div class="progress-step"        id="ps6"></div>
+    <div class="progress-step"        id="ps7"></div>
+    <div class="progress-step"        id="ps8"></div>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════
+     THEORIE
+══════════════════════════════════════ -->
+
+<!-- T1: Warum testen? -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 1 von 3</div>
+    <h2>Warum testen wir Programme?</h2>
+
+    <div class="info-box" style="margin-bottom:1rem;">
+        <strong>Unser Beispielprogramm:</strong> An FOS und BOS Bayern werden in der Oberstufe statt klassischer Schulnoten ganzzahlige <strong>Punkte von 0 bis 15</strong> vergeben – 15 Punkte entsprechen der besten Bewertung (Note 1 – sehr gut), 0 Punkte der schlechtesten (Note 6 – ungenügend). Ein <em>Notenprogramm</em> liest die Punkte als Eingabe ein und gibt die zugehörige Notenstufe als Text aus. An diesem Programm üben wir die systematische Entwicklung von Testfällen.
+    </div>
+
+    <p>Ein Programm, das keine Fehlermeldung erzeugt, ist <strong>nicht automatisch korrekt</strong>. Logische Fehler laufen ohne Absturz durch – sie liefern einfach falsche Ergebnisse.</p>
+    <p>Durch systematisches <strong>Testen</strong> überprüfen wir, ob ein Programm für alle relevanten Eingaben das erwartete Verhalten zeigt.</p>
+
+    <div class="info-box">
+        <strong>Grundregel:</strong> &bdquo;Kein Fehler gefunden&ldquo; bedeutet nicht &bdquo;fehlerfrei&ldquo;. Es bedeutet nur: Die bisher gewählten Testfälle haben keinen Fehler aufgedeckt. Deshalb ist die <em>Auswahl der Testfälle</em> entscheidend.
+    </div>
+
+    <p>Ein <strong>Testfall</strong> besteht aus:</p>
+    <ul style="margin: 0.5rem 0 0.75rem 1.5rem; color: #334155; font-size: 0.95rem; line-height: 1.8;">
+        <li><strong>Eingabe</strong> – der Wert, der in das Programm eingegeben wird</li>
+        <li><strong>Erwartete Ausgabe</strong> – das Ergebnis, das das <em>korrekte</em> Programm liefern soll</li>
+        <li><strong>Tatsächliche Ausgabe</strong> – was das Programm wirklich ausgibt</li>
+        <li><strong>Bewertung</strong> – bestanden (✓) oder nicht bestanden (✗)</li>
+    </ul>
+
+    <div class="warn-box">
+        <strong>Reihenfolge beachten:</strong> Die <em>erwartete Ausgabe</em> wird <strong>vor</strong> dem Test festgelegt – nicht erst nachdem man das Programm ausgeführt hat. Andernfalls akzeptiert man unbewusst fehlerhafte Ergebnisse.
+    </div>
+</div>
+
+<!-- T2: Arten von Testfällen -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 2 von 3</div>
+    <h2>Arten von Testfällen</h2>
+    <p>Um möglichst viele Fehler aufzudecken, unterscheiden wir drei Kategorien:</p>
+
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0 1.25rem;">
+        <div style="flex:1; min-width:180px; background:#dbeafe; border-radius:10px; padding:1rem;">
+            <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#1e40af; margin-bottom:0.3rem;">Normalfall (NF)</div>
+            <p style="font-size:0.88rem; color:#1e3a5f; margin:0;">Typische Eingabe aus dem <strong>Kernbereich</strong> des gültigen Wertebereichs. Das Programm soll ihn problemlos verarbeiten.</p>
+            <div style="margin-top:0.5rem; font-size:0.82rem; font-family:'Courier New',monospace; color:#1e40af;">Beispiel: punkte = 11</div>
+        </div>
+        <div style="flex:1; min-width:180px; background:#fef9c3; border-radius:10px; padding:1rem;">
+            <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#854d0e; margin-bottom:0.3rem;">Grenzfall (GF)</div>
+            <p style="font-size:0.88rem; color:#78350f; margin:0;">Eingabe <strong>genau an einer Bereichsgrenze</strong> – dort passieren die meisten Programmierfehler (Off-by-One-Fehler).</p>
+            <div style="margin-top:0.5rem; font-size:0.82rem; font-family:'Courier New',monospace; color:#854d0e;">Beispiele: punkte = 13, 12, 10, 9, 0, 15</div>
+        </div>
+        <div style="flex:1; min-width:180px; background:#fee2e2; border-radius:10px; padding:1rem;">
+            <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#991b1b; margin-bottom:0.3rem;">Fehlerfall / Sonderfall (FF)</div>
+            <p style="font-size:0.88rem; color:#7f1d1d; margin:0;">Eingabe <strong>außerhalb des gültigen Bereichs</strong> oder ein Sonderfall (z.&nbsp;B. 0, negative Zahlen). Das Programm muss robust reagieren.</p>
+            <div style="margin-top:0.5rem; font-size:0.82rem; font-family:'Courier New',monospace; color:#991b1b;">Beispiele: punkte = -1, punkte = 16</div>
+        </div>
+    </div>
+
+    <h3>Äquivalenzklassen</h3>
+    <p>Eingaben, die alle zum selben Programmverhalten führen, bilden eine <strong>Äquivalenzklasse</strong>. Es genügt, <em>einen</em> Vertreter je Klasse zu testen – alle anderen Werte dieser Klasse verhalten sich identisch.</p>
+    <p>Für das Notenprogramm (Punkte 0–15) ergeben sich diese Klassen:</p>
+
+    <div class="eq-visual" style="gap:0.2rem;">
+        <div class="eq-class invalid" style="min-width:70px;"><div>Ungültig</div><div class="eq-range">&lt; 0</div><div class="eq-output">"Ungültige<br>Eingabe"</div></div>
+        <div class="eq-class valid"   style="min-width:70px;"><div>Ungenügend</div><div class="eq-range">0</div><div class="eq-output">"ungenügend"<br><span style="font-size:0.68rem;opacity:0.7;">(Note 6)</span></div></div>
+        <div class="eq-class valid"   style="min-width:70px;"><div>Mangelhaft</div><div class="eq-range">1 – 3</div><div class="eq-output">"mangelhaft"<br><span style="font-size:0.68rem;opacity:0.7;">(Note 5)</span></div></div>
+        <div class="eq-class valid"   style="min-width:70px;"><div>Ausreichend</div><div class="eq-range">4 – 6</div><div class="eq-output">"ausreichend"<br><span style="font-size:0.68rem;opacity:0.7;">(Note 4)</span></div></div>
+        <div class="eq-class valid"   style="min-width:70px;"><div>Befriedigend</div><div class="eq-range">7 – 9</div><div class="eq-output">"befriedigend"<br><span style="font-size:0.68rem;opacity:0.7;">(Note 3)</span></div></div>
+        <div class="eq-class valid"   style="min-width:70px;"><div>Gut</div><div class="eq-range">10 – 12</div><div class="eq-output">"gut"<br><span style="font-size:0.68rem;opacity:0.7;">(Note 2)</span></div></div>
+        <div class="eq-class valid"   style="min-width:70px;"><div>Sehr gut</div><div class="eq-range">13 – 15</div><div class="eq-output">"sehr gut"<br><span style="font-size:0.68rem;opacity:0.7;">(Note 1)</span></div></div>
+        <div class="eq-class invalid" style="min-width:70px;"><div>Ungültig</div><div class="eq-range">&gt; 15</div><div class="eq-output">"Ungültige<br>Eingabe"</div></div>
+    </div>
+
+    <p>Entlang der <strong>Grenzen zwischen den Klassen</strong> liegen die kritischen Grenzwerte: 0 / −1, 1 / 0, 3 / 4, 6 / 7, 9 / 10, 12 / 13, 15 / 16.</p>
+</div>
+
+<!-- T3: Testfalltabelle -->
+<div class="section">
+    <div class="section-label">Theorie &middot; Teil 3 von 3</div>
+    <h2>Testfälle dokumentieren</h2>
+    <p>Testfälle werden in einer <strong>Testfalltabelle</strong> festgehalten. Das folgende Beispiel zeigt eine vollständige Testtabelle für das Notenprogramm – die erwarteten Ausgaben wurden <em>vor</em> dem Test festgelegt.</p>
+
+    <div class="code-block">
+<span class="var">punkte</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Punkte (0–15): "</span>))
+<span class="kw">if</span>   <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">13</span> <span class="lo">and</span> <span class="var">punkte</span> <span class="op">&lt;=</span> <span class="nm">15</span>: <span class="fn">print</span>(<span class="st">"sehr gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">10</span>:                      <span class="fn">print</span>(<span class="st">"gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">7</span>:                       <span class="fn">print</span>(<span class="st">"befriedigend"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">4</span>:                       <span class="fn">print</span>(<span class="st">"ausreichend"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">1</span>:                       <span class="fn">print</span>(<span class="st">"mangelhaft"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">==</span> <span class="nm">0</span>:                       <span class="fn">print</span>(<span class="st">"ungenügend"</span>)
+<span class="kw">else</span>:                                     <span class="fn">print</span>(<span class="st">"Ungültige Eingabe"</span>)
+    </div>
+
+    <table class="test-table">
+        <thead>
+            <tr>
+                <th>Nr.</th>
+                <th>Beschreibung</th>
+                <th>Eingabe</th>
+                <th>Erwartete Ausgabe</th>
+                <th>Typ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>T01</td>
+                <td>Normalfall: sehr gut</td>
+                <td class="mono">14</td>
+                <td class="mono">"sehr gut"</td>
+                <td><span class="type-badge nf">NF</span></td>
+            </tr>
+            <tr>
+                <td>T02</td>
+                <td>Grenzfall: untere Grenze sehr gut</td>
+                <td class="mono">13</td>
+                <td class="mono">"sehr gut"</td>
+                <td><span class="type-badge gf">GF</span></td>
+            </tr>
+            <tr>
+                <td>T03</td>
+                <td>Grenzfall: obere Grenze gut</td>
+                <td class="mono">12</td>
+                <td class="mono">"gut"</td>
+                <td><span class="type-badge gf">GF</span></td>
+            </tr>
+            <tr>
+                <td>T04</td>
+                <td>Normalfall: befriedigend</td>
+                <td class="mono">8</td>
+                <td class="mono">"befriedigend"</td>
+                <td><span class="type-badge nf">NF</span></td>
+            </tr>
+            <tr>
+                <td>T05</td>
+                <td>Grenzfall: untere Grenze gut</td>
+                <td class="mono">10</td>
+                <td class="mono">"gut"</td>
+                <td><span class="type-badge gf">GF</span></td>
+            </tr>
+            <tr>
+                <td>T06</td>
+                <td>Grenzfall: 0 Punkte (Sonderfall)</td>
+                <td class="mono">0</td>
+                <td class="mono">"ungenügend"</td>
+                <td><span class="type-badge gf">GF</span></td>
+            </tr>
+            <tr>
+                <td>T07</td>
+                <td>Grenzfall: obere Grenze gültig</td>
+                <td class="mono">15</td>
+                <td class="mono">"sehr gut"</td>
+                <td><span class="type-badge gf">GF</span></td>
+            </tr>
+            <tr>
+                <td>T08</td>
+                <td>Fehlerfall: negative Punktzahl</td>
+                <td class="mono">-1</td>
+                <td class="mono">"Ungültige Eingabe"</td>
+                <td><span class="type-badge ff">FF</span></td>
+            </tr>
+            <tr>
+                <td>T09</td>
+                <td>Fehlerfall: Wert über 15</td>
+                <td class="mono">16</td>
+                <td class="mono">"Ungültige Eingabe"</td>
+                <td><span class="type-badge ff">FF</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="info-box">
+        <strong>Minimalstrategie:</strong> Mindestens <strong>je ein Normalfall pro Äquivalenzklasse</strong> und <strong>je ein Grenzfall beiderseits jeder Grenze</strong>. Das deckt die häufigsten Fehler mit möglichst wenigen Tests ab.
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     ÜBUNGEN
+══════════════════════════════════════ -->
+<div class="section">
+    <div class="section-label">Übungen</div>
+    <h2>Jetzt bist du dran!</h2>
+    <p>Bearbeite die fünf Aufgaben. Du erhältst nach jeder Aufgabe sofortiges Feedback.</p>
+
+    <!-- ─────────────────────────────────
+         Ü1 – Zuordnung Testfall-Typen
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex1">
+        <div class="ex-header">
+            <div class="ex-num">1</div>
+            <h3>Testfall-Typ zuordnen</h3>
+            <span class="ex-type">Zuordnung</span>
+        </div>
+        <p class="ex-task">
+            Das Notenprogramm liest Punkte von <strong>0 bis 15</strong> ein. Klicke zuerst auf einen Eingabewert links, dann auf den passenden Testfall-Typ rechts.
+        </p>
+        <div class="match-grid">
+            <div class="match-col">
+                <h4>Eingabewert</h4>
+                <div class="match-item mono" id="ml-a" onclick="matchLeft('a')">punkte = 8</div>
+                <div class="match-item mono" id="ml-b" onclick="matchLeft('b')">punkte = 13</div>
+                <div class="match-item mono" id="ml-c" onclick="matchLeft('c')">punkte = 15</div>
+                <div class="match-item mono" id="ml-d" onclick="matchLeft('d')">punkte = 16</div>
+            </div>
+            <div class="match-col">
+                <h4>Testfall-Typ</h4>
+                <div class="match-item" id="mr-gf2" onclick="matchRight('gf2')"><span class="type-badge gf">GF</span> Grenzfall – obere Grenze (letzter gültiger Wert)</div>
+                <div class="match-item" id="mr-ff"  onclick="matchRight('ff')"><span class="type-badge ff">FF</span> Fehlerfall – Wert direkt oberhalb des gültigen Bereichs</div>
+                <div class="match-item" id="mr-nf"  onclick="matchRight('nf')"><span class="type-badge nf">NF</span> Normalfall – typischer gültiger Wert</div>
+                <div class="match-item" id="mr-gf1" onclick="matchRight('gf1')"><span class="type-badge gf">GF</span> Grenzfall – Bereichsgrenze zwischen zwei Notenstufen</div>
+            </div>
+        </div>
+        <div class="feedback" id="fb1"></div>
+        <button class="btn sec" onclick="resetEx1()">Zurücksetzen</button>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü2 – Welche Testmenge deckt alle Zweige ab?
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex2">
+        <div class="ex-header">
+            <div class="ex-num">2</div>
+            <h3>Testmenge auf Vollständigkeit prüfen</h3>
+            <span class="ex-type">Multiple Choice</span>
+        </div>
+        <p class="ex-task">Betrachte das Notenprogramm mit sieben Äquivalenzklassen (inkl. Fehlerfall). Welche Testmenge deckt <strong>alle Zweige mindestens einmal</strong> ab?</p>
+
+        <div class="code-block">
+<span class="var">punkte</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Punkte (0–15): "</span>))
+<span class="kw">if</span>   <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">13</span> <span class="lo">and</span> <span class="var">punkte</span> <span class="op">&lt;=</span> <span class="nm">15</span>: <span class="fn">print</span>(<span class="st">"sehr gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">10</span>:                      <span class="fn">print</span>(<span class="st">"gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">7</span>:                       <span class="fn">print</span>(<span class="st">"befriedigend"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">4</span>:                       <span class="fn">print</span>(<span class="st">"ausreichend"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">1</span>:                       <span class="fn">print</span>(<span class="st">"mangelhaft"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">==</span> <span class="nm">0</span>:                       <span class="fn">print</span>(<span class="st">"ungenügend"</span>)
+<span class="kw">else</span>:                                     <span class="fn">print</span>(<span class="st">"Ungültige Eingabe"</span>)
+        </div>
+
+        <ul class="mc-list" id="mc2">
+            <li><label><input type="radio" name="q2" value="a">
+                <span><strong>Menge A:</strong> &nbsp;{14, 8, 5, 2, 0, −1} &nbsp; (6 Testfälle)</span>
+            </label></li>
+            <li><label><input type="radio" name="q2" value="b">
+                <span><strong>Menge B:</strong> &nbsp;{14, 11, 8, 5, 2, 0, −1} &nbsp; (7 Testfälle)</span>
+            </label></li>
+            <li><label><input type="radio" name="q2" value="c">
+                <span><strong>Menge C:</strong> &nbsp;{14, 11, 8, 5, 2, 0} &nbsp; (6 Testfälle)</span>
+            </label></li>
+            <li><label><input type="radio" name="q2" value="d">
+                <span><strong>Menge D:</strong> &nbsp;{14, 11} &nbsp; (2 Testfälle)</span>
+            </label></li>
+        </ul>
+
+        <button class="btn"     onclick="checkEx2()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx2()">Zurücksetzen</button>
+        <div class="feedback" id="fb2"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü3 – Grenzwerte identifizieren
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex3">
+        <div class="ex-header">
+            <div class="ex-num">3</div>
+            <h3>Kritische Grenzwerte identifizieren</h3>
+            <span class="ex-type">Multiple Choice</span>
+        </div>
+        <p class="ex-task">Betrachte das folgende vereinfachte Programm. An einer Bedingungsgrenze liegen immer <strong>zwei kritische Grenzwerte</strong>: der letzte Wert innerhalb und der erste Wert außerhalb eines Bereichs.</p>
+
+        <div class="code-block">
+<span class="var">punkte</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Punkte (0–15): "</span>))
+<span class="kw">if</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">10</span> <span class="lo">and</span> <span class="var">punkte</span> <span class="op">&lt;=</span> <span class="nm">15</span>:
+    <span class="fn">print</span>(<span class="st">"gut oder sehr gut"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"unterhalb von gut"</span>)
+        </div>
+
+        <p class="ex-question">Frage 1: Welche vier Werte sind die kritischen Grenzwerte für dieses Programm?</p>
+        <ul class="mc-list" id="mc3a">
+            <li><label><input type="radio" name="q3a" value="a"> 5, 10, 12, 15 &nbsp; (Mitte und Ränder)</label></li>
+            <li><label><input type="radio" name="q3a" value="b"> 9, 10, 15, 16 &nbsp; (je ein Wert beiderseits beider Grenzen)</label></li>
+            <li><label><input type="radio" name="q3a" value="c"> 10, 12, 15 &nbsp; (nur drei Werte)</label></li>
+            <li><label><input type="radio" name="q3a" value="d"> 0, 10, 15, 30 &nbsp; (Extremwerte und Ränder)</label></li>
+        </ul>
+
+        <p class="ex-question">Frage 2: Warum ist der Wert <code>punkte = 12</code> als alleiniger Testfall <strong>nicht ausreichend</strong>?</p>
+        <ul class="mc-list" id="mc3b">
+            <li><label><input type="radio" name="q3b" value="a"> Weil 12 keine ganzzahlige Eingabe ist.</label></li>
+            <li><label><input type="radio" name="q3b" value="b"> Weil 12 nur einen Normalfall abdeckt – Fehler an den Grenzen (z.&nbsp;B. <code>&gt;</code> statt <code>&gt;=</code> bei 10) würden nicht erkannt.</label></li>
+            <li><label><input type="radio" name="q3b" value="c"> Weil 12 außerhalb des gültigen Bereichs liegt.</label></li>
+            <li><label><input type="radio" name="q3b" value="d"> Weil man immer mindestens 10 Testfälle braucht.</label></li>
+        </ul>
+
+        <button class="btn"     onclick="checkEx3()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx3()">Zurücksetzen</button>
+        <div class="feedback" id="fb3"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü4 – Testfalltabelle ausfüllen
+    ───────────────────────────────── -->
+    <div class="exercise" id="ex4">
+        <div class="ex-header">
+            <div class="ex-num">4</div>
+            <h3>Testfalltabelle vervollständigen</h3>
+            <span class="ex-type">Tabelle ausfüllen</span>
+        </div>
+        <p class="ex-task">
+            Betrachte das Notenprogramm (wie in der Theorie). Fülle die Spalte <strong>„Erwartete Ausgabe"</strong> für jeden Testfall aus. Trage den genauen Text der Ausgabe ein (ohne Anführungszeichen).
+        </p>
+
+        <div class="code-block">
+<span class="var">punkte</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Punkte (0–15): "</span>))
+<span class="kw">if</span>   <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">13</span> <span class="lo">and</span> <span class="var">punkte</span> <span class="op">&lt;=</span> <span class="nm">15</span>: <span class="fn">print</span>(<span class="st">"sehr gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">10</span>:                      <span class="fn">print</span>(<span class="st">"gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">7</span>:                       <span class="fn">print</span>(<span class="st">"befriedigend"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">4</span>:                       <span class="fn">print</span>(<span class="st">"ausreichend"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">1</span>:                       <span class="fn">print</span>(<span class="st">"mangelhaft"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">==</span> <span class="nm">0</span>:                       <span class="fn">print</span>(<span class="st">"ungenügend"</span>)
+<span class="kw">else</span>:                                     <span class="fn">print</span>(<span class="st">"Ungültige Eingabe"</span>)
+        </div>
+
+        <table class="test-table" style="margin-top:0.75rem;">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>Beschreibung</th>
+                    <th>Eingabe</th>
+                    <th>Erwartete Ausgabe</th>
+                    <th>Typ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>T01</td>
+                    <td>Normalfall: sehr gut</td>
+                    <td class="mono">14</td>
+                    <td><input class="fill-input" id="f1" placeholder="Ausgabe…"></td>
+                    <td><span class="type-badge nf">NF</span></td>
+                </tr>
+                <tr>
+                    <td>T02</td>
+                    <td>Normalfall: befriedigend</td>
+                    <td class="mono">8</td>
+                    <td><input class="fill-input" id="f2" placeholder="Ausgabe…"></td>
+                    <td><span class="type-badge nf">NF</span></td>
+                </tr>
+                <tr>
+                    <td>T03</td>
+                    <td>Grenzfall: untere Grenze sehr gut</td>
+                    <td class="mono">13</td>
+                    <td><input class="fill-input" id="f3" placeholder="Ausgabe…"></td>
+                    <td><span class="type-badge gf">GF</span></td>
+                </tr>
+                <tr>
+                    <td>T04</td>
+                    <td>Grenzfall: 0 Punkte (Sonderfall)</td>
+                    <td class="mono">0</td>
+                    <td><input class="fill-input" id="f4" placeholder="Ausgabe…"></td>
+                    <td><span class="type-badge gf">GF</span></td>
+                </tr>
+                <tr>
+                    <td>T05</td>
+                    <td>Fehlerfall: Wert über 15</td>
+                    <td class="mono">16</td>
+                    <td><input class="fill-input" id="f5" placeholder="Ausgabe…"></td>
+                    <td><span class="type-badge ff">FF</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button class="btn"     onclick="checkEx4()">Überprüfen</button>
+        <button class="btn sec" onclick="resetEx4()">Zurücksetzen</button>
+        <div class="feedback" id="fb4"></div>
+    </div>
+
+    <!-- ─────────────────────────────────
+         Ü5 – Knobelaufgabe: Fehler durch Grenzfall aufdecken
+    ───────────────────────────────── -->
+    <div class="exercise knobel" id="ex5">
+        <div class="ex-header">
+            <div class="ex-num">5</div>
+            <h3>Knobelaufgabe: Den richtigen Testfall finden</h3>
+            <span class="ex-type knobel-tag">&#129504; Knobelaufgabe</span>
+        </div>
+        <p class="ex-task">
+            Das folgende Programm soll Punkte in eine Note umwandeln. Es enthält einen <strong>versteckten Fehler</strong>. Vier Testfälle wurden bereits durchgeführt – alle bestehen. Ein fünfter Testfall soll den Fehler aufdecken.
+        </p>
+
+        <!-- Schritt 1: Fehler finden -->
+        <div class="knobel-step">
+            <div class="knobel-step-label">Schritt 1 &mdash; Das fehlerhafte Programm analysieren</div>
+            <h4>Welcher Testfall deckt den Fehler auf?</h4>
+            <div class="code-block">
+<span class="var">punkte</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>(<span class="st">"Punkte (0–15): "</span>))
+<span class="kw">if</span>   <span class="var">punkte</span> <span class="op"><span class="bug">&gt;</span></span> <span class="nm">13</span> <span class="lo">and</span> <span class="var">punkte</span> <span class="op">&lt;=</span> <span class="nm">15</span>: <span class="fn">print</span>(<span class="st">"sehr gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">10</span>:                      <span class="fn">print</span>(<span class="st">"gut"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">7</span>:                       <span class="fn">print</span>(<span class="st">"befriedigend"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">4</span>:                       <span class="fn">print</span>(<span class="st">"ausreichend"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">&gt;=</span> <span class="nm">1</span>:                       <span class="fn">print</span>(<span class="st">"mangelhaft"</span>)
+<span class="kw">elif</span> <span class="var">punkte</span> <span class="op">==</span> <span class="nm">0</span>:                       <span class="fn">print</span>(<span class="st">"ungenügend"</span>)
+<span class="kw">else</span>:                                     <span class="fn">print</span>(<span class="st">"Ungültige Eingabe"</span>)
+            </div>
+
+            <table class="test-table" style="margin:0.75rem 0;">
+                <thead>
+                    <tr><th>Nr.</th><th>Eingabe</th><th>Erwartet</th><th>Erhalten</th><th>Ergebnis</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>T01</td><td class="mono">14</td><td class="mono">"sehr gut"</td><td class="mono">"sehr gut"</td><td class="pass">&#10003; bestanden</td></tr>
+                    <tr><td>T02</td><td class="mono">11</td><td class="mono">"gut"</td><td class="mono">"gut"</td><td class="pass">&#10003; bestanden</td></tr>
+                    <tr><td>T03</td><td class="mono">8</td><td class="mono">"befriedigend"</td><td class="mono">"befriedigend"</td><td class="pass">&#10003; bestanden</td></tr>
+                    <tr><td>T04</td><td class="mono">2</td><td class="mono">"mangelhaft"</td><td class="mono">"mangelhaft"</td><td class="pass">&#10003; bestanden</td></tr>
+                    <tr><td>T05</td><td class="mono">?</td><td class="mono">"sehr gut"</td><td class="mono tbd">wird getestet…</td><td class="tbd">—</td></tr>
+                </tbody>
+            </table>
+
+            <p class="ex-question">Welche Eingabe für T05 deckt den Fehler auf?</p>
+            <ul class="mc-list" id="mc5a">
+                <li><label><input type="radio" name="q5a" value="a"> <code>punkte = 15</code> – obere Grenze</label></li>
+                <li><label><input type="radio" name="q5a" value="b"> <code>punkte = 13</code> – genau an der Grenze zwischen "sehr gut" und "gut"</label></li>
+                <li><label><input type="radio" name="q5a" value="c"> <code>punkte = 14</code> – knapp über der Grenze</label></li>
+                <li><label><input type="radio" name="q5a" value="d"> <code>punkte = 10</code> – Grenze "gut"</label></li>
+            </ul>
+            <button class="btn" onclick="checkEx5a()">Überprüfen</button>
+            <button class="btn sec" onclick="resetEx5a()">Zurücksetzen</button>
+            <div class="feedback" id="fb5a"></div>
+        </div>
+
+        <!-- Schritt 2: Fehler benennen und korrigieren -->
+        <div class="knobel-step" id="step5b" style="opacity:0.4; pointer-events:none;">
+            <div class="knobel-step-label">Schritt 2 &mdash; Den Fehler einordnen und korrigieren</div>
+            <h4>Was genau ist der Fehler, und welche Testfall-Kategorie hat ihn gefunden?</h4>
+            <p class="ex-question">Frage 1: Warum gibt das Programm für <code>punkte = 13</code> fälschlicherweise <code>"gut"</code> aus?</p>
+            <ul class="mc-list" id="mc5b1">
+                <li><label><input type="radio" name="q5b1" value="a"> Weil <code>elif punkte &gt;= 10</code> immer vor der <code>if</code>-Bedingung ausgewertet wird.</label></li>
+                <li><label><input type="radio" name="q5b1" value="b"> Weil die Bedingung <code>punkte &gt; 13</code> den Wert 13 <em>ausschließt</em> – <code>&gt;</code> statt <code>&gt;=</code> ist der Fehler.</label></li>
+                <li><label><input type="radio" name="q5b1" value="c"> Weil 13 mathematisch keine Grenze zwischen "sehr gut" und "gut" ist.</label></li>
+                <li><label><input type="radio" name="q5b1" value="d"> Weil <code>else</code> fehlt.</label></li>
+            </ul>
+
+            <p class="ex-question">Frage 2: Zu welcher Testfall-Kategorie gehört <code>punkte = 13</code>?</p>
+            <ul class="mc-list" id="mc5b2">
+                <li><label><input type="radio" name="q5b2" value="a"> Normalfall (NF) – typischer Wert im Kernbereich</label></li>
+                <li><label><input type="radio" name="q5b2" value="b"> Grenzfall (GF) – Wert genau an der Bereichsgrenze</label></li>
+                <li><label><input type="radio" name="q5b2" value="c"> Fehlerfall (FF) – ungültiger Eingabewert</label></li>
+            </ul>
+
+            <button class="btn"     onclick="checkEx5b()">Überprüfen</button>
+            <button class="btn sec" onclick="resetEx5b()">Zurücksetzen</button>
+            <div class="feedback" id="fb5b"></div>
+        </div>
+    </div>
+
+    <!-- Abschluss -->
+    <div class="completion" id="completion">
+        <div class="icon">&#127881;</div>
+        <h2>Herzlichen Glückwunsch!</h2>
+        <p>Du hast alle sechs Lerneinheiten erfolgreich abgeschlossen.<br><br>
+        Du kennst jetzt die Grundlagen der Programmierung:<br>
+        <strong>Modellierung &rarr; Datentypen &rarr; Grundfunktionen &rarr; Verzweigungen &rarr; Schleifen &rarr; Testfälle.</strong><br><br>
+        Im Jupyter-Notebook setzt du dieses Wissen in echtem Python-Code um.</p>
+    </div>
+</div>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── Progress ───────────────────────────
+const done = { ex1:false, ex2:false, ex3:false, ex4:false, ex5:false };
+
+function refreshProgress() {
+    const map = { ps4:'ex1', ps5:'ex2', ps6:'ex3', ps7:'ex4', ps8:'ex5' };
+    Object.entries(map).forEach(([psId, exKey]) => {
+        document.getElementById(psId).className =
+            'progress-step ' + (done[exKey] ? 'done' : '');
+    });
+    if (Object.values(done).every(Boolean)) {
+        const c = document.getElementById('completion');
+        c.classList.add('show');
+        c.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+}
+
+// ─── Feedback helpers ──────────────────
+function showFB(id, isOk, msg) {
+    const el = document.getElementById(id);
+    el.className = 'feedback show ' + (isOk ? 'ok' : 'err');
+    el.innerHTML = (isOk ? '&#10003;&nbsp;' : '&#10007;&nbsp;') + msg;
+}
+function hideFB(id) { const el = document.getElementById(id); el.className = 'feedback'; el.innerHTML = ''; }
+
+// ─── MC helper ─────────────────────────
+function markMC(listId, correctVal) {
+    document.querySelectorAll('#' + listId + ' label').forEach(lbl => {
+        const r = lbl.querySelector('input');
+        if (r.value === correctVal)                   lbl.classList.add('ok');
+        else if (r.checked && r.value !== correctVal) lbl.classList.add('err');
+        r.disabled = true;
+    });
+}
+function resetMC(listId) {
+    document.querySelectorAll('#' + listId + ' input').forEach(r => { r.checked = false; r.disabled = false; });
+    document.querySelectorAll('#' + listId + ' label').forEach(l => l.className = '');
+}
+
+// ════════════════════════════════════════
+// Ü1 – Matching Testfall-Typ
+// ════════════════════════════════════════
+// a=42 → nf,  b=1 → gf1 (untere Grenze),  c=100 → gf2 (obere Grenze),  d=0 → ff
+const PAIRS1 = { a:'nf', b:'gf1', c:'gf2', d:'ff' };
+let selLeft1 = null;
+const matchedL1 = new Set();
+const matchedR1 = new Set();
+
+function matchLeft(id) {
+    if (matchedL1.has(id)) return;
+    document.querySelectorAll('[id^="ml-"]').forEach(el => {
+        if (!el.classList.contains('matched')) el.classList.remove('sel');
+    });
+    selLeft1 = id;
+    document.getElementById('ml-' + id).classList.add('sel');
+}
+
+function matchRight(id) {
+    if (!selLeft1 || matchedR1.has(id)) return;
+    const lEl = document.getElementById('ml-' + selLeft1);
+    const rEl = document.getElementById('mr-' + id);
+    if (PAIRS1[selLeft1] === id) {
+        lEl.classList.remove('sel'); lEl.classList.add('matched');
+        rEl.classList.add('matched');
+        matchedL1.add(selLeft1); matchedR1.add(id);
+        selLeft1 = null;
+        if (matchedL1.size === 4) {
+            showFB('fb1', true, 'Alle vier Zuordnungen korrekt! Merke: Grenzwerte beiderseits einer Notenstufen-Grenze (hier 13 und 12 für die Grenze sehr gut/gut) sind die kritischsten Testfälle – dort schleichen sich Off-by-One-Fehler ein.');
+            done.ex1 = true; refreshProgress();
+        }
+    } else {
+        lEl.classList.add('wrong'); rEl.classList.add('wrong');
+        setTimeout(() => { lEl.classList.remove('wrong','sel'); rEl.classList.remove('wrong'); selLeft1 = null; }, 700);
+        showFB('fb1', false, 'Nicht ganz. Überlege: Liegt der Wert <em>genau</em> an einer Notenstufen-Grenze, klar innerhalb einer Klasse, oder außerhalb des gültigen Bereichs 0–15?');
+    }
+}
+
+function resetEx1() {
+    selLeft1 = null; matchedL1.clear(); matchedR1.clear();
+    document.querySelectorAll('[id^="ml-"]').forEach(el => {
+        el.className = el.classList.contains('mono') ? 'match-item mono' : 'match-item';
+    });
+    document.querySelectorAll('[id^="mr-"]').forEach(el => el.className = 'match-item');
+    hideFB('fb1'); done.ex1 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü2 – Vollständige Testmenge
+// ════════════════════════════════════════
+// 7 branches: >=13&<=15, >=10, >=7, >=4, >=1, ==0, else
+// B = {14, 11, 8, 5, 2, 0, -1} covers all 7
+function checkEx2() {
+    const a = document.querySelector('input[name="q2"]:checked');
+    if (!a) { showFB('fb2', false, 'Bitte eine Menge auswählen.'); return; }
+    markMC('mc2', 'b');
+    if (a.value === 'b') {
+        showFB('fb2', true, 'Richtig! Menge B deckt alle sieben Zweige ab: 14→"sehr gut", 11→"gut", 8→"befriedigend", 5→"ausreichend", 2→"mangelhaft", 0→"ungenügend", −1→"Ungültige Eingabe". Menge A fehlte der "gut"-Zweig (kein Wert 10–12), Menge C fehlte der Fehlerfall, Menge D deckte nur 2 Zweige ab.');
+        done.ex2 = true;
+    } else {
+        const hints = {
+            a: 'Menge A {14, 8, 5, 2, 0, −1} deckt nicht alle Zweige ab – welche Notenstufe fehlt?',
+            c: 'Menge C {14, 11, 8, 5, 2, 0} enthält keinen Testfall für den <code>else</code>-Zweig (Ungültige Eingabe, z.&nbsp;B. −1 oder 16).',
+            d: 'Menge D {14, 11} deckt nur 2 der 7 Zweige ab.'
+        };
+        showFB('fb2', false, hints[a.value]);
+    }
+    refreshProgress();
+}
+function resetEx2() { resetMC('mc2'); hideFB('fb2'); done.ex2 = false; refreshProgress(); }
+
+// ════════════════════════════════════════
+// Ü3 – Grenzwerte identifizieren
+// ════════════════════════════════════════
+// range punkte in [10,15]: boundary values: 9, 10, 15, 16
+function checkEx3() {
+    const a1 = document.querySelector('input[name="q3a"]:checked');
+    const a2 = document.querySelector('input[name="q3b"]:checked');
+    if (!a1 || !a2) { showFB('fb3', false, 'Bitte beide Fragen beantworten.'); return; }
+    markMC('mc3a', 'b'); markMC('mc3b', 'b');
+    if (a1.value === 'b' && a2.value === 'b') {
+        showFB('fb3', true, 'Beide Antworten richtig! Die Grenzwerte 9, 10, 15, 16 testen beide Seiten beider Grenzen. Ein Fehler wie <code>&gt;</code> statt <code>&gt;=</code> bei 10 würde nur mit genau <code>punkte = 10</code> auffallen – nicht mit 12.');
+        done.ex3 = true;
+    } else {
+        let h = '';
+        if (a1.value !== 'b') h += '<strong>F1:</strong> Es gibt zwei Grenzen (bei 10 und bei 15). An jeder Grenze gibt es zwei kritische Werte: den letzten Wert außerhalb (9 und 16) und den ersten Wert innerhalb (10 und 15). ';
+        if (a2.value !== 'b') h += '<strong>F2:</strong> Mit nur <code>punkte = 12</code> würde ein Fehler wie <code>&gt; 10</code> statt <code>&gt;= 10</code> unbemerkt bleiben – nur ein Grenzfall bei <code>punkte = 10</code> deckt das auf.';
+        showFB('fb3', false, h);
+    }
+    refreshProgress();
+}
+function resetEx3() { resetMC('mc3a'); resetMC('mc3b'); hideFB('fb3'); done.ex3 = false; refreshProgress(); }
+
+// ════════════════════════════════════════
+// Ü4 – Testfalltabelle ausfüllen
+// ════════════════════════════════════════
+// Notenprogramm 0–15
+// f1=14→sehr gut, f2=8→befriedigend, f3=13→sehr gut, f4=0→ungenügend, f5=16→ungültige eingabe
+const FILL_ANS = { f1:'sehr gut', f2:'befriedigend', f3:'sehr gut', f4:'ungenügend', f5:'ungültige eingabe' };
+
+function checkEx4() {
+    let allOk = true;
+    Object.entries(FILL_ANS).forEach(([id, expected]) => {
+        const inp = document.getElementById(id);
+        const ok  = inp.value.trim().toLowerCase() === expected;
+        inp.className = 'fill-input ' + (ok ? 'ok' : 'err');
+        inp.disabled  = true;
+        if (!ok) allOk = false;
+    });
+    if (allOk) {
+        showFB('fb4', true, 'Alle erwarteten Ausgaben korrekt! Beachte: Der Grenzfall <code>punkte = 13</code> ist besonders wichtig – er liegt genau an der Grenze zwischen "sehr gut" und "gut". Ein Off-by-One-Fehler dort wäre hier sofort sichtbar.');
+        done.ex4 = true;
+    } else {
+        showFB('fb4', false, 'Noch nicht alle Werte stimmen (rot markiert). Tipp: Geh den Code Zeile für Zeile durch – welche <code>if/elif</code>-Bedingung trifft für den jeweiligen Eingabewert zuerst zu?');
+        Object.entries(FILL_ANS).forEach(([id, expected]) => {
+            const inp = document.getElementById(id);
+            if (inp.value.trim().toLowerCase() !== expected) inp.disabled = false;
+        });
+    }
+    refreshProgress();
+}
+
+function resetEx4() {
+    Object.keys(FILL_ANS).forEach(id => {
+        const inp = document.getElementById(id);
+        inp.value = ''; inp.className = 'fill-input'; inp.disabled = false;
+    });
+    hideFB('fb4'); done.ex4 = false; refreshProgress();
+}
+
+// ════════════════════════════════════════
+// Ü5 – Knobelaufgabe
+// ════════════════════════════════════════
+
+// ── 5a ──
+function checkEx5a() {
+    const a = document.querySelector('input[name="q5a"]:checked');
+    if (!a) { showFB('fb5a', false, 'Bitte eine Antwort auswählen.'); return; }
+    markMC('mc5a', 'b');
+    if (a.value === 'b') {
+        showFB('fb5a', true, 'Genau! <code>punkte = 13</code> ist der kritische Grenzfall. Das Programm verwendet <code>&gt; 13</code> statt <code>&gt;= 13</code> – 13 wird daher <em>nicht</em> als "sehr gut" erkannt, sondern fällt in den nächsten <code>elif</code>-Zweig und ergibt "gut". Schritt 2 analysiert diesen Fehler genauer.');
+        const s2 = document.getElementById('step5b');
+        s2.style.opacity = '1'; s2.style.pointerEvents = 'auto';
+    } else {
+        const hints = {
+            a: '<code>punkte = 15</code> → 15 &gt; 13 ist True → "sehr gut" – kein Fehler sichtbar. Der Fehler betrifft nur den Grenzwert 13 selbst.',
+            c: '<code>punkte = 14</code> → 14 &gt; 13 ist True → "sehr gut" – kein Fehler sichtbar.',
+            d: '<code>punkte = 10</code> liegt im "gut"-Bereich – die Bedingung dort ist korrekt.'
+        };
+        showFB('fb5a', false, hints[a.value] || 'Nicht ganz. Welcher Wert liegt genau auf der Grenze zwischen "sehr gut" und "gut"?');
+    }
+}
+function resetEx5a() {
+    resetMC('mc5a'); hideFB('fb5a');
+    document.getElementById('step5b').style.opacity = '0.4';
+    document.getElementById('step5b').style.pointerEvents = 'none';
+}
+
+// ── 5b ──
+function checkEx5b() {
+    const a1 = document.querySelector('input[name="q5b1"]:checked');
+    const a2 = document.querySelector('input[name="q5b2"]:checked');
+    if (!a1 || !a2) { showFB('fb5b', false, 'Bitte beide Fragen beantworten.'); return; }
+    markMC('mc5b1', 'b'); markMC('mc5b2', 'b');
+    if (a1.value === 'b' && a2.value === 'b') {
+        showFB('fb5b', true,
+            'Perfekt! Zusammenfassung:<br>' +
+            '&bull; Der Fehler ist ein <strong>Off-by-One-Fehler</strong>: <code>&gt; 13</code> schließt genau den Wert 13 aus. Korrekt wäre <code>&gt;= 13</code>.<br>' +
+            '&bull; Der aufdeckende Testfall (<code>punkte = 13</code>) ist ein <strong>Grenzfall</strong> – er liegt exakt an der Grenze zwischen "sehr gut" und "gut".<br>' +
+            '&bull; <strong>Lehre:</strong> Grenzfälle (GF) sind die mächtigsten Testfälle – sie decken die häufigste Fehlerklasse in der Programmierung auf.');
+        done.ex5 = true; refreshProgress();
+    } else {
+        let h = '';
+        if (a1.value !== 'b') h += '<strong>F1:</strong> Der <code>&gt;</code>-Operator schließt den Grenzwert selbst aus. 13 &gt; 13 ist <code>False</code>, daher wird der if-Zweig nicht betreten. <code>&gt;=</code> würde 13 einschließen. ';
+        if (a2.value !== 'b') h += '<strong>F2:</strong> Ein Wert, der exakt auf einer Bereichsgrenze liegt (hier zwischen "sehr gut" und "gut"), ist per Definition ein Grenzfall.';
+        showFB('fb5b', false, h);
+    }
+}
+function resetEx5b() {
+    resetMC('mc5b1'); resetMC('mc5b2');
+    hideFB('fb5b'); done.ex5 = false; refreshProgress();
+}
+</script>
+
+</body>
+</html>
