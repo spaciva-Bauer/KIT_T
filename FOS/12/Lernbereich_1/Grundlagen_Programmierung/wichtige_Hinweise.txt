@@ -1,0 +1,6 @@
+In einzelnen HTML-Dateien muss ich noch Bugfixing betreiben!!
+
+Die zugehörigen Jupyter-Notebooks werden derzeit erarbeitet.
+
+24.03.2026 Oliver Bauer
+
