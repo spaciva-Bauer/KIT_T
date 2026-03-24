@@ -1,6 +1,5 @@
-In einzelnen HTML-Dateien muss ich noch Bugfixing betreiben!!
+In einzelnen HTML-Dateien muss ich noch Bugfixing betreiben (z.B. fehlender Zeilenumbruch)!!
 
-Die zugehörigen Jupyter-Notebooks werden derzeit erarbeitet.
 
 24.03.2026 Oliver Bauer
 
