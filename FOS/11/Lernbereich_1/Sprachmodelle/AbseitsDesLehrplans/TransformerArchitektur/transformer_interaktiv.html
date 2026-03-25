@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transformer-Architektur — Interaktiv</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.10.0/tf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0d0f14;
+    --surface: #141720;
+    --card:    #1a1f2e;
+    --border:  #252c3f;
+    --accent:  #5b8aff;
+    --accent2: #ff6b6b;
+    --accent3: #50fa7b;
+    --accent4: #ffb86c;
+    --text:    #e2e8f0;
+    --muted:   #8892a4;
+    --code-bg: #0a0c12;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 60px 40px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(91,138,255,.15);
+    color: var(--accent);
+    border: 1px solid rgba(91,138,255,.3);
+    padding: 4px 14px;
+    border-radius: 99px;
+    font-size: .75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 14px;
+  }
+  .hero p { color: var(--muted); max-width: 680px; font-size: 1.05rem; }
+
+  /* ── Nav Pills ── */
+  .nav-pills {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    padding: 24px 40px;
+    max-width: 1100px; margin: 0 auto;
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,15,20,.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-pills a {
+    padding: 6px 16px; border-radius: 99px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); text-decoration: none;
+    font-size: .82rem; font-weight: 600;
+    transition: all .2s;
+  }
+  .nav-pills a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── Main layout ── */
+  main { max-width: 1100px; margin: 0 auto; padding: 48px 40px 80px; }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 72px;
+    animation: fadeUp .5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1rem; flex-shrink: 0;
+  }
+  .section-title { font-size: 1.5rem; font-weight: 800; }
+  .section-sub   { color: var(--muted); font-size: .9rem; margin-top: 2px; }
+
+  /* ── Theory box ── */
+  .theory {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+    font-size: .95rem;
+    color: var(--muted);
+  }
+  .theory strong { color: var(--text); }
+  .theory .formula {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin: 12px 0;
+    color: var(--accent);
+    font-size: .88rem;
+    display: block;
+    overflow-x: auto;
+  }
+
+  /* ── Controls ── */
+  .controls {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 22px;
+    display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 6px; }
+  .ctrl-group label {
+    font-size: .78rem; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em;
+  }
+  .ctrl-group input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    width: 180px; height: 4px;
+    background: var(--border); border-radius: 2px; outline: none;
+    cursor: pointer;
+  }
+  .ctrl-group input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--accent); cursor: pointer;
+  }
+  .ctrl-group input[type=text] {
+    background: var(--code-bg); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 12px; border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: .88rem;
+    width: 320px; outline: none;
+  }
+  .ctrl-group input[type=text]:focus { border-color: var(--accent); }
+  .val-display {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent); font-size: .88rem;
+  }
+
+  .btn {
+    padding: 9px 22px; border-radius: 8px;
+    background: var(--accent); color: #fff;
+    border: none; cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: .88rem;
+    transition: all .2s; align-self: flex-end;
+  }
+  .btn:hover { background: #7aa3ff; transform: translateY(-1px); }
+  .btn.secondary {
+    background: var(--card); color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+
+  /* ── Output panels ── */
+  .output-grid {
+    display: grid; gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  .output-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    overflow: hidden;
+  }
+  .output-panel h4 {
+    font-size: .82rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--muted); margin-bottom: 14px;
+  }
+  .output-panel canvas { max-width: 100%; }
+
+  /* ── Token display ── */
+  .token-flow {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    padding: 16px 0;
+  }
+  .token-chip {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .token-word {
+    background: var(--accent); color: #fff;
+    padding: 6px 14px; border-radius: 8px;
+    font-weight: 700; font-size: .9rem;
+  }
+  .token-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem; color: var(--muted);
+  }
+  .arrow { color: var(--border); font-size: 1.2rem; align-self: center; }
+
+  /* ── Heatmap (canvas-based) ── */
+  .heatmap-wrap { overflow-x: auto; }
+  canvas.heatmap { display: block; }
+
+  /* ── Log / output text ── */
+  .log {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem; color: var(--accent3);
+    background: var(--code-bg); border-radius: 8px;
+    padding: 14px; margin-top: 14px;
+    line-height: 1.8; white-space: pre-wrap;
+  }
+
+  /* ── Architecture diagram ── */
+  .arch-diagram {
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+    padding: 24px 0;
+  }
+  .arch-block {
+    width: 260px; padding: 12px 20px;
+    border-radius: 10px; text-align: center;
+    font-weight: 700; font-size: .9rem;
+  }
+  .arch-arrow {
+    width: 2px; height: 22px;
+    background: var(--border); position: relative;
+  }
+  .arch-arrow::after {
+    content: '▼'; position: absolute;
+    bottom: -8px; left: 50%; transform: translateX(-50%);
+    color: var(--muted); font-size: .7rem;
+  }
+
+  /* ── Summary table ── */
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
+  tr:hover td { background: rgba(91,138,255,.05); }
+  .tag-good  { color: var(--accent3); }
+  .tag-bad   { color: var(--accent2); }
+
+  @media (max-width: 700px) {
+    .hero, .nav-pills, main { padding-left: 20px; padding-right: 20px; }
+    .ctrl-group input[type=text] { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-badge">🤖 Interaktives Lernmaterial</div>
+  <h1>Die Transformer-<br>Architektur</h1>
+  <p>Erkunde die Bausteine moderner KI-Modelle wie GPT und BERT — direkt im Browser, ohne Installation. Alle Parameter sind einstellbar.</p>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav-pills">
+  <a href="#tok">1 · Tokenisierung</a>
+  <a href="#pe">2 · Positional Encoding</a>
+  <a href="#attn">3 · Self-Attention</a>
+  <a href="#mha">4 · Multi-Head</a>
+  <a href="#ffn">5 · Feed-Forward</a>
+  <a href="#full">6 · Vollständig</a>
+  <a href="#summary">7 · Übersicht</a>
+</nav>
+
+<main>
+
+<!-- ═══ 1. TOKENISIERUNG ═══ -->
+<section class="section" id="tok">
+  <div class="section-header">
+    <div class="section-num" style="background:var(--accent)">1</div>
+    <div>
+      <div class="section-title">📌 Tokenisierung</div>
+      <div class="section-sub">Text in Zahlen umwandeln</div>
+    </div>
+  </div>
+
+  <div class="theory">
+    Computer verstehen keinen Text. Deshalb wird jedes Wort (oder Wortteil) in eine <strong>Zahl (Token-ID)</strong> umgewandelt.<br><br>
+    <strong>Beispiel:</strong>
+    <span class="formula">"Der Hund schläft"  →  [3, 7, 12]</span>
+    Alle bekannten Wörter bilden das <strong>Vokabular</strong>. Unbekannte Wörter werden als <code style="color:var(--accent2)">[UNK]</code> markiert.
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group" style="flex:1">
+      <label>Trainingstext (Vokabular-Quelle)</label>
+      <input type="text" id="tok-train" value="der hund schläft die katze jagt den vogel singt ein lied">
+    </div>
+    <div class="ctrl-group" style="flex:1">
+      <label>Dein Satz</label>
+      <input type="text" id="tok-input" value="die katze jagt den hund">
+    </div>
+    <button class="btn" onclick="runTokenizer()">Tokenisieren ▶</button>
+  </div>
+
+  <div class="output-grid">
+    <div class="output-panel" style="grid-column:1/-1">
+      <h4>Token-Fluss</h4>
+      <div id="tok-flow" class="token-flow"></div>
+      <div id="tok-log" class="log"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2. POSITIONAL ENCODING ═══ -->
+<section class="section" id="pe">
+  <div class="section-header">
+    <div class="section-num" style="background:#a855f7">2</div>
+    <div>
+      <div class="section-title">🗺️ Positional Encoding</div>
+      <div class="section-sub">Position im Satz kodieren</div>
+    </div>
+  </div>
+
+  <div class="theory">
+    Der Transformer verarbeitet alle Wörter <strong>gleichzeitig</strong>. Damit er trotzdem weiß, welches Wort wo steht, wird ein <strong>Positions-Signal</strong> addiert.<br><br>
+    Es verwendet Sinus- und Kosinusfunktionen verschiedener Frequenzen:
+    <span class="formula">PE(pos, 2i)   = sin( pos / 10000^(2i/d) )
+PE(pos, 2i+1) = cos( pos / 10000^(2i/d) )</span>
+    Jede Position hat ein <strong>einzigartiges Muster</strong> — wie ein Fingerabdruck.
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group">
+      <label>Max. Satzlänge: <span class="val-display" id="pe-len-val">20</span></label>
+      <input type="range" id="pe-len" min="5" max="50" value="20" oninput="document.getElementById('pe-len-val').textContent=this.value">
+    </div>
+    <div class="ctrl-group">
+      <label>Embedding-Größe (d): <span class="val-display" id="pe-dim-val">64</span></label>
+      <input type="range" id="pe-dim" min="8" max="128" step="8" value="64" oninput="document.getElementById('pe-dim-val').textContent=this.value">
+    </div>
+    <button class="btn" onclick="runPE()">Berechnen ▶</button>
+  </div>
+
+  <div class="output-grid">
+    <div class="output-panel">
+      <h4>Heatmap des Positional Encoding</h4>
+      <div class="heatmap-wrap"><canvas id="pe-heat" class="heatmap"></canvas></div>
+    </div>
+    <div class="output-panel">
+      <h4>Einzelne Dimensionen (Kurven)</h4>
+      <canvas id="pe-line"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3. SELF-ATTENTION ═══ -->
+<section class="section" id="attn">
+  <div class="section-header">
+    <div class="section-num" style="background:#ef4444">3</div>
+    <div>
+      <div class="section-title">👁️ Self-Attention</div>
+      <div class="section-sub">Das Herzstück des Transformers</div>
+    </div>
+  </div>
+
+  <div class="theory">
+    Self-Attention beantwortet: <strong>„Welche anderen Wörter sind für dieses Wort gerade wichtig?"</strong><br><br>
+    Jedes Wort wird in drei Vektoren umgewandelt:
+    <span class="formula">Q (Query)  — „Wonach suche ich?"
+K (Key)    — „Was habe ich anzubieten?"
+V (Value)  — „Was ist mein Inhalt?"</span>
+    Die Attention-Gewichte werden berechnet:
+    <span class="formula">Attention(Q,K,V) = softmax( Q·Kᵀ / √d_k ) · V</span>
+    <strong>Hohe Gewichte</strong> bedeuten: „Schau genau auf dieses Wort!"
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group" style="flex:1">
+      <label>Satz (2–6 Wörter, Leerzeichen getrennt)</label>
+      <input type="text" id="attn-input" value="der hund jagt die katze">
+    </div>
+    <div class="ctrl-group">
+      <label>d_k (Q/K/V Dimension): <span class="val-display" id="attn-dk-val">8</span></label>
+      <input type="range" id="attn-dk" min="2" max="32" step="2" value="8" oninput="document.getElementById('attn-dk-val').textContent=this.value">
+    </div>
+    <div class="ctrl-group">
+      <label>Zufalls-Seed: <span class="val-display" id="attn-seed-val">42</span></label>
+      <input type="range" id="attn-seed" min="0" max="99" value="42" oninput="document.getElementById('attn-seed-val').textContent=this.value">
+    </div>
+    <button class="btn" onclick="runAttention()">Berechnen ▶</button>
+  </div>
+
+  <div class="output-grid">
+    <div class="output-panel" style="grid-column:1/-1">
+      <h4>Attention-Matrix — Zeile lesen: „Worauf schaut dieses Wort?"</h4>
+      <div class="heatmap-wrap"><canvas id="attn-heat" class="heatmap"></canvas></div>
+    </div>
+    <div class="output-panel" style="grid-column:1/-1">
+      <h4>Attention des ersten Wortes auf alle anderen</h4>
+      <canvas id="attn-bar"></canvas>
+    </div>
+  </div>
+  <div id="attn-log" class="log"></div>
+</section>
+
+<!-- ═══ 4. MULTI-HEAD ATTENTION ═══ -->
+<section class="section" id="mha">
+  <div class="section-header">
+    <div class="section-num" style="background:#f59e0b">4</div>
+    <div>
+      <div class="section-title">👁️👁️ Multi-Head Attention</div>
+      <div class="section-sub">Mehrere Perspektiven gleichzeitig</div>
+    </div>
+  </div>
+
+  <div class="theory">
+    Echte Transformers nutzen <strong>mehrere Attention-Köpfe gleichzeitig</strong>. Jeder Kopf kann auf verschiedene Aspekte achten:<br>
+    Kopf 1 → Grammatik &nbsp;|&nbsp; Kopf 2 → Bedeutung &nbsp;|&nbsp; Kopf 3 → Kontext &nbsp;|&nbsp; …<br><br>
+    Die Ausgaben aller Köpfe werden <strong>zusammengeführt</strong> (Concatenation + Projektion).
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group" style="flex:1">
+      <label>Satz</label>
+      <input type="text" id="mha-input" value="die katze jagt den hund">
+    </div>
+    <div class="ctrl-group">
+      <label>Anzahl Köpfe: <span class="val-display" id="mha-h-val">4</span></label>
+      <input type="range" id="mha-h" min="1" max="8" value="4" oninput="document.getElementById('mha-h-val').textContent=this.value">
+    </div>
+    <button class="btn" onclick="runMHA()">Berechnen ▶</button>
+  </div>
+
+  <div id="mha-grid" class="output-grid"></div>
+</section>
+
+<!-- ═══ 5. FEED-FORWARD ═══ -->
+<section class="section" id="ffn">
+  <div class="section-header">
+    <div class="section-num" style="background:var(--accent3);color:#000">5</div>
+    <div>
+      <div class="section-title">🧠 Feed-Forward Netzwerk</div>
+      <div class="section-sub">Nicht-lineare Verarbeitung</div>
+    </div>
+  </div>
+
+  <div class="theory">
+    Nach der Attention-Schicht kommt ein einfaches <strong>2-schichtiges neuronales Netzwerk</strong>. Es verarbeitet jedes Wort <em>unabhängig</em>:<br>
+    <span class="formula">FFN(x) = ReLU(x·W₁ + b₁)·W₂ + b₂</span>
+    <strong>ReLU</strong> ist die Aktivierungsfunktion: <code style="color:var(--accent)">ReLU(x) = max(0, x)</code><br>
+    Sie bringt Nicht-Linearität ins Modell — ohne sie wäre alles nur lineare Algebra!
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group">
+      <label>d_model (Embedding-Größe): <span class="val-display" id="ffn-dm-val">16</span></label>
+      <input type="range" id="ffn-dm" min="4" max="64" step="4" value="16" oninput="document.getElementById('ffn-dm-val').textContent=this.value">
+    </div>
+    <div class="ctrl-group">
+      <label>d_ff (Innere Schicht): <span class="val-display" id="ffn-df-val">64</span></label>
+      <input type="range" id="ffn-df" min="8" max="256" step="8" value="64" oninput="document.getElementById('ffn-df-val').textContent=this.value">
+    </div>
+    <button class="btn" onclick="runFFN()">Berechnen ▶</button>
+  </div>
+
+  <div class="output-grid">
+    <div class="output-panel">
+      <h4>ReLU Aktivierungsfunktion</h4>
+      <canvas id="ffn-relu"></canvas>
+    </div>
+    <div class="output-panel">
+      <h4>Eingabe vs. Ausgabe (erstes Wort)</h4>
+      <canvas id="ffn-bar"></canvas>
+    </div>
+  </div>
+  <div id="ffn-log" class="log"></div>
+</section>
+
+<!-- ═══ 6. VOLLSTÄNDIG ═══ -->
+<section class="section" id="full">
+  <div class="section-header">
+    <div class="section-num" style="background:#ec4899">6</div>
+    <div>
+      <div class="section-title">🔗 Vollständiger Transformer-Block</div>
+      <div class="section-sub">Alle Bausteine zusammen</div>
+    </div>
+  </div>
+
+  <div class="theory">
+    Ein vollständiger Block kombiniert alle Teile — mit <strong>Skip-Connections</strong> (Residualverbindungen) und <strong>Layer Normalization</strong>:
+    <span class="formula">x₁ = LayerNorm(x + MultiHeadAttention(x))
+x₂ = LayerNorm(x₁ + FFN(x₁))</span>
+    In echten Modellen werden viele Blöcke <strong>gestapelt</strong>:<br>
+    GPT-2 small: 12 Blöcke &nbsp;|&nbsp; GPT-3: 96 Blöcke &nbsp;|&nbsp; GPT-4: ~120 Blöcke (geschätzt)
+  </div>
+
+  <div class="arch-diagram">
+    <div class="arch-block" style="background:rgba(91,138,255,.2);border:1px solid rgba(91,138,255,.4)">📌 Input Embeddings + Positional Encoding</div>
+    <div class="arch-arrow"></div>
+    <div class="arch-block" style="background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4)">👁️ Multi-Head Self-Attention</div>
+    <div class="arch-arrow"></div>
+    <div class="arch-block" style="background:rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.4)">➕ Add &amp; Layer Norm</div>
+    <div class="arch-arrow"></div>
+    <div class="arch-block" style="background:rgba(80,250,123,.2);border:1px solid rgba(80,250,123,.4)">🧠 Feed-Forward Netzwerk</div>
+    <div class="arch-arrow"></div>
+    <div class="arch-block" style="background:rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.4)">➕ Add &amp; Layer Norm</div>
+    <div class="arch-arrow"></div>
+    <div class="arch-block" style="background:rgba(255,184,108,.2);border:1px solid rgba(255,184,108,.4)">🔁 (× N Blöcke wiederholen)</div>
+    <div class="arch-arrow"></div>
+    <div class="arch-block" style="background:rgba(236,72,153,.2);border:1px solid rgba(236,72,153,.4)">📤 Output (z.B. nächstes Wort vorhersagen)</div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-group" style="flex:1">
+      <label>Satz</label>
+      <input type="text" id="full-input" value="der vogel singt">
+    </div>
+    <div class="ctrl-group">
+      <label>Anzahl Blöcke: <span class="val-display" id="full-b-val">3</span></label>
+      <input type="range" id="full-b" min="1" max="8" value="3" oninput="document.getElementById('full-b-val').textContent=this.value">
+    </div>
+    <button class="btn" onclick="runFull()">Simulieren ▶</button>
+  </div>
+
+  <div id="full-grid" class="output-grid"></div>
+  <div id="full-log" class="log"></div>
+</section>
+
+<!-- ═══ 7. ZUSAMMENFASSUNG ═══ -->
+<section class="section" id="summary">
+  <div class="section-header">
+    <div class="section-num" style="background:var(--muted)">7</div>
+    <div>
+      <div class="section-title">📊 Zusammenfassung</div>
+      <div class="section-sub">Transformer vs. andere Architekturen</div>
+    </div>
+  </div>
+
+  <div class="output-panel" style="margin-bottom:24px">
+    <table>
+      <thead>
+        <tr><th>Merkmal</th><th>RNN / LSTM</th><th>Transformer</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Verarbeitung</td><td class="tag-bad">Sequenziell (Wort für Wort)</td><td class="tag-good">Parallel (alle gleichzeitig)</td></tr>
+        <tr><td>Langer Kontext</td><td class="tag-bad">Begrenzt (Vergessen)</td><td class="tag-good">Unbegrenzt (Attention)</td></tr>
+        <tr><td>GPU-Nutzung</td><td class="tag-bad">Schlecht (sequenziell)</td><td class="tag-good">Sehr gut (Matrixoperationen)</td></tr>
+        <tr><td>Skalierung</td><td class="tag-bad">Schwierig</td><td class="tag-good">Exzellent (Milliarden Parameter)</td></tr>
+        <tr><td>Bekannte Modelle</td><td style="color:var(--muted)">LSTM, GRU</td><td class="tag-good">GPT-4, BERT, Gemini, Claude</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="theory">
+    <strong>🚀 Weiterführende Aufgaben:</strong><br><br>
+    1. Ändere die <strong>Anzahl der Attention-Köpfe</strong> auf 1 und 8. Was fällt dir auf?<br>
+    2. Warum teilt man durch <strong>√d_k</strong>? Setze d_k auf 1 und beobachte die Attention-Werte.<br>
+    3. Was passiert, wenn der <strong>Satz sehr lang</strong> wird? Wie wächst die Attention-Matrix?<br>
+    4. In echten Modellen sind Embeddings <strong>gelernt</strong> – hier sind sie zufällig. Was ändert das?
+  </div>
+</section>
+
+</main>
+
+<script>
+// ╔═══════════════════════════════════════════════════════╗
+// ║  UTILITIES                                            ║
+// ╚═══════════════════════════════════════════════════════╝
+
+// Seeded pseudo-random (LCG)
+function makeRng(seed) {
+  let s = seed | 0;
+  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+function randnRng(rng) {
+  // Box-Muller
+  const u = rng(), v = rng();
+  return Math.sqrt(-2*Math.log(u||1e-9)) * Math.cos(2*Math.PI*v);
+}
+function randn(rows, cols, rng) {
+  const m = [];
+  for (let i=0;i<rows;i++){m[i]=[];for(let j=0;j<cols;j++) m[i][j]=randnRng(rng);}
+  return m;
+}
+function matmul(A, B) {
+  const r=A.length, c=B[0].length, k=B.length, C=Array.from({length:r},()=>Array(c).fill(0));
+  for(let i=0;i<r;i++) for(let j=0;j<c;j++) for(let l=0;l<k;l++) C[i][j]+=A[i][l]*B[l][j];
+  return C;
+}
+function matT(A){ return A[0].map((_,j)=>A.map(r=>r[j])); }
+function softmax(row){ const m=Math.max(...row), e=row.map(x=>Math.exp(x-m)), s=e.reduce((a,b)=>a+b); return e.map(x=>x/s); }
+function relu(x){ return Math.max(0,x); }
+function layerNorm(vec){ const mu=vec.reduce((a,b)=>a+b)/vec.length, v=vec.map(x=>(x-mu)**2).reduce((a,b)=>a+b)/vec.length; return vec.map(x=>(x-mu)/Math.sqrt(v+1e-6)); }
+
+function selfAttention(Q, K, V) {
+  const n=Q.length, dk=Q[0].length, scale=Math.sqrt(dk);
+  const KT=matT(K);
+  const scores=Q.map(q=>KT[0].map((_,j)=>KT.map((r,i)=>q[i]*KT[i][j]).reduce((a,b)=>a+b)/scale));
+  // recompute properly
+  const scores2 = Q.map(q => K.map(k => q.reduce((s,qi,i)=>s+qi*k[i],0)/scale));
+  const weights = scores2.map(row=>softmax(row));
+  const out = weights.map(w => V[0].map((_,j)=>w.reduce((s,wi,i)=>s+wi*V[i][j],0)));
+  return {weights, out};
+}
+
+// ─── Canvas heatmap ───
+function drawHeatmap(canvasId, matrix, rowLabels, colLabels, colorFn) {
+  const canvas = document.getElementById(canvasId);
+  const n = matrix.length, m = matrix[0].length;
+  const cellW = 56, cellH = 48, padL = 90, padT = 70, padR = 20, padB = 20;
+  canvas.width  = padL + m*cellW + padR;
+  canvas.height = padT + n*cellH + padB;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.font = '12px JetBrains Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // cells
+  for(let i=0;i<n;i++) for(let j=0;j<m;j++){
+    const v = matrix[i][j];
+    ctx.fillStyle = colorFn(v);
+    ctx.fillRect(padL+j*cellW, padT+i*cellH, cellW-2, cellH-2);
+    ctx.fillStyle = v>0.55 ? '#fff' : '#8892a4';
+    ctx.fillText(v.toFixed(2), padL+j*cellW+cellW/2-1, padT+i*cellH+cellH/2);
+  }
+  // col labels (top)
+  ctx.fillStyle = '#8892a4'; ctx.textAlign = 'center';
+  colLabels.forEach((l,j)=>ctx.fillText(l, padL+j*cellW+cellW/2-1, padT-14));
+  // row labels (left)
+  ctx.textAlign = 'right';
+  rowLabels.forEach((l,i)=>ctx.fillText(l, padL-8, padT+i*cellH+cellH/2));
+}
+
+function blueColor(v){ const b=Math.round(v*255), g=Math.round(v*140); return `rgb(${20},${g+30},${b})`; }
+function redColor(v) { const r=Math.round(200+v*55), g=Math.round(v*80); return `rgb(${r},${g},${20})`; }
+function greenColor(v){ const g=Math.round(v*250), r=Math.round(20+v*30); return `rgb(${r},${g},${50})`; }
+const palettes = [blueColor, redColor, greenColor,
+  v=>{ const r=Math.round(255*v), b=Math.round(180*(1-v)); return `rgb(${r},${Math.round(100*v)},${b})`; }];
+
+// ─── Chart.js helpers ───
+const chartReg = {};
+function getOrCreate(id, type, data, options){
+  if(chartReg[id]){ chartReg[id].destroy(); }
+  chartReg[id] = new Chart(document.getElementById(id), {type, data, options});
+  return chartReg[id];
+}
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║  1. TOKENIZER                                         ║
+// ╚═══════════════════════════════════════════════════════╝
+function runTokenizer(){
+  const train = document.getElementById('tok-train').value.toLowerCase().split(/\s+/).filter(Boolean);
+  const vocab = [...new Set(train)].sort();
+  const w2id = Object.fromEntries(vocab.map((w,i)=>[w,i+1]));
+  const id2w = Object.fromEntries(vocab.map((w,i)=>[i+1,w]));
+  w2id['[UNK]']=0; id2w[0]='[UNK]';
+
+  const input = document.getElementById('tok-input').value.toLowerCase().split(/\s+/).filter(Boolean);
+  const ids = input.map(w=>w2id[w]??0);
+
+  const flow = document.getElementById('tok-flow');
+  flow.innerHTML = '';
+  input.forEach((w,i)=>{
+    const chip = document.createElement('div'); chip.className='token-chip';
+    chip.innerHTML=`<div class="token-word" style="background:${ids[i]===0?'var(--accent2)':'var(--accent)'}">${w}</div><div class="token-id">ID: ${ids[i]}</div>`;
+    flow.appendChild(chip);
+    if(i<input.length-1){const a=document.createElement('div');a.className='arrow';a.textContent='→';flow.appendChild(a);}
+  });
+
+  const unk = input.filter(w=>!(w in w2id)||w2id[w]===0);
+  document.getElementById('tok-log').textContent =
+    `Vokabular (${vocab.length} Wörter): [${vocab.join(', ')}]\n` +
+    `Token-IDs: [${ids.join(', ')}]\n` +
+    `Zurück dekodiert: "${ids.map(i=>id2w[i]??'[UNK]').join(' ')}"` +
+    (unk.length?`\n⚠️ Unbekannte Wörter: [${unk.join(', ')}]`:'');
+}
+runTokenizer();
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║  2. POSITIONAL ENCODING                               ║
+// ╚═══════════════════════════════════════════════════════╝
+let peLineChart = null;
+function runPE(){
+  const L = +document.getElementById('pe-len').value;
+  const D = +document.getElementById('pe-dim').value;
+  const PE = Array.from({length:L},(_,pos)=>Array.from({length:D},(_,i)=>
+    i%2===0 ? Math.sin(pos/Math.pow(10000,i/D)) : Math.cos(pos/Math.pow(10000,(i-1)/D))
+  ));
+
+  // Heatmap
+  const hc = document.getElementById('pe-heat');
+  hc.width = Math.min(800, D*8 + 60); hc.height = L*14 + 60;
+  const ctx = hc.getContext('2d');
+  ctx.clearRect(0,0,hc.width,hc.height);
+  const cw=(hc.width-60)/D, ch=(hc.height-60)/L;
+  for(let r=0;r<L;r++) for(let c=0;c<D;c++){
+    const v=(PE[r][c]+1)/2;
+    const col=Math.round(v*255);
+    ctx.fillStyle=`rgb(${Math.round(255*(1-v))},${Math.round(col*0.6)},${col})`;
+    ctx.fillRect(30+c*cw, 30+r*ch, cw-0.5, ch-0.5);
+  }
+  ctx.fillStyle='#8892a4'; ctx.font='10px JetBrains Mono'; ctx.textAlign='center';
+  ctx.fillText('Dimension →', hc.width/2, hc.height-4);
+  ctx.save(); ctx.translate(10,hc.height/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Position', 0, 0); ctx.restore();
+
+  // Line chart
+  const dims=[0,1,4,5,10,11].filter(d=>d<D);
+  const colors=['#5b8aff','#ff6b6b','#50fa7b','#ffb86c','#ff79c6','#8be9fd'];
+  const datasets = dims.map((d,i)=>({
+    label:`Dim ${d}`,
+    data: PE.map(r=>r[d]),
+    borderColor: colors[i], borderWidth:2, pointRadius:0, tension:.4
+  }));
+  getOrCreate('pe-line','line',{labels:Array.from({length:L},(_,i)=>i),datasets},{
+    plugins:{legend:{labels:{color:'#8892a4',font:{size:11}}}},
+    scales:{x:{ticks:{color:'#8892a4'},grid:{color:'#252c3f'},title:{display:true,text:'Position',color:'#8892a4'}},
+            y:{ticks:{color:'#8892a4'},grid:{color:'#252c3f'},title:{display:true,text:'Wert',color:'#8892a4'}}},
+    backgroundColor:'transparent'
+  });
+}
+runPE();
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║  3. SELF-ATTENTION                                    ║
+// ╚═══════════════════════════════════════════════════════╝
+function runAttention(){
+  const words = document.getElementById('attn-input').value.trim().split(/\s+/).slice(0,6);
+  const dk = +document.getElementById('attn-dk').value;
+  const seed = +document.getElementById('attn-seed').value;
+  const n = words.length;
+  const rng = makeRng(seed);
+  const Q = randn(n,dk,rng), K = randn(n,dk,rng), V = randn(n,dk,rng);
+  const {weights} = selfAttention(Q,K,V);
+
+  drawHeatmap('attn-heat', weights, words, words, blueColor);
+
+  const w0 = weights[0];
+  getOrCreate('attn-bar','bar',
+    {labels:words, datasets:[{label:`Attention von "${words[0]}"`, data:w0,
+      backgroundColor: words.map((_,i)=>i===0?'rgba(91,138,255,.9)':'rgba(91,138,255,.35)'),
+      borderColor:'rgba(91,138,255,1)', borderWidth:1}]},
+    {plugins:{legend:{labels:{color:'#8892a4'}}},
+     scales:{x:{ticks:{color:'#e2e8f0'},grid:{color:'#252c3f'}},
+             y:{min:0,max:1,ticks:{color:'#8892a4'},grid:{color:'#252c3f'}}}}
+  );
+
+  const rowSums = weights.map(r=>r.reduce((a,b)=>a+b,0).toFixed(4));
+  document.getElementById('attn-log').textContent =
+    `Attention-Gewichte (${n}×${n}):\n`+
+    weights.map((r,i)=>`  ${words[i].padEnd(12)} → [${r.map(v=>v.toFixed(3)).join(', ')}]  Σ=${rowSums[i]}`).join('\n')+
+    `\n\n💡 Jede Zeile summiert sich zu 1.0 (Softmax-Eigenschaft)`;
+}
+runAttention();
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║  4. MULTI-HEAD ATTENTION                              ║
+// ╚═══════════════════════════════════════════════════════╝
+function runMHA(){
+  const words = document.getElementById('mha-input').value.trim().split(/\s+/).slice(0,6);
+  const heads = +document.getElementById('mha-h').value;
+  const n = words.length;
+  const grid = document.getElementById('mha-grid');
+  grid.innerHTML='';
+  grid.style.gridTemplateColumns=`repeat(${Math.min(heads,4)}, 1fr)`;
+
+  for(let h=0;h<heads;h++){
+    const rng = makeRng(h*37+13);
+    const Q=randn(n,8,rng), K=randn(n,8,rng), V=randn(n,8,rng);
+    const {weights}=selfAttention(Q,K,V);
+    const panel=document.createElement('div'); panel.className='output-panel';
+    panel.innerHTML=`<h4>Kopf ${h+1}</h4><div class="heatmap-wrap"><canvas id="mha-c${h}" class="heatmap"></canvas></div>`;
+    grid.appendChild(panel);
+    // defer draw until appended
+    setTimeout(()=>drawHeatmap(`mha-c${h}`,weights,words,words,palettes[h%palettes.length]),0);
+  }
+}
+runMHA();
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║  5. FEED-FORWARD                                      ║
+// ╚═══════════════════════════════════════════════════════╝
+function runFFN(){
+  const dm=+document.getElementById('ffn-dm').value;
+  const df=+document.getElementById('ffn-df').value;
+  const rng=makeRng(7);
+  const W1=randn(dm,df,rng), b1=Array(df).fill(0);
+  const W2=randn(df,dm,rng), b2=Array(dm).fill(0);
+  const rng2=makeRng(42);
+  const x=Array.from({length:dm},()=>randnRng(rng2));
+
+  const h1 = Array.from({length:df},(_,j)=>relu(x.reduce((s,xi,i)=>s+xi*W1[i][j],0)+b1[j]));
+  const out = Array.from({length:dm},(_,j)=>h1.reduce((s,hi,i)=>s+hi*W2[i][j],0)+b2[j]);
+
+  // ReLU curve
+  const xs=Array.from({length:80},(_,i)=>-3+i*0.08);
+  getOrCreate('ffn-relu','line',{
+    labels:xs.map(v=>v.toFixed(1)),
+    datasets:[
+      {label:'ReLU(x)',data:xs.map(v=>relu(v)),borderColor:'#ef4444',borderWidth:2.5,pointRadius:0,tension:.01},
+      {label:'x (linear)',data:xs,borderColor:'#444',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:.01}
+    ]
+  },{plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:{color:'#8892a4',maxTicksLimit:8},grid:{color:'#252c3f'}},
+            y:{ticks:{color:'#8892a4'},grid:{color:'#252c3f'}}}});
+
+  // Input vs output
+  const labels=Array.from({length:dm},(_,i)=>`d${i}`);
+  getOrCreate('ffn-bar','bar',{
+    labels,
+    datasets:[
+      {label:'Eingabe',data:x,backgroundColor:'rgba(91,138,255,.5)',borderColor:'rgba(91,138,255,.9)',borderWidth:1},
+      {label:'Ausgabe FFN',data:out,backgroundColor:'rgba(239,68,68,.5)',borderColor:'rgba(239,68,68,.9)',borderWidth:1}
+    ]
+  },{plugins:{legend:{labels:{color:'#8892a4'}}},
+    scales:{x:{ticks:{color:'#8892a4',maxTicksLimit:16},grid:{color:'#252c3f'}},
+            y:{ticks:{color:'#8892a4'},grid:{color:'#252c3f'}}}});
+
+  const params1=dm*df+df, params2=df*dm+dm;
+  document.getElementById('ffn-log').textContent=
+    `Architektur: ${dm} → ${df} → ${dm} Neuronen\n`+
+    `Parameter Schicht 1: ${params1.toLocaleString()}\n`+
+    `Parameter Schicht 2: ${params2.toLocaleString()}\n`+
+    `Gesamt: ${(params1+params2).toLocaleString()} Parameter`;
+}
+runFFN();
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║  6. FULL TRANSFORMER BLOCKS                           ║
+// ╚═══════════════════════════════════════════════════════╝
+function runFull(){
+  const words=document.getElementById('full-input').value.trim().split(/\s+/).slice(0,8);
+  const numBlocks=+document.getElementById('full-b').value;
+  const n=words.length, dm=16;
+  const grid=document.getElementById('full-grid');
+  grid.innerHTML='';
+  grid.style.gridTemplateColumns=`repeat(${Math.min(numBlocks,4)},1fr)`;
+
+  let x=Array.from({length:n},(_,i)=>Array.from({length:dm},(_,j)=>Math.sin(i*0.5+j*0.3)));
+
+  const allWeights=[];
+  for(let b=0;b<numBlocks;b++){
+    // attention
+    const rng=makeRng(b*17+3);
+    const Wq=randn(dm,dm,rng), Wk=randn(dm,dm,rng), Wv=randn(dm,dm,rng);
+    const Q=x.map(row=>Array.from({length:dm},(_,j)=>row.reduce((s,xi,i)=>s+xi*Wq[i][j],0)*0.1));
+    const K=x.map(row=>Array.from({length:dm},(_,j)=>row.reduce((s,xi,i)=>s+xi*Wk[i][j],0)*0.1));
+    const V=x.map(row=>Array.from({length:dm},(_,j)=>row.reduce((s,xi,i)=>s+xi*Wv[i][j],0)*0.1));
+    const {weights,out:attnOut}=selfAttention(Q,K,V);
+    allWeights.push(weights);
+
+    // residual + norm
+    x=x.map((row,i)=>layerNorm(row.map((v,j)=>v+attnOut[i][j])));
+
+    // FFN
+    const rng2=makeRng(b*31+7);
+    const W1=randn(dm,32,rng2), W2=randn(32,dm,rng2);
+    const ffnOut=x.map(row=>{
+      const h=Array.from({length:32},(_,j)=>relu(row.reduce((s,xi,i)=>s+xi*W1[i][j],0)));
+      return Array.from({length:dm},(_,j)=>h.reduce((s,hi,i)=>s+hi*W2[i][j],0));
+    });
+    x=x.map((row,i)=>layerNorm(row.map((v,j)=>v+ffnOut[i][j])));
+  }
+
+  allWeights.forEach((w,b)=>{
+    const panel=document.createElement('div'); panel.className='output-panel';
+    panel.innerHTML=`<h4>Block ${b+1} — Attention</h4><div class="heatmap-wrap"><canvas id="full-c${b}" class="heatmap"></canvas></div>`;
+    grid.appendChild(panel);
+    setTimeout(()=>drawHeatmap(`full-c${b}`,w,words,words,greenColor),0);
+  });
+
+  document.getElementById('full-log').textContent=
+    `${numBlocks} Transformer-Block(s) verarbeitet.\n`+
+    `Ausgabe-Shape: (${n} Wörter × ${dm} Dimensionen)\n`+
+    `Ausgabe (letzte Zeile, erste 8 Werte): [${x[x.length-1].slice(0,8).map(v=>v.toFixed(3)).join(', ')}]`;
+}
+runFull();
+</script>
+</body>
+</html>
