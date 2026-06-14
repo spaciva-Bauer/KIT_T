@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbeitsblatt – Prompt Engineering: Fortgeschrittene Interaktionsstrategien</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f5f4f0;
+    --surface:   #ffffff;
+    --border:    #d8d5cc;
+    --text:      #1a1a1a;
+    --muted:     #6b6860;
+    --accent:    #1d5fa8;
+    --accent-bg: #eaf1fb;
+    --success:   #2a7a45;
+    --success-bg:#e8f5ee;
+    --danger:    #b03030;
+    --danger-bg: #fdeaea;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.65;
+    background: var(--bg); color: var(--text);
+    padding: 2rem 1rem 4rem;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+
+  header {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1rem; margin-bottom: 2rem;
+  }
+  header .meta { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+  header p { font-size: 14px; color: var(--muted); margin-top: .3rem; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem;
+  }
+  .card h2 { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin-bottom: 1rem; }
+  .card h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: .75rem; }
+
+  .task-label {
+    display: inline-block; background: var(--accent-bg); color: var(--accent);
+    font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 20px;
+    margin-bottom: .6rem; letter-spacing: .04em;
+  }
+  .question { font-size: 15px; color: var(--text); margin-bottom: .75rem; }
+  .hint { font-size: 13px; color: var(--muted); margin-bottom: .75rem; font-style: italic; }
+
+  .infobox {
+    background: var(--accent-bg); border: 1px solid #c0d8f0;
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+    margin-bottom: 1rem; font-size: 14px; color: var(--text);
+  }
+
+  .lernziele {
+    background: var(--success-bg); border: 1px solid #b3dac0;
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem; font-size: 14px;
+  }
+  .lernziele strong { color: var(--success); display: block; margin-bottom: .4rem; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
+  .lernziele ul { padding-left: 1.2rem; }
+  .lernziele li { margin-bottom: .3rem; }
+
+  .prompt-block {
+    background: #f8f7f4; border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: .75rem 1rem; margin: .5rem 0 .75rem;
+    font-size: 14px; color: var(--text); font-style: italic;
+  }
+  .prompt-label {
+    display: block; font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin-bottom: .25rem; font-style: normal;
+  }
+
+  /* Vergleichstabelle CoT vs Task Decomp */
+  .compare-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 14px; }
+  .compare-table th, .compare-table td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+  .compare-table th { background: var(--accent-bg); color: var(--accent); font-weight: 600; font-size: 13px; }
+  .compare-table td:first-child { font-weight: 600; }
+
+  /* Protokoll-Grid für mehrspaltige Eingaben */
+  .proto-grid { display: grid; grid-template-columns: 200px 1fr; gap: 0; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .proto-grid .proto-label {
+    background: var(--accent-bg); color: var(--accent);
+    font-size: 13px; font-weight: 600; padding: 10px 14px;
+    border-right: 1px solid var(--border); display: flex; align-items: flex-start;
+    border-bottom: 1px solid var(--border);
+  }
+  .proto-grid .proto-label:last-of-type { border-bottom: none; }
+  .proto-grid textarea, .proto-grid input[type="text"] {
+    border: none; border-bottom: 1px solid var(--border);
+    border-radius: 0; background: #fafaf8;
+    font-family: inherit; font-size: 14px; color: var(--text);
+    padding: 10px 12px; width: 100%; outline: none; resize: vertical;
+    min-height: 60px; transition: background .15s;
+  }
+  .proto-grid textarea:focus, .proto-grid input[type="text"]:focus {
+    background: var(--surface); box-shadow: inset 0 0 0 2px var(--accent);
+  }
+  .proto-grid .proto-last { border-bottom: none; }
+  .proto-grid .proto-last + textarea,
+  .proto-grid .proto-last + input { border-bottom: none; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 520px) { .field-group { grid-template-columns: 1fr; } }
+  label.field-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+  input[type="text"], input[type="date"], textarea {
+    font-family: inherit; font-size: 15px; color: var(--text);
+    background: #fafaf8; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 12px; width: 100%;
+    outline: none; transition: border-color .15s;
+  }
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--accent); background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(29,95,168,.12);
+  }
+  textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+  .toolbar {
+    position: sticky; bottom: 1rem; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,.10); padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem;
+  }
+  .toolbar .spacer { flex: 1; }
+
+  .btn {
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 9px 18px; border-radius: var(--radius); border: 1px solid transparent;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { opacity: .88; }
+  .btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--bg); }
+
+  .status-msg { font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 20px; display: none; }
+  .status-msg.ok  { background: var(--success-bg); color: var(--success); display: inline-block; }
+  .status-msg.err { background: var(--danger-bg);  color: var(--danger);  display: inline-block; }
+
+  .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; }
+
+  @media print {
+    .toolbar { display: none; }
+    body { background: white; }
+    .card { box-shadow: none; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="meta">KIT (T) · Jahrgangsstufe 11 · FOS</div>
+    <h1>Prompt Engineering – Fortgeschrittene Interaktionsstrategien</h1>
+    <p>Dialoge führen, Ergebnisse verfeinern und Aufgaben strukturieren &nbsp;·&nbsp; Fülle alle Felder aus und speichere deine Antworten.</p>
+  </header>
+
+  <!-- Persönliche Angaben -->
+  <div class="card">
+    <h2>Persönliche Angaben</h2>
+    <div class="field-group">
+      <div class="field">
+        <label class="field-label" for="f-name">Name</label>
+        <input type="text" id="f-name" placeholder="Vor- und Nachname">
+      </div>
+      <div class="field">
+        <label class="field-label" for="f-klasse">Klasse</label>
+        <input type="text" id="f-klasse" placeholder="z. B. 11T">
+      </div>
+      <div class="field">
+        <label class="field-label" for="f-datum">Datum</label>
+        <input type="date" id="f-datum">
+      </div>
+    </div>
+  </div>
+
+  <!-- Lernziele -->
+  <div class="lernziele">
+    <strong>Lernziele</strong>
+    Nach diesem Arbeitsblatt könnt ihr:
+    <ul>
+      <li><strong>Iteratives Prompting</strong> einsetzen, um Ergebnisse durch gezielte Folgeprompts schrittweise zu verbessern</li>
+      <li><strong>Self-Reflection-Prompts</strong> formulieren, damit das Sprachmodell die eigene Antwort kritisch überprüft und korrigiert</li>
+      <li><strong>Task Decomposition</strong> anwenden, um komplexe Aufgaben in klar definierte Teilschritte zu zerlegen und nacheinander abzuarbeiten</li>
+    </ul>
+  </div>
+
+  <!-- ── A. Iteratives Prompting ── -->
+  <div class="card">
+    <h2>A. Iteratives Prompting (Prompt Refinement)</h2>
+    <div class="infobox">
+      „Ein Sprachmodell ist kein Automat, der auf Knopfdruck perfekte Ergebnisse liefert – es ist ein Gesprächspartner. Wer gezielt nachfragt und Feedback gibt, erhält deutlich bessere Ergebnisse als jemand, der einmalig einen langen Prompt schreibt und hofft."
+    </div>
+
+    <p class="question"><strong>Wie funktioniert es?</strong> Statt alles in einen einzigen Prompt zu packen, führst du einen Dialog:</p>
+    <ol style="margin: 0 0 1rem 1.3rem; font-size:14px; line-height:1.9; color:var(--muted);">
+      <li>Erster Prompt → Ergebnis erhalten</li>
+      <li>Feedback geben → konkret benennen, was fehlt oder falsch ist</li>
+      <li>Verbesserung anfordern → gezielt nachsteuern</li>
+      <li>Schritt 2–3 so oft wiederholen, bis das Ergebnis passt</li>
+    </ol>
+
+    <p class="question" style="margin-bottom:.5rem;"><strong>Beispiel: Bewerbungsschreiben</strong></p>
+    <div class="prompt-block">
+      <span class="prompt-label">Prompt 1 – Ersteinstieg</span>
+      „Schreib mir ein kurzes Bewerbungsschreiben für eine Ausbildung als Fachinformatiker."
+    </div>
+    <div class="prompt-block">
+      <span class="prompt-label">Prompt 2 – Feedback</span>
+      „Das klingt zu allgemein. Mach es persönlicher: Ich heiße Lukas Meier, bin 17 Jahre alt, habe ein Schulpraktikum bei einer IT-Firma gemacht und interessiere mich besonders für Netzwerktechnik. Überarbeite das Schreiben entsprechend."
+    </div>
+    <div class="prompt-block">
+      <span class="prompt-label">Prompt 3 – Feinschliff</span>
+      „Gut, aber der Eröffnungssatz ist zu langweilig. Beginne stattdessen mit einer konkreten Erfahrung aus meinem Praktikum. Halte den Text auf maximal 150 Wörter."
+    </div>
+    <p class="hint">Tipp: Je konkreter dein Feedback, desto gezielter die Verbesserung. Sage nicht nur „Das ist schlecht", sondern erkläre <strong>warum</strong> und <strong>was</strong> genau geändert werden soll.</p>
+  </div>
+
+  <!-- Übung A1 -->
+  <div class="card">
+    <span class="task-label">Übung A1</span>
+    <h3>Iterativ zum Ziel</h3>
+    <p class="question">Deine Schule plant einen Projekttag zum Thema „KI im Alltag". Du sollst einen kurzen Ankündigungstext für die Schulwebsite erstellen.</p>
+    <ol style="margin: 0 0 .75rem 1.3rem; font-size:15px; line-height:1.8;">
+      <li>Starte mit einem einfachen Prompt ohne Details und notiere das Ergebnis.</li>
+      <li>Gib gezieltes Feedback (z. B. zu Länge, Ton, fehlenden Informationen) und fordere eine Überarbeitung an.</li>
+      <li>Verfeinere das Ergebnis in einem dritten Schritt noch einmal.</li>
+    </ol>
+    <p class="question">Protokolliere alle drei Prompts und halte die wichtigsten Änderungen fest:</p>
+
+    <div class="field">
+      <label class="field-label" for="f-a1-p1">Prompt 1 (Ersteinstieg)</label>
+      <textarea id="f-a1-p1" placeholder="Dein erster, einfacher Prompt …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a1-p2">Feedback / Prompt 2</label>
+      <textarea id="f-a1-p2" placeholder="Was war nicht gut? Wie hast du nachgesteuert?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a1-p3">Feinschliff / Prompt 3</label>
+      <textarea id="f-a1-p3" placeholder="Deine letzte Verfeinerung …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a1-verbesserung">Wichtigste Verbesserung (von Prompt 1 zu Prompt 3)</label>
+      <textarea id="f-a1-verbesserung" style="min-height:60px;" placeholder="Was hat sich am stärksten verändert?"></textarea>
+    </div>
+  </div>
+
+  <!-- ── B. Self-Reflection ── -->
+  <div class="card">
+    <h2>B. Self-Reflection-Prompting (Selbstkritik)</h2>
+    <div class="infobox">
+      „Sprachmodelle machen Fehler – manchmal schleichen sich logische Widersprüche, falsche Fakten oder unklare Formulierungen ein. Mit einem Self-Reflection-Prompt forderst du das Modell auf, seine eigene Antwort kritisch zu überprüfen. Das verbessert die Qualität erheblich."
+    </div>
+
+    <p class="question" style="margin-bottom:.5rem;"><strong>Typische Self-Reflection-Anweisungen:</strong></p>
+    <ul style="margin: 0 0 1rem 1.3rem; font-size:14px; line-height:1.9; color:var(--muted);">
+      <li>„Überprüfe deine Antwort auf logische Fehler und korrigiere sie."</li>
+      <li>„Welche Annahmen hast du getroffen? Sind sie alle gültig?"</li>
+      <li>„Gibt es Formulierungen, die missverständlich sein könnten? Verbessere sie."</li>
+      <li>„Bewerte deine Antwort auf einer Skala von 1–10 und begründe die Bewertung."</li>
+    </ul>
+
+    <p class="question" style="margin-bottom:.5rem;"><strong>Beispiel: Fehlerhafte Erklärung korrigieren</strong></p>
+    <div class="prompt-block">
+      <span class="prompt-label">Direkter Prompt</span>
+      „Erkläre, warum WLAN schneller ist als ein Kabel."
+    </div>
+    <p class="hint" style="margin-bottom:.5rem;">Das Modell könnte eine sachlich falsche Antwort liefern (Kabel ist in der Regel schneller und stabiler). Anschließend:</p>
+    <div class="prompt-block">
+      <span class="prompt-label">Self-Reflection-Prompt</span>
+      „Überprüfe deine Antwort. Enthält sie fachliche Fehler oder einseitige Darstellungen? Korrigiere sie und begründe deine Änderungen."
+    </div>
+  </div>
+
+  <!-- Übung B1 -->
+  <div class="card">
+    <span class="task-label">Übung B1</span>
+    <h3>Die KI auf den Prüfstand stellen</h3>
+    <ol style="margin: 0 0 .75rem 1.3rem; font-size:15px; line-height:1.8;">
+      <li>Stelle dem Sprachmodell die folgende Frage direkt:</li>
+    </ol>
+    <div class="prompt-block">
+      <span class="prompt-label">Direkte Frage</span>
+      „Welche drei Programmiersprachen sollte man als Einsteiger zuerst lernen, und warum?"
+    </div>
+    <ol start="2" style="margin: 0 0 .75rem 1.3rem; font-size:15px; line-height:1.8;">
+      <li>Notiere die Antwort.</li>
+      <li>Verwende anschließend diesen Self-Reflection-Prompt:</li>
+    </ol>
+    <div class="prompt-block">
+      <span class="prompt-label">Self-Reflection-Prompt</span>
+      „Überprüfe deine Empfehlung kritisch. Welche Argumente könnten dagegensprechen? Gibt es wichtige Aspekte, die du nicht berücksichtigt hast? Überarbeite deine Antwort."
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="f-b1-erste">Erste Antwort (Stichpunkte)</label>
+      <textarea id="f-b1-erste" placeholder="Welche drei Sprachen hat das Modell empfohlen und warum?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-b1-reflexion">Zweite Antwort (nach Self-Reflection)</label>
+      <textarea id="f-b1-reflexion" placeholder="Wie hat das Modell seine Empfehlung überarbeitet?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-b1-verbesserung">Was hat sich verbessert?</label>
+      <textarea id="f-b1-verbesserung" style="min-height:60px;" placeholder="Worin liegt der Unterschied zwischen den beiden Antworten?"></textarea>
+    </div>
+  </div>
+
+  <!-- Übung B2 -->
+  <div class="card">
+    <span class="task-label">Übung B2</span>
+    <h3>Eigene Fehler provozieren</h3>
+    <p class="question">Stelle dem Modell eine Fangfrage, bei der es wahrscheinlich einen Fehler macht (z. B. eine Rechenaufgabe mit einem Trick, eine absichtlich missverständliche Formulierung oder eine Frage mit falscher Prämisse).</p>
+    <div class="prompt-block">
+      <span class="prompt-label">Beispiel für eine Fangfrage</span>
+      „Wenn ein Zug mit 80 km/h von München nach Hamburg fährt und ein anderer Zug mit 100 km/h von Hamburg nach München, welcher Zug ist näher an München, wenn sie sich treffen?"
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="f-b2-frage">Deine Fangfrage</label>
+      <input type="text" id="f-b2-frage" placeholder="Formuliere hier deine Fangfrage …">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-b2-erste">Erste Antwort des Modells</label>
+      <textarea id="f-b2-erste" placeholder="Was hat das Modell geantwortet?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-b2-reflexion">Nach Self-Reflection – hat das Modell seinen Fehler erkannt?</label>
+      <textarea id="f-b2-reflexion" placeholder="Wie hat das Modell die Antwort nach dem Reflection-Prompt überarbeitet?"></textarea>
+    </div>
+  </div>
+
+  <!-- ── C. Task Decomposition ── -->
+  <div class="card">
+    <h2>C. Task Decomposition (Aufgabenteilung)</h2>
+    <div class="infobox">
+      „Wenn du einem Mitarbeiter eine komplizierte Aufgabe gibst, erklärst du sie nicht in einem einzigen, riesigen Satz – du zerlegst sie in klare Schritte. Genau das macht Task Decomposition: Komplexe Aufgaben werden in Teilaufgaben aufgeteilt, die das Modell nacheinander abarbeitet."
+    </div>
+
+    <p class="question" style="margin-bottom:.5rem;"><strong>Unterschied zu Chain-of-Thought:</strong></p>
+    <table class="compare-table">
+      <thead>
+        <tr><th></th><th>Chain-of-Thought</th><th>Task Decomposition</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Wer zerlegt?</td><td>Das Modell selbst</td><td>Du als Nutzer</td></tr>
+        <tr><td>Anweisung</td><td>„Gehe Schritt für Schritt vor."</td><td>Du gibst explizite Teilaufgaben vor</td></tr>
+        <tr><td>Wann sinnvoll?</td><td>Logische Überlegungen</td><td>Komplexe, mehrstufige Projekte</td></tr>
+      </tbody>
+    </table>
+
+    <p class="question" style="margin-bottom:.5rem;"><strong>Beispiel: Schulprojekt planen</strong></p>
+    <div class="prompt-block">
+      <span class="prompt-label">Schritt 1</span>
+      „Erstelle eine Liste von 5 möglichen Themen für ein Schulprojekt über KI in der Medizin. Bewerte jedes Thema kurz nach Schwierigkeit und Verfügbarkeit von Informationen."
+    </div>
+    <div class="prompt-block">
+      <span class="prompt-label">Schritt 2 (nach Auswahl eines Themas)</span>
+      „Ich habe mich für das Thema ‚KI-gestützte Diagnose bei Hautkrebs' entschieden. Erstelle eine Gliederung mit 5 Hauptpunkten für eine 10-minütige Präsentation."
+    </div>
+    <div class="prompt-block">
+      <span class="prompt-label">Schritt 3</span>
+      „Schreib für den ersten Gliederungspunkt ‚Wie funktioniert KI-Bilderkennung?' einen Einstiegstext von ca. 80 Wörtern, der für Mitschüler ohne Vorkenntnisse verständlich ist."
+    </div>
+  </div>
+
+  <!-- Übung C1 -->
+  <div class="card">
+    <span class="task-label">Übung C1</span>
+    <h3>Projekt Schritt für Schritt</h3>
+    <p class="question">Du planst eine Umfrage in deiner Klasse zum Thema „Nutzung von KI-Tools im Alltag". Zerlege diese Aufgabe in mindestens <strong>drei separate Prompts</strong> und führe sie nacheinander durch.</p>
+
+    <div class="field">
+      <label class="field-label" for="f-c1-t1">Teilaufgabe 1 – Was soll der erste Prompt leisten?</label>
+      <input type="text" id="f-c1-t1" placeholder="z. B. Fragen für die Umfrage entwickeln">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-c1-p1">Prompt 1</label>
+      <textarea id="f-c1-p1" placeholder="Formuliere den ersten Prompt …"></textarea>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="f-c1-t2">Teilaufgabe 2</label>
+      <input type="text" id="f-c1-t2" placeholder="z. B. Antwortskala festlegen">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-c1-p2">Prompt 2</label>
+      <textarea id="f-c1-p2" placeholder="Formuliere den zweiten Prompt …"></textarea>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="f-c1-t3">Teilaufgabe 3</label>
+      <input type="text" id="f-c1-t3" placeholder="z. B. Auswertung planen">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-c1-p3">Prompt 3</label>
+      <textarea id="f-c1-p3" placeholder="Formuliere den dritten Prompt …"></textarea>
+    </div>
+  </div>
+
+  <!-- Übung C2 -->
+  <div class="card">
+    <span class="task-label">Übung C2</span>
+    <h3>Chaos in Struktur verwandeln</h3>
+    <p class="question">Dir liegt folgender Auftrag vor:</p>
+    <div class="prompt-block">
+      <span class="prompt-label">Komplexer Auftrag</span>
+      „Erstelle für unsere Schul-AG eine komplette Social-Media-Kampagne für Instagram über den Tag der offenen Tür am 15. April: Themenideen, drei Beiträge mit Bildideen, einen Countdown-Post eine Woche vorher und eine kurze Anleitung, wann was gepostet werden soll."
+    </div>
+    <ol style="margin: 0 0 .75rem 1.3rem; font-size:15px; line-height:1.8;">
+      <li>Zerlege diesen Auftrag in sinnvolle Teilaufgaben.</li>
+      <li>Formuliere für jede Teilaufgabe einen eigenen Prompt.</li>
+      <li>Führe die Prompts nacheinander durch und notiere, ob die Ergebnisse konsistenter sind als bei einem einzigen langen Prompt.</li>
+    </ol>
+
+    <div class="field">
+      <label class="field-label" for="f-c2-anzahl">Wie viele Teilaufgaben hast du identifiziert?</label>
+      <input type="text" id="f-c2-anzahl" placeholder="Anzahl der Teilaufgaben …">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-c2-prompts">Deine Teilaufgaben und Prompts (kurz stichpunktartig)</label>
+      <textarea id="f-c2-prompts" style="min-height:120px;" placeholder="1. Teilaufgabe: … → Prompt: …&#10;2. Teilaufgabe: … → Prompt: …&#10;…"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-c2-vergleich">War das Ergebnis besser als bei einem einzigen Prompt? Warum?</label>
+      <textarea id="f-c2-vergleich" style="min-height:60px;" placeholder="Deine Beobachtung …"></textarea>
+    </div>
+  </div>
+
+  <!-- Reflexion -->
+  <div class="card">
+    <span class="task-label">Reflexion</span>
+    <h3>Abschlussfragen</h3>
+    <ul style="margin: 0 0 .75rem 1.3rem; font-size:14px; color:var(--muted); line-height:1.9;">
+      <li>In welchen Situationen ist <strong>Iteratives Prompting</strong> sinnvoller als ein einzelner, langer Prompt?</li>
+      <li>Warum kann ein Sprachmodell durch einen <strong>Self-Reflection-Prompt</strong> seine eigene Antwort verbessern – obwohl es doch denselben Text noch einmal liest?</li>
+      <li>Wann würdet ihr <strong>Task Decomposition</strong> gegenüber <strong>Chain-of-Thought</strong> bevorzugen? Begründet eure Antwort mit einem Beispiel.</li>
+    </ul>
+    <div class="field">
+      <label class="field-label" for="f-reflexion">Meine Reflexion</label>
+      <textarea id="f-reflexion" style="min-height:120px;" placeholder="Deine Antworten in Stichpunkten …"></textarea>
+    </div>
+  </div>
+
+  <!-- Hausaufgabe -->
+  <div class="card">
+    <span class="task-label">Optional / Hausaufgabe</span>
+    <h3>Der vollständige Workflow</h3>
+    <p class="question">Wählt eine komplexe, reale Aufgabe aus eurem Schulalltag (z. B. eine Facharbeit vorbereiten, ein Referat strukturieren, eine Tabellenkalkulation planen). Bearbeitet sie mit einem kombinierten Ansatz:</p>
+    <ol style="margin: 0 0 .75rem 1.3rem; font-size:14px; color:var(--muted); line-height:1.9;">
+      <li><strong>Task Decomposition</strong> – zerlegt die Aufgabe in Teilschritte</li>
+      <li><strong>Iteratives Prompting</strong> – verfeinert mindestens einen Teilschritt durch zwei Folgeprompts</li>
+      <li><strong>Self-Reflection</strong> – lasst das Modell das Endergebnis kritisch überprüfen</li>
+    </ol>
+    <div class="field">
+      <label class="field-label" for="f-ha-aufgabe">Meine gewählte Aufgabe</label>
+      <input type="text" id="f-ha-aufgabe" placeholder="z. B. Referat über erneuerbare Energien vorbereiten">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-ha-dokumentation">Dokumentation (Schritte, Prompts, Ergebnisse)</label>
+      <textarea id="f-ha-dokumentation" style="min-height:140px;" placeholder="Beschreibe dein Vorgehen Schritt für Schritt …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-ha-mehrwert">Welche Technik hat den größten Mehrwert gebracht?</label>
+      <textarea id="f-ha-mehrwert" style="min-height:60px;" placeholder="Deine Beobachtung …"></textarea>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="btn btn-secondary" onclick="loadFromFile()">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      Datei laden
+    </button>
+    <input type="file" id="file-input" accept=".json" style="display:none" onchange="onFileSelected(event)">
+    <div class="spacer"></div>
+    <span class="status-msg" id="status-msg"></span>
+    <button class="btn btn-primary" onclick="saveToFile()">
+      <svg class="icon" viewBox="0 0 24 24" style="stroke:#fff"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Antworten speichern
+    </button>
+  </div>
+
+</div>
+
+<script>
+function collectData() {
+  return {
+    version: "1.0",
+    gespeichert_am: new Date().toLocaleString('de-DE'),
+    schueler: {
+      name:   document.getElementById('f-name').value.trim(),
+      klasse: document.getElementById('f-klasse').value.trim(),
+      datum:  document.getElementById('f-datum').value
+    },
+    aufgaben: {
+      a1_p1:           document.getElementById('f-a1-p1').value,
+      a1_p2:           document.getElementById('f-a1-p2').value,
+      a1_p3:           document.getElementById('f-a1-p3').value,
+      a1_verbesserung: document.getElementById('f-a1-verbesserung').value,
+      b1_erste:        document.getElementById('f-b1-erste').value,
+      b1_reflexion:    document.getElementById('f-b1-reflexion').value,
+      b1_verbesserung: document.getElementById('f-b1-verbesserung').value,
+      b2_frage:        document.getElementById('f-b2-frage').value.trim(),
+      b2_erste:        document.getElementById('f-b2-erste').value,
+      b2_reflexion:    document.getElementById('f-b2-reflexion').value,
+      c1_t1:           document.getElementById('f-c1-t1').value.trim(),
+      c1_p1:           document.getElementById('f-c1-p1').value,
+      c1_t2:           document.getElementById('f-c1-t2').value.trim(),
+      c1_p2:           document.getElementById('f-c1-p2').value,
+      c1_t3:           document.getElementById('f-c1-t3').value.trim(),
+      c1_p3:           document.getElementById('f-c1-p3').value,
+      c2_anzahl:       document.getElementById('f-c2-anzahl').value.trim(),
+      c2_prompts:      document.getElementById('f-c2-prompts').value,
+      c2_vergleich:    document.getElementById('f-c2-vergleich').value,
+      reflexion:       document.getElementById('f-reflexion').value,
+      ha_aufgabe:      document.getElementById('f-ha-aufgabe').value.trim(),
+      ha_dokumentation:document.getElementById('f-ha-dokumentation').value,
+      ha_mehrwert:     document.getElementById('f-ha-mehrwert').value
+    }
+  };
+}
+
+function fillData(d) {
+  if (d.schueler) {
+    setVal('f-name',   d.schueler.name   || '');
+    setVal('f-klasse', d.schueler.klasse || '');
+    setVal('f-datum',  d.schueler.datum  || '');
+  }
+  if (d.aufgaben) {
+    const a = d.aufgaben;
+    setVal('f-a1-p1',           a.a1_p1           || '');
+    setVal('f-a1-p2',           a.a1_p2           || '');
+    setVal('f-a1-p3',           a.a1_p3           || '');
+    setVal('f-a1-verbesserung', a.a1_verbesserung || '');
+    setVal('f-b1-erste',        a.b1_erste        || '');
+    setVal('f-b1-reflexion',    a.b1_reflexion    || '');
+    setVal('f-b1-verbesserung', a.b1_verbesserung || '');
+    setVal('f-b2-frage',        a.b2_frage        || '');
+    setVal('f-b2-erste',        a.b2_erste        || '');
+    setVal('f-b2-reflexion',    a.b2_reflexion    || '');
+    setVal('f-c1-t1',           a.c1_t1           || '');
+    setVal('f-c1-p1',           a.c1_p1           || '');
+    setVal('f-c1-t2',           a.c1_t2           || '');
+    setVal('f-c1-p2',           a.c1_p2           || '');
+    setVal('f-c1-t3',           a.c1_t3           || '');
+    setVal('f-c1-p3',           a.c1_p3           || '');
+    setVal('f-c2-anzahl',       a.c2_anzahl       || '');
+    setVal('f-c2-prompts',      a.c2_prompts      || '');
+    setVal('f-c2-vergleich',    a.c2_vergleich    || '');
+    setVal('f-reflexion',       a.reflexion       || '');
+    setVal('f-ha-aufgabe',      a.ha_aufgabe      || '');
+    setVal('f-ha-dokumentation',a.ha_dokumentation|| '');
+    setVal('f-ha-mehrwert',     a.ha_mehrwert     || '');
+  }
+}
+
+function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+
+function saveToFile() {
+  const data = collectData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const name  = (data.schueler.name || 'NN').replace(/\s+/g, '_');
+  const fname = `${name}_Prompting_im_Unterricht_Vertiefung.json`;
+  a.download = fname;
+  a.click();
+  URL.revokeObjectURL(url);
+  showStatus(`✓ Gespeichert als „${fname}"`, 'ok');
+}
+
+function loadFromFile() { document.getElementById('file-input').click(); }
+
+function onFileSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      fillData(data);
+      const ts = data.gespeichert_am ? ` (${data.gespeichert_am})` : '';
+      showStatus(`✓ Datei geladen${ts}`, 'ok');
+    } catch { showStatus('✗ Fehler: Datei konnte nicht gelesen werden.', 'err'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = `status-msg ${type}`;
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.className = 'status-msg'; }, 5000);
+}
+
+document.getElementById('f-datum').value = new Date().toISOString().slice(0, 10);
+</script>
+</body>
+</html>

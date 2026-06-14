@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übungsblatt – Prompting im Unterricht: Alle Techniken</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f5f4f0;
+    --surface:   #ffffff;
+    --border:    #d8d5cc;
+    --text:      #1a1a1a;
+    --muted:     #6b6860;
+    --accent:    #1d5fa8;
+    --accent-bg: #eaf1fb;
+    --success:   #2a7a45;
+    --success-bg:#e8f5ee;
+    --danger:    #b03030;
+    --danger-bg: #fdeaea;
+    --warn:      #7a5a00;
+    --warn-bg:   #fff8e1;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.65;
+    background: var(--bg); color: var(--text);
+    padding: 2rem 1rem 4rem;
+  }
+  .page { max-width: 760px; margin: 0 auto; }
+
+  header {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1rem; margin-bottom: 2rem;
+  }
+  header .meta { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+  header p { font-size: 14px; color: var(--muted); margin-top: .3rem; }
+
+  .hinweis {
+    background: var(--warn-bg); border: 1px solid #e6cc80;
+    border-radius: var(--radius); padding: .9rem 1.25rem;
+    margin-bottom: 1.25rem; font-size: 14px; color: var(--warn);
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem;
+  }
+  .card h2 { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin-bottom: 1rem; }
+  .card h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: .75rem; }
+
+  .task-label {
+    display: inline-block; background: var(--accent-bg); color: var(--accent);
+    font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 20px;
+    margin-bottom: .6rem; letter-spacing: .04em;
+  }
+  .question { font-size: 15px; color: var(--text); margin-bottom: .75rem; }
+  .hint { font-size: 13px; color: var(--muted); margin-bottom: .75rem; font-style: italic; }
+
+  .prompt-block {
+    background: #f8f7f4; border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: .75rem 1rem; margin: .5rem 0 .75rem;
+    font-size: 14px; color: var(--text); font-style: italic;
+  }
+  .prompt-label {
+    display: block; font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin-bottom: .25rem; font-style: normal;
+  }
+
+  .code-block {
+    background: #1e1e2e; color: #cdd6f4;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 13px; border-radius: var(--radius);
+    padding: .9rem 1.1rem; margin: .5rem 0 .75rem;
+    white-space: pre; overflow-x: auto; font-style: normal;
+  }
+
+  /* RKAF-Eingaberaster */
+  .rkaf-grid { display: grid; grid-template-columns: 110px 1fr; gap: 0; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .rkaf-grid .rk-label {
+    background: var(--accent-bg); color: var(--accent);
+    font-size: 13px; font-weight: 700; padding: 10px 14px;
+    border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+  }
+  .rkaf-grid .rk-label.last { border-bottom: none; }
+  .rkaf-grid input[type="text"], .rkaf-grid textarea {
+    border: none; border-bottom: 1px solid var(--border); border-radius: 0;
+    background: #fafaf8; font-family: inherit; font-size: 14px; color: var(--text);
+    padding: 10px 12px; width: 100%; outline: none; resize: vertical;
+    transition: background .15s;
+  }
+  .rkaf-grid input[type="text"]:focus, .rkaf-grid textarea:focus { background: var(--surface); box-shadow: inset 0 0 0 2px var(--accent); }
+  .rkaf-grid .last-input { border-bottom: none; }
+
+  /* Checkboxen */
+  .rkaf-check { display: flex; flex-wrap: wrap; gap: 10px; margin-top: .5rem; }
+  .rkaf-check-item {
+    display: flex; align-items: center; gap: 7px;
+    background: #fafaf8; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 6px 14px;
+    cursor: pointer; transition: background .12s, border-color .12s;
+    user-select: none; font-size: 15px; font-weight: 600; color: var(--text);
+  }
+  .rkaf-check-item:hover { background: var(--accent-bg); border-color: var(--accent); }
+  .rkaf-check-item input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+
+  /* Radio-Buttons */
+  .radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: .5rem; }
+  .radio-option {
+    display: flex; align-items: center; gap: 8px;
+    background: #fafaf8; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 7px 14px;
+    cursor: pointer; transition: background .12s, border-color .12s;
+    user-select: none; font-size: 14px; color: var(--text);
+  }
+  .radio-option:hover { background: var(--accent-bg); border-color: var(--accent); }
+  .radio-option input { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+
+  /* Standard-Felder */
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 520px) { .field-group { grid-template-columns: 1fr; } }
+  label.field-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+  input[type="text"], input[type="date"], textarea {
+    font-family: inherit; font-size: 15px; color: var(--text);
+    background: #fafaf8; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 12px; width: 100%;
+    outline: none; transition: border-color .15s;
+  }
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--accent); background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(29,95,168,.12);
+  }
+  textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+  .toolbar {
+    position: sticky; bottom: 1rem; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,.10); padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem;
+  }
+  .toolbar .spacer { flex: 1; }
+  .btn {
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 9px 18px; border-radius: var(--radius); border: 1px solid transparent;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { opacity: .88; }
+  .btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--bg); }
+  .status-msg { font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 20px; display: none; }
+  .status-msg.ok  { background: var(--success-bg); color: var(--success); display: inline-block; }
+  .status-msg.err { background: var(--danger-bg);  color: var(--danger);  display: inline-block; }
+  .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; }
+
+  @media print {
+    .toolbar { display: none; }
+    body { background: white; }
+    .card { box-shadow: none; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="meta">KIT (T) · Jahrgangsstufe 11 · FOS</div>
+    <h1>Übungsblatt – Prompting im Unterricht</h1>
+    <p>Alle Techniken auf einen Blick &nbsp;·&nbsp; Fülle alle Felder aus und speichere deine Antworten.</p>
+  </header>
+
+  <div class="hinweis">
+    <strong>Hinweis:</strong> Dieses Übungsblatt setzt die Inhalte aller drei Arbeitsblätter voraus. Nutze das Sprachmodell der ByCS für alle Aufgaben.
+  </div>
+
+  <!-- Persönliche Angaben -->
+  <div class="card">
+    <h2>Persönliche Angaben</h2>
+    <div class="field-group">
+      <div class="field">
+        <label class="field-label" for="f-name">Name</label>
+        <input type="text" id="f-name" placeholder="Vor- und Nachname">
+      </div>
+      <div class="field">
+        <label class="field-label" for="f-klasse">Klasse</label>
+        <input type="text" id="f-klasse" placeholder="z. B. 11T">
+      </div>
+      <div class="field">
+        <label class="field-label" for="f-datum">Datum</label>
+        <input type="date" id="f-datum">
+      </div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 1: R-K-A-F -->
+  <div class="card">
+    <span class="task-label">Aufgabe 1</span>
+    <h3>R-K-A-F-Modell</h3>
+    <p class="question">Ein Freund möchte sich auf sein erstes Vorstellungsgespräch für einen IT-Ausbildungsplatz vorbereiten. Er hat keine Erfahrung mit solchen Gesprächen und weiß nicht, welche Fragen typischerweise gestellt werden.</p>
+    <p class="question">Verfasse einen vollständigen Prompt nach dem R-K-A-F-Modell, der dem Sprachmodell die Aufgabe gibt, ein realistisches Übungsgespräch zu simulieren.</p>
+
+    <div class="rkaf-grid">
+      <div class="rk-label">R – Rolle</div>
+      <input type="text" id="f-a1-r" placeholder="Welche Rolle soll die KI einnehmen?">
+      <div class="rk-label">K – Kontext</div>
+      <input type="text" id="f-a1-k" placeholder="Was ist der Hintergrund der Situation?">
+      <div class="rk-label">A – Aufgabe</div>
+      <input type="text" id="f-a1-a" placeholder="Was genau soll die KI tun?">
+      <div class="rk-label last">F – Format</div>
+      <input type="text" id="f-a1-f" class="last-input" placeholder="Wie soll die Ausgabe aussehen?">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="f-a1-vollstaendig">Vollständiger Prompt</label>
+      <textarea id="f-a1-vollstaendig" style="min-height:100px;" placeholder="Formuliere hier den vollständigen, kombinierten Prompt …"></textarea>
+    </div>
+
+    <p class="question" style="margin-top:.25rem;"><strong>Selbstcheck:</strong> Welche Komponenten hast du eingebaut?</p>
+    <div class="rkaf-check">
+      <label class="rkaf-check-item"><input type="checkbox" id="rkaf-r"> R – Rolle</label>
+      <label class="rkaf-check-item"><input type="checkbox" id="rkaf-k"> K – Kontext</label>
+      <label class="rkaf-check-item"><input type="checkbox" id="rkaf-a"> A – Aufgabe</label>
+      <label class="rkaf-check-item"><input type="checkbox" id="rkaf-f"> F – Format</label>
+    </div>
+  </div>
+
+  <!-- Aufgabe 2: Chain-of-Thought -->
+  <div class="card">
+    <span class="task-label">Aufgabe 2</span>
+    <h3>Chain-of-Thought</h3>
+    <p class="question">Stelle dem Sprachmodell folgende Frage <strong>zuerst direkt</strong>, dann mit einer Chain-of-Thought-Anweisung:</p>
+    <div class="prompt-block">
+      <span class="prompt-label">Aufgabe</span>
+      „Eine Schulklasse sammelt Geld für eine Klassenfahrt. 18 Schüler zahlen je 45 €, 6 Schüler zahlen je 30 €, weil sie Ermäßigung bekommen. Die Fahrt kostet insgesamt 1.080 €. Reicht das Geld? Wenn ja: Wie viel bleibt übrig?"
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="f-a2-direkt">Direkte Antwort des Modells (Ergebnis / Rechenweg)</label>
+      <textarea id="f-a2-direkt" placeholder="Was hat das Modell direkt geantwortet?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a2-cot-prompt">Dein Chain-of-Thought-Prompt</label>
+      <textarea id="f-a2-cot-prompt" style="min-height:60px;" placeholder="Notiere deinen Prompt mit der CoT-Anweisung …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a2-cot-antwort">Antwort mit Chain-of-Thought</label>
+      <textarea id="f-a2-cot-antwort" placeholder="Was hat das Modell mit CoT geantwortet?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a2-unterschied">Unterschied in der Qualität / Nachvollziehbarkeit</label>
+      <textarea id="f-a2-unterschied" style="min-height:60px;" placeholder="Was hat sich durch CoT verbessert?"></textarea>
+    </div>
+  </div>
+
+  <!-- Aufgabe 3: Few-Shot -->
+  <div class="card">
+    <span class="task-label">Aufgabe 3</span>
+    <h3>Few-Shot Prompting</h3>
+    <p class="question">Du willst das Sprachmodell trainieren, Social-Media-Kommentare automatisch in drei Kategorien einzuordnen: <strong>Positiv</strong>, <strong>Negativ</strong> oder <strong>Neutral</strong>.</p>
+    <ol style="margin: 0 0 .75rem 1.3rem; font-size:15px; line-height:1.8;">
+      <li>Entwickle einen Few-Shot Prompt mit mindestens <strong>zwei Beispielpaaren</strong>.</li>
+      <li>Stelle dann folgende Kommentare zur Klassifikation:</li>
+    </ol>
+    <ul style="margin: 0 0 .75rem 1.5rem; font-size:14px; color:var(--muted); line-height:1.9; font-style:italic;">
+      <li>„Endlich mal ein Update, das nicht alles schlechter macht!"</li>
+      <li>„Weiß nicht, hab's noch nicht ausprobiert."</li>
+      <li>„Absoluter Müll, deinstalliert."</li>
+    </ul>
+
+    <div class="field">
+      <label class="field-label" for="f-a3-prompt">Mein Few-Shot Prompt (inkl. Beispielpaare)</label>
+      <textarea id="f-a3-prompt" style="min-height:140px;" placeholder="Beispiel 1: „…" → Positiv&#10;Beispiel 2: „…" → Negativ&#10;&#10;Klassifiziere: „…""></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a3-ergebnis">Ergebnis der Klassifikation</label>
+      <textarea id="f-a3-ergebnis" placeholder="Wie hat das Modell die drei Kommentare eingeordnet?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a3-einbeispiel">Was passiert, wenn du nur ein Beispiel verwendest?</label>
+      <textarea id="f-a3-einbeispiel" style="min-height:60px;" placeholder="Deine Beobachtung …"></textarea>
+    </div>
+  </div>
+
+  <!-- Aufgabe 4: Delimiter & XML-Tags -->
+  <div class="card">
+    <span class="task-label">Aufgabe 4</span>
+    <h3>Delimiter &amp; XML-Tags</h3>
+    <p class="question">Unten stehen Rohdaten aus einer Schülerumfrage als unstrukturierter Fließtext. Schreibe einen Prompt mit XML-Tags, der das Sprachmodell anweist, die Daten in eine übersichtliche Tabelle mit den Spalten <strong>Name</strong>, <strong>Klasse</strong> und <strong>Lieblingsapp</strong> zu extrahieren.</p>
+
+    <div class="code-block">&lt;umfrage_daten&gt;
+Lisa Wagner aus der 11a nutzt am liebsten Spotify. Max Huber, ebenfalls 11a,
+schwört auf YouTube. In der 11b ist es bei Fabian Ott Instagram und bei
+Sarah Kern TikTok. Auch aus der 11b kommt Jonas Richter, dessen Favorit
+WhatsApp ist.
+&lt;/umfrage_daten&gt;</div>
+
+    <div class="field">
+      <label class="field-label" for="f-a4-prompt">Mein Prompt (mit XML-Tags)</label>
+      <textarea id="f-a4-prompt" style="min-height:100px;" placeholder="Formuliere deinen Extraktions-Prompt …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a4-korrekt">Hat das Modell die Tabelle korrekt erstellt?</label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="a4-korrekt" id="a4-ja" value="ja"> Ja</label>
+        <label class="radio-option"><input type="radio" name="a4-korrekt" id="a4-nein" value="nein"> Nein – Fehler:</label>
+      </div>
+      <input type="text" id="f-a4-fehler" placeholder="Falls nein: Welcher Fehler ist aufgetreten?" style="margin-top:8px;">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a4-ohnedelimiter">Was wäre passiert ohne Delimiter?</label>
+      <textarea id="f-a4-ohnedelimiter" style="min-height:60px;" placeholder="Warum sind Delimiter hier wichtig?"></textarea>
+    </div>
+  </div>
+
+  <!-- Aufgabe 5: Iteratives Prompting -->
+  <div class="card">
+    <span class="task-label">Aufgabe 5</span>
+    <h3>Iteratives Prompting</h3>
+    <p class="question">Du willst eine kurze Produktbeschreibung für eine fiktive App entwickeln, die Schülern beim Lernen hilft.</p>
+    <ol style="margin: 0 0 .75rem 1.3rem; font-size:15px; line-height:1.8;">
+      <li><strong>Prompt 1:</strong> Bitte das Modell um eine erste Produktbeschreibung (max. 60 Wörter).</li>
+      <li><strong>Prompt 2:</strong> Gib konkretes Feedback zu mindestens zwei Aspekten und fordere eine Überarbeitung.</li>
+      <li><strong>Prompt 3:</strong> Verfeinere das Ergebnis ein letztes Mal (z. B. Anpassung des Tons oder der Zielgruppe).</li>
+    </ol>
+
+    <div class="field">
+      <label class="field-label" for="f-a5-p1">Prompt 1 (erster Entwurf, max. 60 Wörter)</label>
+      <textarea id="f-a5-p1" placeholder="Dein erster Prompt …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a5-p2">Feedback / Prompt 2</label>
+      <textarea id="f-a5-p2" placeholder="Was war nicht gut? Wie hast du nachgesteuert?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a5-p3">Feinschliff / Prompt 3</label>
+      <textarea id="f-a5-p3" placeholder="Deine finale Verfeinerung …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a5-unterschied">Hauptunterschied zwischen Version 1 und Version 3</label>
+      <textarea id="f-a5-unterschied" style="min-height:60px;" placeholder="Was hat sich am stärksten verbessert?"></textarea>
+    </div>
+  </div>
+
+  <!-- Aufgabe 6: Self-Reflection -->
+  <div class="card">
+    <span class="task-label">Aufgabe 6</span>
+    <h3>Self-Reflection</h3>
+    <p class="question">Stelle dem Sprachmodell folgende Frage:</p>
+    <div class="prompt-block">
+      <span class="prompt-label">Direkte Frage</span>
+      „Erkläre in drei Sätzen, wie das Internet funktioniert."
+    </div>
+    <ol style="margin: 0 0 .75rem 1.3rem; font-size:15px; line-height:1.8;">
+      <li>Notiere die Antwort.</li>
+      <li>Verwende anschließend einen Self-Reflection-Prompt, um das Modell zur kritischen Überprüfung aufzufordern.</li>
+      <li>Bewertet das Modell seine eigene Antwort realistisch?</li>
+    </ol>
+
+    <div class="field">
+      <label class="field-label" for="f-a6-erste">Erste Antwort des Modells</label>
+      <textarea id="f-a6-erste" placeholder="Wie hat das Modell das Internet erklärt?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a6-reflprompt">Dein Self-Reflection-Prompt</label>
+      <textarea id="f-a6-reflprompt" style="min-height:60px;" placeholder="Formuliere deinen Reflection-Prompt …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a6-ueberarbeitet">Überarbeitete Antwort (Stichpunkte)</label>
+      <textarea id="f-a6-ueberarbeitet" placeholder="Was hat das Modell geändert?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">War die Selbstkritik des Modells zutreffend?</label>
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="a6-selbstkritik" id="a6-ja"        value="ja">        Ja</label>
+        <label class="radio-option"><input type="radio" name="a6-selbstkritik" id="a6-teilweise" value="teilweise"> Teilweise</label>
+        <label class="radio-option"><input type="radio" name="a6-selbstkritik" id="a6-nein"      value="nein">      Nein</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 7: Task Decomposition -->
+  <div class="card">
+    <span class="task-label">Aufgabe 7</span>
+    <h3>Task Decomposition</h3>
+    <p class="question">Du planst mit einer Gruppe ein kurzes Erklär-Video (ca. 2 Minuten) zum Thema „Was ist ein Algorithmus?". Zerlege die Aufgabe in <strong>mindestens vier Teilprompts</strong> und führe sie nacheinander durch.</p>
+
+    <div class="field">
+      <label class="field-label" for="f-a7-t1">Teilaufgabe 1</label>
+      <input type="text" id="f-a7-t1" placeholder="z. B. Themenstruktur / Gliederung erstellen">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a7-p1">Prompt 1</label>
+      <textarea id="f-a7-p1" style="min-height:65px;" placeholder="Formuliere Prompt 1 …"></textarea>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="f-a7-t2">Teilaufgabe 2</label>
+      <input type="text" id="f-a7-t2" placeholder="z. B. Einstieg / Hook formulieren">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a7-p2">Prompt 2</label>
+      <textarea id="f-a7-p2" style="min-height:65px;" placeholder="Formuliere Prompt 2 …"></textarea>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="f-a7-t3">Teilaufgabe 3</label>
+      <input type="text" id="f-a7-t3" placeholder="z. B. Erklärtext für mittleren Teil">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a7-p3">Prompt 3</label>
+      <textarea id="f-a7-p3" style="min-height:65px;" placeholder="Formuliere Prompt 3 …"></textarea>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="f-a7-t4">Teilaufgabe 4</label>
+      <input type="text" id="f-a7-t4" placeholder="z. B. Schluss / Call-to-Action">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a7-p4">Prompt 4</label>
+      <textarea id="f-a7-p4" style="min-height:65px;" placeholder="Formuliere Prompt 4 …"></textarea>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="f-a7-bewertung">War das Gesamtergebnis besser als ein einziger langer Prompt? Begründe kurz.</label>
+      <textarea id="f-a7-bewertung" style="min-height:60px;" placeholder="Deine Einschätzung …"></textarea>
+    </div>
+  </div>
+
+  <!-- Aufgabe 8: Transferaufgabe -->
+  <div class="card">
+    <span class="task-label">Aufgabe 8 – Transferaufgabe</span>
+    <h3>Freie Aufgabe</h3>
+    <p class="question">Wähle eine eigene Aufgabe aus deinem Schulalltag oder Privatleben (z. B. einen Lernplan erstellen, eine E-Mail formulieren, eine Präsentation vorbereiten) und bearbeite sie mit <strong>mindestens drei verschiedenen Prompting-Techniken</strong> aus diesem Kurs.</p>
+
+    <div class="field">
+      <label class="field-label" for="f-a8-aufgabe">Meine Aufgabe</label>
+      <input type="text" id="f-a8-aufgabe" placeholder="z. B. Lernplan für die nächste Klassenarbeit erstellen">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a8-techniken">Techniken, die ich eingesetzt habe</label>
+      <input type="text" id="f-a8-techniken" placeholder="1. R-K-A-F   2. Iteratives Prompting   3. …">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a8-vorgehen">Kurze Beschreibung meines Vorgehens</label>
+      <textarea id="f-a8-vorgehen" placeholder="Wie bist du Schritt für Schritt vorgegangen?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a8-wirksamste">Was war die wirksamste Technik? Warum?</label>
+      <textarea id="f-a8-wirksamste" style="min-height:60px;" placeholder="Deine Begründung …"></textarea>
+    </div>
+  </div>
+
+  <!-- Abschlussreflexion -->
+  <div class="card">
+    <span class="task-label">Abschlussreflexion</span>
+    <h3>Rückblick auf den Kurs</h3>
+    <ul style="margin: 0 0 .75rem 1.3rem; font-size:14px; color:var(--muted); line-height:1.9;">
+      <li>Welche der acht Techniken wirst du in Zukunft am häufigsten einsetzen? Begründe deine Wahl.</li>
+      <li>Bei welcher Aufgabe hat dich das Ergebnis des Sprachmodells am meisten überrascht (positiv oder negativ)?</li>
+      <li>Gibt es eine Situation, in der du <strong>kein</strong> Sprachmodell einsetzen würdest, obwohl es technisch möglich wäre?</li>
+    </ul>
+    <div class="field">
+      <label class="field-label" for="f-reflexion">Meine Abschlussreflexion</label>
+      <textarea id="f-reflexion" style="min-height:140px;" placeholder="Deine Antworten in Stichpunkten …"></textarea>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="btn btn-secondary" onclick="loadFromFile()">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      Datei laden
+    </button>
+    <input type="file" id="file-input" accept=".json" style="display:none" onchange="onFileSelected(event)">
+    <div class="spacer"></div>
+    <span class="status-msg" id="status-msg"></span>
+    <button class="btn btn-primary" onclick="saveToFile()">
+      <svg class="icon" viewBox="0 0 24 24" style="stroke:#fff"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Antworten speichern
+    </button>
+  </div>
+
+</div>
+
+<script>
+function getRadio(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : null;
+}
+function setRadio(name, value) {
+  if (!value) return;
+  const el = document.querySelector(`input[name="${name}"][value="${value}"]`);
+  if (el) el.checked = true;
+}
+
+function collectData() {
+  return {
+    version: "1.0",
+    gespeichert_am: new Date().toLocaleString('de-DE'),
+    schueler: {
+      name:   document.getElementById('f-name').value.trim(),
+      klasse: document.getElementById('f-klasse').value.trim(),
+      datum:  document.getElementById('f-datum').value
+    },
+    aufgaben: {
+      a1_r:            document.getElementById('f-a1-r').value.trim(),
+      a1_k:            document.getElementById('f-a1-k').value.trim(),
+      a1_a:            document.getElementById('f-a1-a').value.trim(),
+      a1_f:            document.getElementById('f-a1-f').value.trim(),
+      a1_vollstaendig: document.getElementById('f-a1-vollstaendig').value,
+      a1_rkaf: {
+        r: document.getElementById('rkaf-r').checked,
+        k: document.getElementById('rkaf-k').checked,
+        a: document.getElementById('rkaf-a').checked,
+        f: document.getElementById('rkaf-f').checked
+      },
+      a2_direkt:       document.getElementById('f-a2-direkt').value,
+      a2_cot_prompt:   document.getElementById('f-a2-cot-prompt').value,
+      a2_cot_antwort:  document.getElementById('f-a2-cot-antwort').value,
+      a2_unterschied:  document.getElementById('f-a2-unterschied').value,
+      a3_prompt:       document.getElementById('f-a3-prompt').value,
+      a3_ergebnis:     document.getElementById('f-a3-ergebnis').value,
+      a3_einbeispiel:  document.getElementById('f-a3-einbeispiel').value,
+      a4_prompt:       document.getElementById('f-a4-prompt').value,
+      a4_korrekt:      getRadio('a4-korrekt'),
+      a4_fehler:       document.getElementById('f-a4-fehler').value.trim(),
+      a4_ohnedelimiter:document.getElementById('f-a4-ohnedelimiter').value,
+      a5_p1:           document.getElementById('f-a5-p1').value,
+      a5_p2:           document.getElementById('f-a5-p2').value,
+      a5_p3:           document.getElementById('f-a5-p3').value,
+      a5_unterschied:  document.getElementById('f-a5-unterschied').value,
+      a6_erste:        document.getElementById('f-a6-erste').value,
+      a6_reflprompt:   document.getElementById('f-a6-reflprompt').value,
+      a6_ueberarbeitet:document.getElementById('f-a6-ueberarbeitet').value,
+      a6_selbstkritik: getRadio('a6-selbstkritik'),
+      a7_t1:           document.getElementById('f-a7-t1').value.trim(),
+      a7_p1:           document.getElementById('f-a7-p1').value,
+      a7_t2:           document.getElementById('f-a7-t2').value.trim(),
+      a7_p2:           document.getElementById('f-a7-p2').value,
+      a7_t3:           document.getElementById('f-a7-t3').value.trim(),
+      a7_p3:           document.getElementById('f-a7-p3').value,
+      a7_t4:           document.getElementById('f-a7-t4').value.trim(),
+      a7_p4:           document.getElementById('f-a7-p4').value,
+      a7_bewertung:    document.getElementById('f-a7-bewertung').value,
+      a8_aufgabe:      document.getElementById('f-a8-aufgabe').value.trim(),
+      a8_techniken:    document.getElementById('f-a8-techniken').value.trim(),
+      a8_vorgehen:     document.getElementById('f-a8-vorgehen').value,
+      a8_wirksamste:   document.getElementById('f-a8-wirksamste').value,
+      reflexion:       document.getElementById('f-reflexion').value
+    }
+  };
+}
+
+function fillData(d) {
+  if (d.schueler) {
+    setVal('f-name',   d.schueler.name   || '');
+    setVal('f-klasse', d.schueler.klasse || '');
+    setVal('f-datum',  d.schueler.datum  || '');
+  }
+  if (d.aufgaben) {
+    const a = d.aufgaben;
+    setVal('f-a1-r',             a.a1_r            || '');
+    setVal('f-a1-k',             a.a1_k            || '');
+    setVal('f-a1-a',             a.a1_a            || '');
+    setVal('f-a1-f',             a.a1_f            || '');
+    setVal('f-a1-vollstaendig',  a.a1_vollstaendig || '');
+    if (a.a1_rkaf) {
+      setCheck('rkaf-r', a.a1_rkaf.r);
+      setCheck('rkaf-k', a.a1_rkaf.k);
+      setCheck('rkaf-a', a.a1_rkaf.a);
+      setCheck('rkaf-f', a.a1_rkaf.f);
+    }
+    setVal('f-a2-direkt',        a.a2_direkt       || '');
+    setVal('f-a2-cot-prompt',    a.a2_cot_prompt   || '');
+    setVal('f-a2-cot-antwort',   a.a2_cot_antwort  || '');
+    setVal('f-a2-unterschied',   a.a2_unterschied  || '');
+    setVal('f-a3-prompt',        a.a3_prompt       || '');
+    setVal('f-a3-ergebnis',      a.a3_ergebnis     || '');
+    setVal('f-a3-einbeispiel',   a.a3_einbeispiel  || '');
+    setVal('f-a4-prompt',        a.a4_prompt       || '');
+    setRadio('a4-korrekt',       a.a4_korrekt);
+    setVal('f-a4-fehler',        a.a4_fehler       || '');
+    setVal('f-a4-ohnedelimiter', a.a4_ohnedelimiter|| '');
+    setVal('f-a5-p1',            a.a5_p1           || '');
+    setVal('f-a5-p2',            a.a5_p2           || '');
+    setVal('f-a5-p3',            a.a5_p3           || '');
+    setVal('f-a5-unterschied',   a.a5_unterschied  || '');
+    setVal('f-a6-erste',         a.a6_erste        || '');
+    setVal('f-a6-reflprompt',    a.a6_reflprompt   || '');
+    setVal('f-a6-ueberarbeitet', a.a6_ueberarbeitet|| '');
+    setRadio('a6-selbstkritik',  a.a6_selbstkritik);
+    setVal('f-a7-t1',            a.a7_t1           || '');
+    setVal('f-a7-p1',            a.a7_p1           || '');
+    setVal('f-a7-t2',            a.a7_t2           || '');
+    setVal('f-a7-p2',            a.a7_p2           || '');
+    setVal('f-a7-t3',            a.a7_t3           || '');
+    setVal('f-a7-p3',            a.a7_p3           || '');
+    setVal('f-a7-t4',            a.a7_t4           || '');
+    setVal('f-a7-p4',            a.a7_p4           || '');
+    setVal('f-a7-bewertung',     a.a7_bewertung    || '');
+    setVal('f-a8-aufgabe',       a.a8_aufgabe      || '');
+    setVal('f-a8-techniken',     a.a8_techniken    || '');
+    setVal('f-a8-vorgehen',      a.a8_vorgehen     || '');
+    setVal('f-a8-wirksamste',    a.a8_wirksamste   || '');
+    setVal('f-reflexion',        a.reflexion       || '');
+  }
+}
+
+function setVal(id, val)   { const el = document.getElementById(id); if (el) el.value = val; }
+function setCheck(id, val) { const el = document.getElementById(id); if (el) el.checked = !!val; }
+
+function saveToFile() {
+  const data = collectData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const name  = (data.schueler.name || 'NN').replace(/\s+/g, '_');
+  const fname = `${name}_Prompting_im_Unterricht_Uebungsblatt.json`;
+  a.download = fname;
+  a.click();
+  URL.revokeObjectURL(url);
+  showStatus(`✓ Gespeichert als „${fname}"`, 'ok');
+}
+
+function loadFromFile() { document.getElementById('file-input').click(); }
+
+function onFileSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      fillData(data);
+      const ts = data.gespeichert_am ? ` (${data.gespeichert_am})` : '';
+      showStatus(`✓ Datei geladen${ts}`, 'ok');
+    } catch { showStatus('✗ Fehler: Datei konnte nicht gelesen werden.', 'err'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = `status-msg ${type}`;
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.className = 'status-msg'; }, 5000);
+}
+
+document.getElementById('f-datum').value = new Date().toISOString().slice(0, 10);
+</script>
+</body>
+</html>

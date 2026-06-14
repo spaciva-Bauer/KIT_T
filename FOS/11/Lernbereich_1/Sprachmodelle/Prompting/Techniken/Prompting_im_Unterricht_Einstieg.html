@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbeitsblatt – Prompting im Unterricht</title>
+<style>
+  /* ── Grundlayout ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f5f4f0;
+    --surface:   #ffffff;
+    --border:    #d8d5cc;
+    --text:      #1a1a1a;
+    --muted:     #6b6860;
+    --accent:    #1d5fa8;
+    --accent-bg: #eaf1fb;
+    --success:   #2a7a45;
+    --success-bg:#e8f5ee;
+    --danger:    #b03030;
+    --danger-bg: #fdeaea;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  /* ── Kopfzeile ───────────────────────────────────────────── */
+  header {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+  header .meta {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: .4rem;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  header p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: .3rem;
+  }
+
+  /* ── Abschnitte ──────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card h2 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: .75rem;
+  }
+  .task-label {
+    display: inline-block;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-bottom: .6rem;
+    letter-spacing: .04em;
+  }
+  .question {
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: .75rem;
+  }
+  .hint {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: .75rem;
+    font-style: italic;
+  }
+
+  /* ── Infobox ─────────────────────────────────────────────── */
+  .infobox {
+    background: var(--accent-bg);
+    border: 1px solid #c0d8f0;
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .infobox p { margin-bottom: .5rem; }
+  .infobox p:last-child { margin-bottom: 0; }
+
+  /* ── Tabelle ─────────────────────────────────────────────── */
+  .rkaf-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 14px;
+  }
+  .rkaf-table th, .rkaf-table td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .rkaf-table th {
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .rkaf-table td:first-child { font-weight: 600; white-space: nowrap; }
+  .rkaf-table td em { color: var(--muted); font-size: 13px; }
+
+  /* ── Prompt-Beispiel ─────────────────────────────────────── */
+  .prompt-block {
+    background: #f8f7f4;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: .75rem 1rem;
+    margin: .5rem 0 1rem;
+    font-size: 14px;
+    color: var(--text);
+    font-style: italic;
+  }
+  .prompt-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    margin-bottom: .25rem;
+    font-style: normal;
+  }
+
+  /* ── Formularelemente ────────────────────────────────────── */
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 520px) {
+    .field-group { grid-template-columns: 1fr; }
+  }
+  label.field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  input[type="text"],
+  input[type="date"],
+  textarea,
+  select {
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text);
+    background: #fafaf8;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(29,95,168,.12);
+  }
+  textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  /* ── Checkboxen (RKAF-Selbstcheck) ──────────────────────── */
+  .rkaf-check {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: .5rem;
+  }
+  .rkaf-check-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: #fafaf8;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: background .12s, border-color .12s;
+    user-select: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .rkaf-check-item:hover { background: var(--accent-bg); border-color: var(--accent); }
+  .rkaf-check-item input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+
+  /* ── Toolbar (Speichern/Laden) ───────────────────────────── */
+  .toolbar {
+    position: sticky;
+    bottom: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,.10);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+  .toolbar .spacer { flex: 1; }
+
+  .btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { opacity: .88; }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover { background: var(--bg); }
+
+  .status-msg {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: none;
+  }
+  .status-msg.ok  { background: var(--success-bg); color: var(--success); display: inline-block; }
+  .status-msg.err { background: var(--danger-bg);  color: var(--danger);  display: inline-block; }
+
+  /* ── Icons ───────────────────────────────────────────────── */
+  .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; }
+
+  /* ── Druckstil ───────────────────────────────────────────── */
+  @media print {
+    .toolbar { display: none; }
+    body { background: white; }
+    .card { box-shadow: none; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Kopfzeile ─────────────────────────────────────── -->
+  <header>
+    <div class="meta">KIT (T) · Jahrgangsstufe 11 · FOS</div>
+    <h1>Prompting im Unterricht</h1>
+    <p>Effiziente Kommunikation mit Large Language Models (LLMs) &nbsp;·&nbsp; Fülle alle Felder aus und speichere deine Antworten mit dem Button unten.</p>
+  </header>
+
+  <!-- ── Persönliche Angaben ────────────────────────────── -->
+  <div class="card">
+    <h2>Persönliche Angaben</h2>
+    <div class="field-group">
+      <div class="field">
+        <label class="field-label" for="f-name">Name</label>
+        <input type="text" id="f-name" placeholder="Vor- und Nachname">
+      </div>
+      <div class="field">
+        <label class="field-label" for="f-klasse">Klasse</label>
+        <input type="text" id="f-klasse" placeholder="z. B. 11T">
+      </div>
+      <div class="field">
+        <label class="field-label" for="f-datum">Datum</label>
+        <input type="date" id="f-datum">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Theorie: Was ist ein Prompt? ──────────────────── -->
+  <div class="card">
+    <h2>Grundlagen</h2>
+    <h3>1. Was ist ein „Prompt"?</h3>
+    <div class="infobox">
+      <p>Ein Prompt ist die Eingabeaufforderung an ein KI-System (häufig ein Sprachmodell). Während wir bei Suchmaschinen meist nur Schlagworte eingeben, funktioniert ein Sprachmodell wie ein <strong>hochbegabter, aber kontextloser Assistent</strong>. Je präziser du den Kontext beschreibst, desto besser ist das Ergebnis.</p>
+    </div>
+
+    <h3>2. Das „R-K-A-F"-Modell</h3>
+    <p class="question" style="margin-bottom:.75rem;">Um einen professionellen Prompt zu verfassen, hilft die Orientierung an dieser Struktur:</p>
+    <table class="rkaf-table">
+      <thead>
+        <tr><th>Komponente</th><th>Beschreibung</th><th>Beispiel</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>R</strong>olle (Persona)</td><td>Weise der KI eine Identität zu.</td><td><em>„Handle als erfahrener Python-Entwickler."</em></td></tr>
+        <tr><td><strong>K</strong>ontext</td><td>Gib Hintergrundinformationen.</td><td><em>„Ich lerne gerade Schleifen in der Schule."</em></td></tr>
+        <tr><td><strong>A</strong>ufgabe</td><td>Was genau soll getan werden?</td><td><em>„Erkläre mir den Unterschied zwischen while und for."</em></td></tr>
+        <tr><td><strong>F</strong>ormat</td><td>Wie soll die Ausgabe aussehen?</td><td><em>„Erstelle eine übersichtliche Tabelle."</em></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Aufgabe 1 ───────────────────────────────────────── -->
+  <div class="card">
+    <span class="task-label">Aufgabe 1</span>
+    <h3>Prompt-Vergleich: ohne Kontext vs. R-K-A-F</h3>
+    <p class="question">Nutze dein Sprachmodell aus der ByCS (Lernplattform, Telli …) für diese Aufgabe.</p>
+
+    <p class="question" style="margin-top:.5rem;"><strong>Schritt 1 –</strong> Frage das Sprachmodell ohne Kontext:</p>
+    <div class="prompt-block"><span class="prompt-label">Prompt ohne Kontext</span>„Was ist ein Algorithmus?"</div>
+
+    <p class="question"><strong>Schritt 2 –</strong> Nutze nun das R-K-A-F-Modell:</p>
+    <div class="prompt-block"><span class="prompt-label">R-K-A-F-Prompt</span>„Du bist eine humorvolle Informatiklehrkraft. Als Thema des Unterrichts sollen Algorithmen behandelt werden. Erkläre einem Schüler bzw. einer Schülerin der Unterstufe, was ein Algorithmus im Alltagsbezug ist. Nutze Aufzählungszeichen."</div>
+
+    <p class="question"><strong>Schritt 3 – Reflexion:</strong> Notiere kurz den Hauptunterschied in der Qualität der Antworten.</p>
+    <div class="field">
+      <label class="field-label" for="f-a1-reflexion">Meine Beobachtung</label>
+      <textarea id="f-a1-reflexion" placeholder="Worin unterscheiden sich die Antworten? Was fällt dir auf?"></textarea>
+    </div>
+
+    <p class="question" style="margin-top:.5rem;"><strong>Schritt 4 –</strong> Verändere nun gezielt die Rolle oder die Zielgruppe (z. B. „für einen Erstklässler" statt „für einen Schüler der Unterstufe") und beobachte, wie sich die Antwort verändert.</p>
+    <div class="field">
+      <label class="field-label" for="f-a1-variante">Meine Beobachtung zur Variante</label>
+      <textarea id="f-a1-variante" placeholder="Wie hat sich die Antwort verändert?"></textarea>
+    </div>
+  </div>
+
+  <!-- ── Aufgabe 2 ───────────────────────────────────────── -->
+  <div class="card">
+    <span class="task-label">Aufgabe 2</span>
+    <h3>Schlechten Prompt verbessern</h3>
+    <p class="question">Überarbeite den folgenden „schlechten" Prompt so, dass er spezifische Anforderungen enthält (z. B. Eingabe der Punkte, Gewichtung, Anzahl der Stellen im Ergebnis, HTML- oder Excel-Format usw.).</p>
+    <div class="prompt-block"><span class="prompt-label">Schlechter Prompt</span>„Schreib mir ein Programm für eine Notenberechnung."</div>
+
+    <div class="field">
+      <label class="field-label" for="f-a2-prompt">Mein verbesserter Prompt</label>
+      <textarea id="f-a2-prompt" placeholder="Formuliere hier deinen verbesserten Prompt …"></textarea>
+    </div>
+
+    <p class="question" style="margin-top:.25rem;"><strong>Selbstcheck:</strong> Welche R-K-A-F-Komponenten hast du eingebaut?</p>
+    <div class="rkaf-check">
+      <label class="rkaf-check-item"><input type="checkbox" id="rkaf-r"> R – Rolle</label>
+      <label class="rkaf-check-item"><input type="checkbox" id="rkaf-k"> K – Kontext</label>
+      <label class="rkaf-check-item"><input type="checkbox" id="rkaf-a"> A – Aufgabe</label>
+      <label class="rkaf-check-item"><input type="checkbox" id="rkaf-f"> F – Format</label>
+    </div>
+  </div>
+
+  <!-- ── Aufgabe 3: Chain-of-Thought ────────────────────── -->
+  <div class="card">
+    <span class="task-label">Aufgabe 3</span>
+    <h3>Chain-of-Thought</h3>
+    <div class="infobox">
+      <p>Stell dir vor, du sollst eine komplizierte Matheaufgabe im Kopf lösen. Wenn du sofort das Endergebnis nennen musst, ist die Chance groß, dass du dich vertippst oder einen kleinen Logikfehler machst. Schreibst du aber jeden Zwischenschritt auf, bemerkst du Fehler oft selbst und kommst sicher ans Ziel.</p>
+      <p><strong>Genau das passiert bei Chain-of-Thought!</strong></p>
+    </div>
+
+    <!-- 3.1 -->
+    <h3 style="margin-top:.5rem;">3.1 Übung 1 – Klassenfahrt</h3>
+    <p class="question"><strong>Direkter Prompt:</strong></p>
+    <div class="prompt-block"><span class="prompt-label">Ohne Chain-of-Thought</span>„Wir planen eine Klassenfahrt für 25 Personen von München nach Berlin. Wir haben 2000 € Budget. Was ist die günstigste und umweltfreundlichste Option?"</div>
+
+    <p class="question"><strong>Chain-of-Thought Prompt:</strong></p>
+    <div class="prompt-block"><span class="prompt-label">Mit Chain-of-Thought</span>„Wir planen eine Klassenfahrt für 25 Personen von München nach Berlin. Wir haben 2000 € Budget. Was ist die günstigste und umweltfreundlichste Option? <strong>Gehe dabei Schritt für Schritt vor.</strong>"</div>
+    <p class="hint">Tipp: Achte darauf, wie klein der Unterschied zwischen den beiden Prompts ist – nur ein einziger Zusatz macht den Unterschied!</p>
+
+    <p class="question">Notiere kurz den Hauptunterschied in der Qualität der Antworten. Kommt das Sprachmodell zu unterschiedlichen Ergebnissen?</p>
+    <div class="field">
+      <label class="field-label" for="f-a31">Meine Beobachtung</label>
+      <textarea id="f-a31" placeholder="Worin unterscheiden sich die Antworten?"></textarea>
+    </div>
+
+    <!-- 3.2 -->
+    <h3 style="margin-top:1.25rem;">3.2 Übung 2 – Das Schafe-Rätsel</h3>
+    <div class="prompt-block"><span class="prompt-label">Direkter Prompt</span>„Ein Bauer hat 17 Schafe. Alle außer 9 sterben. Wie viele Schafe bleiben übrig?"</div>
+
+    <p class="question"><strong>Schritt 1 –</strong> Frage das Modell zuerst direkt nach der Antwort.</p>
+    <p class="question"><strong>Schritt 2 –</strong> Verwende nun den Prompt mit der zusätzlichen Anweisung:</p>
+    <div class="prompt-block"><span class="prompt-label">Mit Chain-of-Thought</span>„Analysiere das Problem Schritt für Schritt und achte genau auf die Formulierung ‚Alle außer 9'."</div>
+
+    <p class="question"><strong>Schritt 3 –</strong> Notiere kurz den Hauptunterschied in der Qualität der Antworten. Kommt das Sprachmodell zu unterschiedlichen Ergebnissen?</p>
+    <div class="field">
+      <label class="field-label" for="f-a32">Meine Beobachtung</label>
+      <textarea id="f-a32" placeholder="Worin unterscheiden sich die Antworten?"></textarea>
+    </div>
+  </div>
+
+  <!-- ── Aufgabe 4: Transferaufgabe ─────────────────────── -->
+  <div class="card">
+    <span class="task-label">Aufgabe 4 – Transferaufgabe</span>
+    <h3>Eigener R-K-A-F-Prompt</h3>
+    <p class="question">Wähle ein Thema aus einem anderen Unterrichtsfach und verfasse dazu einen vollständigen Prompt nach dem R-K-A-F-Modell. Teste ihn im Sprachmodell und halte das Ergebnis unten fest.</p>
+
+    <div class="field">
+      <label class="field-label" for="f-a4-prompt">Mein R-K-A-F-Prompt</label>
+      <textarea id="f-a4-prompt" placeholder="Schreibe hier deinen vollständigen Prompt …" style="min-height:120px;"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a4-ergebnis">Ergebnis / Beobachtung</label>
+      <textarea id="f-a4-ergebnis" placeholder="Wie war die Antwort des Sprachmodells? Was hat gut funktioniert?"></textarea>
+    </div>
+  </div>
+
+  <!-- ── Toolbar ────────────────────────────────────────── -->
+  <div class="toolbar">
+    <button class="btn btn-secondary" onclick="loadFromFile()">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      Datei laden
+    </button>
+    <input type="file" id="file-input" accept=".json" style="display:none" onchange="onFileSelected(event)">
+
+    <div class="spacer"></div>
+    <span class="status-msg" id="status-msg"></span>
+    <button class="btn btn-primary" onclick="saveToFile()">
+      <svg class="icon" viewBox="0 0 24 24" style="stroke:#fff"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Antworten speichern
+    </button>
+  </div>
+
+</div><!-- .page -->
+
+<script>
+/* ── Daten einsammeln ──────────────────────────────────────── */
+function collectData() {
+  return {
+    version: "1.0",
+    gespeichert_am: new Date().toLocaleString('de-DE'),
+    schueler: {
+      name:   document.getElementById('f-name').value.trim(),
+      klasse: document.getElementById('f-klasse').value.trim(),
+      datum:  document.getElementById('f-datum').value
+    },
+    aufgaben: {
+      a1_reflexion:   document.getElementById('f-a1-reflexion').value,
+      a1_variante:    document.getElementById('f-a1-variante').value,
+      a2_prompt:      document.getElementById('f-a2-prompt').value,
+      a2_rkaf: {
+        r: document.getElementById('rkaf-r').checked,
+        k: document.getElementById('rkaf-k').checked,
+        a: document.getElementById('rkaf-a').checked,
+        f: document.getElementById('rkaf-f').checked
+      },
+      a31_beobachtung: document.getElementById('f-a31').value,
+      a32_beobachtung: document.getElementById('f-a32').value,
+      a4_prompt:       document.getElementById('f-a4-prompt').value,
+      a4_ergebnis:     document.getElementById('f-a4-ergebnis').value
+    }
+  };
+}
+
+/* ── Daten ins Formular eintragen ─────────────────────────── */
+function fillData(d) {
+  if (d.schueler) {
+    setVal('f-name',   d.schueler.name   || '');
+    setVal('f-klasse', d.schueler.klasse || '');
+    setVal('f-datum',  d.schueler.datum  || '');
+  }
+  if (d.aufgaben) {
+    const a = d.aufgaben;
+    setVal('f-a1-reflexion', a.a1_reflexion  || '');
+    setVal('f-a1-variante',  a.a1_variante   || '');
+    setVal('f-a2-prompt',    a.a2_prompt     || '');
+    setVal('f-a31',          a.a31_beobachtung || '');
+    setVal('f-a32',          a.a32_beobachtung || '');
+    setVal('f-a4-prompt',    a.a4_prompt     || '');
+    setVal('f-a4-ergebnis',  a.a4_ergebnis   || '');
+
+    if (a.a2_rkaf) {
+      setCheck('rkaf-r', a.a2_rkaf.r);
+      setCheck('rkaf-k', a.a2_rkaf.k);
+      setCheck('rkaf-a', a.a2_rkaf.a);
+      setCheck('rkaf-f', a.a2_rkaf.f);
+    }
+  }
+}
+
+function setVal(id, val)   { const el = document.getElementById(id); if (el) el.value = val; }
+function setCheck(id, val) { const el = document.getElementById(id); if (el) el.checked = !!val; }
+
+/* ── Speichern als .json (fester Dateiname) ───────────────── */
+function saveToFile() {
+  const data = collectData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+
+  const name  = (data.schueler.name || 'NN').replace(/\s+/g, '_');
+  const fname = `${name}_Prompting_im_Unterricht_Einstieg.json`;
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  showStatus(`✓ Gespeichert als „${fname}"`, 'ok');
+}
+
+/* ── Laden aus .json ──────────────────────────────────────── */
+function loadFromFile() {
+  document.getElementById('file-input').click();
+}
+
+function onFileSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      fillData(data);
+      const ts = data.gespeichert_am ? ` (${data.gespeichert_am})` : '';
+      showStatus(`✓ Datei geladen${ts}`, 'ok');
+    } catch {
+      showStatus('✗ Fehler: Datei konnte nicht gelesen werden.', 'err');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/* ── Statusmeldung ────────────────────────────────────────── */
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = `status-msg ${type}`;
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.className = 'status-msg'; }, 5000);
+}
+
+/* ── Heutiges Datum vorbelegen ────────────────────────────── */
+document.getElementById('f-datum').value = new Date().toISOString().slice(0, 10);
+</script>
+</body>
+</html>

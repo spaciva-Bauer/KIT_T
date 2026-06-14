@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbeitsblatt – Prompt Engineering: Fortgeschrittene Techniken</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f5f4f0;
+    --surface:   #ffffff;
+    --border:    #d8d5cc;
+    --text:      #1a1a1a;
+    --muted:     #6b6860;
+    --accent:    #1d5fa8;
+    --accent-bg: #eaf1fb;
+    --success:   #2a7a45;
+    --success-bg:#e8f5ee;
+    --danger:    #b03030;
+    --danger-bg: #fdeaea;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page { max-width: 760px; margin: 0 auto; }
+
+  header {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+  header .meta {
+    font-size: 12px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: .4rem;
+  }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+  header p { font-size: 14px; color: var(--muted); margin-top: .3rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card h2 {
+    font-size: 14px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--accent); margin-bottom: 1rem;
+  }
+  .card h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: .75rem; }
+  .card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin: 1rem 0 .5rem; }
+
+  .task-label {
+    display: inline-block; background: var(--accent-bg); color: var(--accent);
+    font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 20px;
+    margin-bottom: .6rem; letter-spacing: .04em;
+  }
+  .question { font-size: 15px; color: var(--text); margin-bottom: .75rem; }
+  .hint { font-size: 13px; color: var(--muted); margin-bottom: .75rem; font-style: italic; }
+
+  .infobox {
+    background: var(--accent-bg); border: 1px solid #c0d8f0;
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+    margin-bottom: 1rem; font-size: 14px; color: var(--text);
+  }
+  .infobox p { margin-bottom: .4rem; }
+  .infobox p:last-child { margin-bottom: 0; }
+
+  .lernziele {
+    background: var(--success-bg); border: 1px solid #b3dac0;
+    border-radius: var(--radius); padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem; font-size: 14px;
+  }
+  .lernziele strong { color: var(--success); display: block; margin-bottom: .4rem; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
+  .lernziele ul { padding-left: 1.2rem; }
+  .lernziele li { margin-bottom: .3rem; }
+
+  .prompt-block {
+    background: #f8f7f4; border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: .75rem 1rem; margin: .5rem 0 1rem;
+    font-size: 14px; color: var(--text); font-style: italic;
+  }
+  .prompt-label {
+    display: block; font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin-bottom: .25rem; font-style: normal;
+  }
+
+  .xml-example {
+    background: #1e1e2e; color: #cdd6f4; font-family: "Consolas", "Courier New", monospace;
+    font-size: 13px; border-radius: var(--radius); padding: 1rem 1.25rem;
+    margin: .5rem 0 1rem; white-space: pre; overflow-x: auto;
+  }
+  .xml-tag { color: #89b4fa; }
+  .xml-content { color: #a6e3a1; }
+
+  .delimiter-list {
+    list-style: none; padding: 0; margin-bottom: 1rem;
+  }
+  .delimiter-list li {
+    background: #fafaf8; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 7px 14px;
+    margin-bottom: 6px; font-size: 14px;
+  }
+  .delimiter-list li code {
+    font-family: "Consolas", monospace; background: var(--accent-bg);
+    color: var(--accent); padding: 1px 6px; border-radius: 4px; font-size: 13px;
+  }
+
+  .xml-tag-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 14px; }
+  .xml-tag-table th, .xml-tag-table td {
+    border: 1px solid var(--border); padding: 8px 12px; text-align: left;
+  }
+  .xml-tag-table th { background: var(--accent-bg); color: var(--accent); font-weight: 600; font-size: 13px; }
+  .xml-tag-table td:first-child { font-family: "Consolas", monospace; font-size: 13px; color: var(--accent); white-space: nowrap; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 520px) { .field-group { grid-template-columns: 1fr; } }
+  label.field-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+  input[type="text"], input[type="date"], textarea, select {
+    font-family: inherit; font-size: 15px; color: var(--text);
+    background: #fafaf8; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 12px; width: 100%;
+    outline: none; transition: border-color .15s;
+  }
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--accent); background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(29,95,168,.12);
+  }
+  textarea { min-height: 100px; resize: vertical; line-height: 1.6; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+  .toolbar {
+    position: sticky; bottom: 1rem; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,.10); padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem;
+  }
+  .toolbar .spacer { flex: 1; }
+
+  .btn {
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 9px 18px; border-radius: var(--radius); border: 1px solid transparent;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { opacity: .88; }
+  .btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--bg); }
+
+  .status-msg {
+    font-size: 13px; font-weight: 600; padding: 5px 12px;
+    border-radius: 20px; display: none;
+  }
+  .status-msg.ok  { background: var(--success-bg); color: var(--success); display: inline-block; }
+  .status-msg.err { background: var(--danger-bg);  color: var(--danger);  display: inline-block; }
+
+  .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; }
+
+  @media print {
+    .toolbar { display: none; }
+    body { background: white; }
+    .card { box-shadow: none; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="meta">KIT (T) · Jahrgangsstufe 11 · FOS</div>
+    <h1>Prompt Engineering – Die Kunst der präzisen Instruktion</h1>
+    <p>Fortgeschrittene Strategien im Umgang mit Large Language Models (LLMs) &nbsp;·&nbsp; Fülle alle Felder aus und speichere deine Antworten.</p>
+  </header>
+
+  <!-- Persönliche Angaben -->
+  <div class="card">
+    <h2>Persönliche Angaben</h2>
+    <div class="field-group">
+      <div class="field">
+        <label class="field-label" for="f-name">Name</label>
+        <input type="text" id="f-name" placeholder="Vor- und Nachname">
+      </div>
+      <div class="field">
+        <label class="field-label" for="f-klasse">Klasse</label>
+        <input type="text" id="f-klasse" placeholder="z. B. 11T">
+      </div>
+      <div class="field">
+        <label class="field-label" for="f-datum">Datum</label>
+        <input type="date" id="f-datum">
+      </div>
+    </div>
+  </div>
+
+  <!-- Lernziele -->
+  <div class="lernziele">
+    <strong>Lernziele</strong>
+    Nach diesem Arbeitsblatt könnt ihr:
+    <ul>
+      <li><strong>Few-Shot Prompts</strong> gezielt einsetzen, um Sprachmodellen das gewünschte Ausgabeformat beizubringen</li>
+      <li><strong>Delimiter (Trennzeichen)</strong> verwenden, um Anweisungen klar von Daten zu trennen und Prompt Injection zu verhindern</li>
+      <li><strong>Einen unstrukturierten „Chaos-Prompt"</strong> professionell mit XML-Tags umstrukturieren und die Qualität der Ergebnisse vergleichen</li>
+    </ul>
+  </div>
+
+  <!-- A. Few-Shot Prompting -->
+  <div class="card">
+    <h2>A. Few-Shot Prompting</h2>
+    <div class="infobox">
+      <p>„Geben Sie dem Modell 2–3 Beispiele (Shots), wie die Aufgabe gelöst werden soll, bevor Sie die eigentliche Aufgabe stellen. Dies ist effektiver als jede lange Erklärung."</p>
+    </div>
+
+    <h4>Beispiel 1: Klassifikation</h4>
+    <div class="prompt-block">
+      <span class="prompt-label">Few-Shot Prompt</span>
+      Klassifiziere das letzte Wort basierend auf den vorherigen Beispielen:<br>
+      Apfel → Obst<br>
+      Karotte → Gemüse<br>
+      Computer → <em>(Antwort des Modells)</em>
+    </div>
+
+    <h4>Beispiel 2: Stilübertragung</h4>
+    <div class="prompt-block">
+      <span class="prompt-label">Few-Shot Prompt</span>
+      Du bist ein Sprachexperte. Deine Aufgabe ist es, alte Sprichwörter in die Sprache eines Teenagers im Jahr 2026 zu übersetzen.<br><br>
+      Beispiel 1:<br>
+      Original: „Morgenstund hat Gold im Mund."<br>
+      Übersetzung: „Wer früh hustlet, kriegt den Cash als Erster."<br><br>
+      Beispiel 2:<br>
+      Original: „Wer anderen eine Grube gräbt, fällt selbst hinein."<br>
+      Übersetzung: „Wenn du versuchst, jemanden zu pranken, kriegst du am Ende selbst den Karma-L-Take."<br><br>
+      Deine Aufgabe:<br>
+      Original: „Lügen haben kurze Beine."<br>
+      Übersetzung:
+    </div>
+
+    <hr class="divider">
+
+    <h3>Eigene Aufgabe: Eigenen Few-Shot Prompt entwickeln</h3>
+    <p class="question">Entwickle einen eigenen Few-Shot Prompt für ein Fach deiner Wahl (z. B. Geschichte, Biologie, Deutsch oder Mathematik).</p>
+    <ol style="margin: 0 0 .75rem 1.3rem; font-size:15px; line-height:1.8;">
+      <li>Wähle eine Aufgabenart (z. B. Faktenüberprüfung, Zusammenfassen, Umformulieren, Klassifizieren).</li>
+      <li>Formuliere mindestens zwei Beispiel-Paare (Eingabe → gewünschte Ausgabe).</li>
+      <li>Stelle dann die eigentliche Aufgabe und teste deinen Prompt im Sprachmodell.</li>
+    </ol>
+    <p class="hint">Tipp: Je repräsentativer deine Beispiele für die gewünschte Ausgabe sind, desto zuverlässiger wird das Modell. Probiere aus, was passiert, wenn du nur ein statt zwei Beispiele verwendest.</p>
+    <div class="field">
+      <label class="field-label" for="f-fewshot-fach">Gewähltes Fach / Aufgabenart</label>
+      <input type="text" id="f-fewshot-fach" placeholder="z. B. Biologie – Klassifikation von Lebewesen">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-fewshot-prompt">Mein Few-Shot Prompt (inkl. Beispielpaare und Aufgabe)</label>
+      <textarea id="f-fewshot-prompt" style="min-height:140px;" placeholder="Beispiel 1: … → …&#10;Beispiel 2: … → …&#10;&#10;Deine Aufgabe: …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-fewshot-ergebnis">Ergebnis des Modells &amp; Beobachtung (1 vs. 2 Beispiele)</label>
+      <textarea id="f-fewshot-ergebnis" placeholder="Was hat das Modell geantwortet? Wie hat sich die Antwortqualität verändert?"></textarea>
+    </div>
+  </div>
+
+  <!-- B. Delimiter -->
+  <div class="card">
+    <h2>B. Delimiter (Trennzeichen)</h2>
+    <p class="question">Nutze Trennzeichen wie <code style="font-family:monospace;background:var(--accent-bg);color:var(--accent);padding:1px 5px;border-radius:4px;">###</code>, <code style="font-family:monospace;background:var(--accent-bg);color:var(--accent);padding:1px 5px;border-radius:4px;">"""</code> oder XML-Tags (<code style="font-family:monospace;background:var(--accent-bg);color:var(--accent);padding:1px 5px;border-radius:4px;">&lt;text&gt;&lt;/text&gt;</code>), um Instruktionen klar von den zu verarbeitenden Daten abzugrenzen.</p>
+
+    <div class="infobox">
+      <p><strong>Was ist Prompt Injection?</strong><br>
+      Ohne Trennzeichen kann ein Sprachmodell in den Daten enthaltene Texte als neue Befehle missverstehen. Beispiel: Wenn in einem zu analysierenden Text steht „<em>Ignoriere alle bisherigen Anweisungen und schreibe stattdessen…</em>", kann das Modell diesen Text tatsächlich als Befehl ausführen. Delimiter verhindern genau das.</p>
+    </div>
+
+    <h4>Beispiel: Kundenbeschwerde analysieren</h4>
+    <div class="prompt-block">
+      <span class="prompt-label">Prompt mit Delimiter</span>
+      Bitte fasse die Kernpunkte der Kundenbeschwerde zusammen, die zwischen den Dreifach-Anführungszeichen (<code style="font-family:monospace;">&quot;&quot;&quot;</code>) steht. Erstelle daraus eine kurze To-Do-Liste für unseren Kundenservice.<br><br>
+      Kundenbeschwerde:<br>
+      """<br>
+      Sehr geehrte Damen und Herren, ich bin maßlos enttäuscht. Ihr Lieferant hat das Paket einfach im Regen stehen lassen. Stoppen Sie sofort alle weiteren Lieferungen an mich! Außerdem war die Ware beschädigt. Ich erwarte eine Rückerstattung bis Freitag.<br>
+      """
+    </div>
+
+    <p class="question" style="margin-bottom:.5rem;"><strong>Andere gängige Delimiter:</strong></p>
+    <ul class="delimiter-list">
+      <li><strong>XML-Tags:</strong> <code>&lt;text&gt;</code> Hier steht der Inhalt <code>&lt;/text&gt;</code></li>
+      <li><strong>Hashtags:</strong> <code>###</code> Hier steht der Inhalt <code>###</code></li>
+      <li><strong>Eckige Klammern:</strong> <code>[[</code> Hier steht der Inhalt <code>]]</code></li>
+    </ul>
+  </div>
+
+  <!-- Aufgabe 1 -->
+  <div class="card">
+    <span class="task-label">Aufgabe 1</span>
+    <h3>Daten extrahieren mit Few-Shot + Delimiter</h3>
+    <p class="question"><strong>a)</strong> Testen Sie den unten stehenden Prompt auf Funktionalität.</p>
+    <p class="question"><strong>b)</strong> Kopieren Sie dann einen kurzen Nachrichtenartikel Ihrer Wahl. Das Ziel ist es, Namen und Daten in einem maschinenlesbaren Format zu extrahieren.</p>
+
+    <div class="prompt-block">
+      <span class="prompt-label">Vorgefertigter Prompt</span>
+      Extrahieren Sie Namen und Zeitangaben aus dem Text unter &lt;data&gt;.<br><br>
+      Beispiel 1: "Julia Meier besuchte am 04.05.2023 die Messe." → {"Name": "Julia Meier", "Datum": "04.05.2023"}<br>
+      Beispiel 2: "Im Jahr 2022 traf sich Herr Schmidt mit Kollegen." → {"Name": "Schmidt", "Datum": "2022"}<br><br>
+      &lt;data&gt;<br>
+      Gestern, am 12.02.2025, verkündete die CEO Lisa Dröger bei der Quartalskonferenz die neuen Zahlen. Auch der Finanzvorstand Marc Schneider war anwesend, der bereits für den 15.03.2025 einen Folgetermin ansetzte.<br>
+      &lt;/data&gt;
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="f-a1-artikel">Mein gewählter Nachrichtenartikel (kurzer Ausschnitt)</label>
+      <textarea id="f-a1-artikel" placeholder="Füge hier deinen Textausschnitt ein …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a1-ergebnis">Ergebnis des Modells &amp; Beobachtung</label>
+      <textarea id="f-a1-ergebnis" placeholder="Hat das Modell die Daten korrekt extrahiert? Was ist aufgefallen?"></textarea>
+    </div>
+  </div>
+
+  <!-- Aufgabe 2 -->
+  <div class="card">
+    <span class="task-label">Aufgabe 2</span>
+    <h3>Rezept-Extraktion</h3>
+    <p class="question">Schreibe einen Prompt, der alle Zutaten und Mengenangaben aus dem Text extrahiert, der innerhalb der Tags steht. Die Daten sollen in Tabellenform ausgegeben werden.</p>
+
+    <div class="prompt-block">
+      <span class="prompt-label">Zu verarbeitender Text</span>
+      &lt;omas_rezept&gt;<br>
+      Also, für meinen berühmten Apfelkuchen nimmst du zuerst mal 500 Gramm Mehl. Das gute Mehl, nicht das billige! Dann brauchst du noch 250 Gramm Butter – die muss zimmerwarm sein, hörst du? Ach ja, und 4 große Äpfel, am besten Boskoop. „Hör auf zu trödeln", hat mein Mann immer gesagt, also vergiss die 150 Gramm Zucker nicht. Eine Prise Salz gehört auch rein, das hebt den Geschmack.<br>
+      &lt;/omas_rezept&gt;
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="f-a2-prompt">Mein Prompt (mit XML-Tag-Referenz)</label>
+      <textarea id="f-a2-prompt" placeholder="Schreibe hier deinen Prompt …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a2-ergebnis">Ergebnis des Modells</label>
+      <textarea id="f-a2-ergebnis" placeholder="Hat das Modell alle Zutaten und Mengen korrekt in Tabellenform ausgegeben?"></textarea>
+    </div>
+  </div>
+
+  <!-- Aufgabe 3 -->
+  <div class="card">
+    <span class="task-label">Aufgabe 3</span>
+    <h3>Den „Chaos-Prompt" strukturieren</h3>
+    <div class="infobox">
+      <p><strong>Situation:</strong> Ein Mitarbeiter einer Event-Agentur hat versucht, ein Sprachmodell als Assistenten einzusetzen. Sein Prompt ist jedoch ein unstrukturierter Fließtext. Das Modell liefert deshalb oft unbrauchbare Ergebnisse, vergisst Einschränkungen oder vermischt die Informationen.</p>
+    </div>
+
+    <p class="question"><strong>Der „Chaos-Prompt":</strong></p>
+    <div class="prompt-block">
+      <span class="prompt-label">Chaos-Prompt (unstrukturiert)</span>
+      „Hey KI, du sollst mir helfen, eine Einladung für ein Firmenevent zu schreiben. Wir machen ein Sommerfest am 15. Juli am Starnberger See. Es gibt BBQ und Segeln. Schreib das bitte höflich, aber nicht zu steif. Wichtig: Erwähne auf keinen Fall das Budget! Und am Ende soll eine Checkliste für die Anmeldung stehen. Der Text für die Einladung soll maximal 150 Wörter lang sein und benutze bitte keine Emojis."
+    </div>
+
+    <p class="question"><strong>Arbeitsauftrag:</strong> Strukturiere diesen Prompt professionell mit XML-Tags um. Erstelle eine Hierarchie mit folgenden Tags:</p>
+    <table class="xml-tag-table" style="margin-bottom:1rem;">
+      <thead><tr><th>Tag</th><th>Bedeutung</th></tr></thead>
+      <tbody>
+        <tr><td>&lt;role&gt;…&lt;/role&gt;</td><td>Wer soll die KI sein?</td></tr>
+        <tr><td>&lt;task&gt;…&lt;/task&gt;</td><td>Was ist das Ziel?</td></tr>
+        <tr><td>&lt;data&gt;…&lt;/data&gt;</td><td>Welche Fakten müssen rein?</td></tr>
+        <tr><td>&lt;constraints&gt;…&lt;/constraints&gt;</td><td>Was sind die Verbote oder Regeln?</td></tr>
+        <tr><td>&lt;format&gt;…&lt;/format&gt;</td><td>Wie soll das Ergebnis aussehen?</td></tr>
+      </tbody>
+    </table>
+
+    <div class="field">
+      <label class="field-label" for="f-a3-strukturiert">Mein strukturierter Prompt (mit XML-Tags)</label>
+      <textarea id="f-a3-strukturiert" style="min-height:160px;" placeholder="&lt;role&gt;…&lt;/role&gt;&#10;&lt;task&gt;…&lt;/task&gt;&#10;&lt;data&gt;…&lt;/data&gt;&#10;&lt;constraints&gt;…&lt;/constraints&gt;&#10;&lt;format&gt;…&lt;/format&gt;"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-a3-vergleich">Vergleich: Chaos-Prompt vs. strukturierter Prompt</label>
+      <textarea id="f-a3-vergleich" placeholder="Wie unterscheiden sich die Ergebnisse? Was hat sich durch die Strukturierung verbessert?"></textarea>
+    </div>
+  </div>
+
+  <!-- Reflexion -->
+  <div class="card">
+    <span class="task-label">Reflexion</span>
+    <h3>Abschlussfragen</h3>
+    <p class="question">Beantworte die folgenden Fragen in Stichpunkten oder im Gespräch mit deiner Partnerin / deinem Partner:</p>
+    <ul style="margin: 0 0 .75rem 1.3rem; font-size:14px; color:var(--muted); line-height:1.8;">
+      <li>Warum liefert der strukturierte Prompt konsistentere Ergebnisse als der Fließtext? Welche Rolle spielen dabei die XML-Tags?</li>
+      <li>Welche Technik – Few-Shot Prompting oder Delimiter – erscheint dir in Aufgabe 1 als wichtiger? Begründe deine Antwort.</li>
+      <li>In welchen Alltagssituationen (Schule, Praktikum, Privatleben) könntest du die heute gelernten Techniken sinnvoll einsetzen?</li>
+    </ul>
+    <div class="field">
+      <label class="field-label" for="f-reflexion">Meine Reflexion</label>
+      <textarea id="f-reflexion" style="min-height:120px;" placeholder="Deine Antworten in Stichpunkten …"></textarea>
+    </div>
+  </div>
+
+  <!-- Optionale Hausaufgabe -->
+  <div class="card">
+    <span class="task-label">Optional / Hausaufgabe</span>
+    <h3>Eigener Meister-Prompt</h3>
+    <p class="question">Wähle eine eigene Alltagssituation (z. B. Bewerbungsschreiben, Lernplan erstellen, Produktbeschreibung formulieren) und entwickle einen vollständig strukturierten Prompt, der – wenn möglich – beide Techniken kombiniert:</p>
+    <ul style="margin: 0 0 .75rem 1.3rem; font-size:14px; color:var(--muted); line-height:1.8;">
+      <li><strong>Few-Shot Prompting</strong> (mindestens zwei Beispiel-Paare)</li>
+      <li><strong>Delimiter / XML-Tags</strong> (zur klaren Trennung von Anweisung und Daten)</li>
+    </ul>
+    <div class="field">
+      <label class="field-label" for="f-ha-prompt">Mein Meister-Prompt</label>
+      <textarea id="f-ha-prompt" style="min-height:140px;" placeholder="Schreibe hier deinen kombinierten Prompt …"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-ha-beobachtung">Welche Änderungen hatten die größte Wirkung auf die Antwortqualität?</label>
+      <textarea id="f-ha-beobachtung" placeholder="Deine Beobachtungen …"></textarea>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="btn btn-secondary" onclick="loadFromFile()">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      Datei laden
+    </button>
+    <input type="file" id="file-input" accept=".json" style="display:none" onchange="onFileSelected(event)">
+    <div class="spacer"></div>
+    <span class="status-msg" id="status-msg"></span>
+    <button class="btn btn-primary" onclick="saveToFile()">
+      <svg class="icon" viewBox="0 0 24 24" style="stroke:#fff"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Antworten speichern
+    </button>
+  </div>
+
+</div>
+
+<script>
+function collectData() {
+  return {
+    version: "1.0",
+    gespeichert_am: new Date().toLocaleString('de-DE'),
+    schueler: {
+      name:   document.getElementById('f-name').value.trim(),
+      klasse: document.getElementById('f-klasse').value.trim(),
+      datum:  document.getElementById('f-datum').value
+    },
+    aufgaben: {
+      fewshot_fach:      document.getElementById('f-fewshot-fach').value.trim(),
+      fewshot_prompt:    document.getElementById('f-fewshot-prompt').value,
+      fewshot_ergebnis:  document.getElementById('f-fewshot-ergebnis').value,
+      a1_artikel:        document.getElementById('f-a1-artikel').value,
+      a1_ergebnis:       document.getElementById('f-a1-ergebnis').value,
+      a2_prompt:         document.getElementById('f-a2-prompt').value,
+      a2_ergebnis:       document.getElementById('f-a2-ergebnis').value,
+      a3_strukturiert:   document.getElementById('f-a3-strukturiert').value,
+      a3_vergleich:      document.getElementById('f-a3-vergleich').value,
+      reflexion:         document.getElementById('f-reflexion').value,
+      ha_prompt:         document.getElementById('f-ha-prompt').value,
+      ha_beobachtung:    document.getElementById('f-ha-beobachtung').value
+    }
+  };
+}
+
+function fillData(d) {
+  if (d.schueler) {
+    setVal('f-name',   d.schueler.name   || '');
+    setVal('f-klasse', d.schueler.klasse || '');
+    setVal('f-datum',  d.schueler.datum  || '');
+  }
+  if (d.aufgaben) {
+    const a = d.aufgaben;
+    setVal('f-fewshot-fach',     a.fewshot_fach     || '');
+    setVal('f-fewshot-prompt',   a.fewshot_prompt   || '');
+    setVal('f-fewshot-ergebnis', a.fewshot_ergebnis || '');
+    setVal('f-a1-artikel',       a.a1_artikel       || '');
+    setVal('f-a1-ergebnis',      a.a1_ergebnis      || '');
+    setVal('f-a2-prompt',        a.a2_prompt        || '');
+    setVal('f-a2-ergebnis',      a.a2_ergebnis      || '');
+    setVal('f-a3-strukturiert',  a.a3_strukturiert  || '');
+    setVal('f-a3-vergleich',     a.a3_vergleich     || '');
+    setVal('f-reflexion',        a.reflexion        || '');
+    setVal('f-ha-prompt',        a.ha_prompt        || '');
+    setVal('f-ha-beobachtung',   a.ha_beobachtung   || '');
+  }
+}
+
+function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+
+function saveToFile() {
+  const data = collectData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const name  = (data.schueler.name || 'NN').replace(/\s+/g, '_');
+  const fname = `${name}_Prompting_im_Unterricht_Fortsetzung.json`;
+  a.download = fname;
+  a.click();
+  URL.revokeObjectURL(url);
+  showStatus(`✓ Gespeichert als „${fname}"`, 'ok');
+}
+
+function loadFromFile() { document.getElementById('file-input').click(); }
+
+function onFileSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      fillData(data);
+      const ts = data.gespeichert_am ? ` (${data.gespeichert_am})` : '';
+      showStatus(`✓ Datei geladen${ts}`, 'ok');
+    } catch { showStatus('✗ Fehler: Datei konnte nicht gelesen werden.', 'err'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = `status-msg ${type}`;
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.className = 'status-msg'; }, 5000);
+}
+
+document.getElementById('f-datum').value = new Date().toISOString().slice(0, 10);
+</script>
+</body>
+</html>
